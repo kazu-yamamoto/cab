@@ -6,6 +6,7 @@ data Command = Sync
              | Installed
              | Configure
              | Build
+             | Clean
              | Info
              | Help
              deriving (Eq,Show)
@@ -59,6 +60,12 @@ commandDB = [
        , commandNames = ["build"]
        , document = "Building a cabal package"
        , routing = RouteProc "cabal" ["build"]
+       }
+  , CommandSpec {
+         command = Clean
+       , commandNames = ["clean"]
+       , document = "Cleaning a build directory"
+       , routing = RouteProc "cabal" ["clean"]
        }
   , CommandSpec {
          command = Info
