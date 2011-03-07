@@ -1,0 +1,25 @@
+Name:                   cab
+Version:                0.0.0
+Author:                 Kazu Yamamoto <kazu@iij.ad.jp>
+Maintainer:             Kazu Yamamoto <kazu@iij.ad.jp>
+License:                BSD3
+License-File:           LICENSE
+Synopsis:               A maintenance command of Haskell cabal packages
+Description:            A wrapper to ghc-pkg, cabal, and so on
+Category:               System
+Cabal-Version:          >= 1.6
+Build-Type:             Simple
+Executable cab
+  Main-Is:              Main.hs
+  if impl(ghc >= 6.12)
+    GHC-Options:        -Wall -fno-warn-unused-do-bind
+  else
+    GHC-Options:        -Wall
+  Build-Depends:        base >= 4.0 && < 5, process
+  Other-Modules:	Commands
+                        Help
+                        Options
+                        Program
+Source-Repository head
+  Type:                 git
+  Location:             git://github.com/kazu-yamamoto/cab.git
