@@ -1,5 +1,7 @@
 module Commands where
 
+import Outdated
+
 data Command = Sync
              | Install
              | Uninstall
@@ -7,6 +9,7 @@ data Command = Sync
              | Configure
              | Build
              | Clean
+             | Outdated
              | Info
              | Help
              deriving (Eq,Show)
@@ -51,7 +54,7 @@ commandDB = [
        }
   , CommandSpec {
          command = Configure
-       , commandNames = ["configure"]
+       , commandNames = ["configure", "conf"]
        , document = "Configuring a cabal package"
        , routing = RouteProc "cabal" ["configure"]
        }
@@ -66,6 +69,12 @@ commandDB = [
        , commandNames = ["clean"]
        , document = "Cleaning a build directory"
        , routing = RouteProc "cabal" ["clean"]
+       }
+  , CommandSpec {
+         command = Outdated
+       , commandNames = ["outdated"]
+       , document = "Displaying outdated packages"
+       , routing = RouteFunc outdated
        }
   , CommandSpec {
          command = Info
