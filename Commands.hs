@@ -48,7 +48,7 @@ commandDB = [
        }
   , CommandSpec {
          command = Installed
-       , commandNames = ["installed"]
+       , commandNames = ["installed", "list"]
        , document = "Listing installed packages"
        , routing = RouteProc "ghc-pkg" ["list"]
        }

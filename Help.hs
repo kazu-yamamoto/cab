@@ -19,13 +19,29 @@ displayHelpAll = do
     putStrLn "Usage:"
     putStrLn $ "\t" ++ programName ++ " help"
     putStrLn $ "\t" ++ programName ++ " <command> [args...]"
-    putStrLn ""
-    putStrLn $ "\t <command> = " ++ extractCommands commandDB
+    putStrLn $ "\t  where"
+    printCommands (getCommands commandDB)
   where
-    extractCommands = concat . intersperse "," . map head . map commandNames
-    -- FIXME take 5 or so
+    getCommands = map concat
+                . split helpCommandNumber
+                . intersperse ","
+                . map head
+                . map commandNames
+    printCommands [] = return ()
+    printCommands (x:xs) = do
+        putStrLn $ "\t    <command> = " ++ x
+        mapM_ (\cmds -> putStrLn $ "\t                " ++ cmds) xs
 
 displayHelpCommand :: Command -> IO ()
 displayHelpCommand com = putStrLn $ document spec
   where
     spec = fromJust $ commandSpecByCommand com commandDB
+
+helpCommandNumber :: Int
+helpCommandNumber = 10
+
+split :: Int -> [a] -> [[a]]
+split _ [] = []
+split n ss = x : split n rest
+  where
+    (x,rest) = splitAt n ss
