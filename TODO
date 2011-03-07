@@ -1,0 +1,4 @@
+cabal-delete
+	https://github.com/iquiw/cabal-delete
+cabal-dev
+	https://github.com/creswick/cabal-dev
