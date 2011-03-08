@@ -10,9 +10,10 @@ import Data.Enumerator (Iteratee, run_, ($$))
 import Data.Enumerator.Binary (enumHandle)
 import System.Process
 import System.IO
+import Types
 
-outdated :: [String] -> IO ()
-outdated _ = do
+outdated :: FunctionCommand
+outdated _ _ _ = do
     (Nothing, Just hdl, Nothing, _) <- createProcess proSpec
     hSetEncoding hdl latin1
     olds <- run_ (enumHandle 4096 hdl $$ outdatedParser)

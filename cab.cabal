@@ -19,8 +19,7 @@ Executable cab
                         attoparsec, attoparsec-enumerator,
                         enumerator, bytestring
   Other-Modules:	Commands
-                        Help
-                        Options
+                        Types
                         Outdated
                         Program
 Source-Repository head
