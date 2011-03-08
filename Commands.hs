@@ -85,6 +85,20 @@ commandDB = [
        , options = []
        }
   , CommandSpec {
+         command = Sdist
+       , commandNames = ["sdist"]
+       , document = "Make tar.gz for source distribution"
+       , routing = RouteProc "cabal" ["sdist"]
+       , options = []
+       }
+  , CommandSpec {
+         command = Unpack
+       , commandNames = ["unpack"]
+       , document = "Untar a package in the current directory"
+       , routing = RouteProc "cabal" ["unpack"]
+       , options = []
+       }
+  , CommandSpec {
          command = Help
        , commandNames = ["help"]
        , document = undefined

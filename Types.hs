@@ -10,6 +10,8 @@ data Command = Sync
              | Build
              | Clean
              | Outdated
+             | Sdist
+             | Unpack
              | Info
              | Help
              deriving (Eq,Show)
