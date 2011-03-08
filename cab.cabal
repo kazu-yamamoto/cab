@@ -15,7 +15,8 @@ Executable cab
     GHC-Options:        -Wall -fno-warn-unused-do-bind
   else
     GHC-Options:        -Wall
-  Build-Depends:        base >= 4.0 && < 5, process,
+  Build-Depends:        base >= 4.0 && < 5, process, filepath,
+                        containers, bin-package-db, Cabal,
                         attoparsec, attoparsec-enumerator,
                         enumerator, bytestring
   Other-Modules:	Commands
