@@ -17,6 +17,7 @@ main :: IO ()
 main = flip catches handlers $ do
     (args,opts) <- argsOpts <$> getArgs
     when (args == []) helpAndExit
+    checkHelp args opts helpCommandAndExit
     let act = head args
         mcmdspec = commandSpecByName act commandDB
     when (isNothing mcmdspec) (illegalCommandAndExit act)
@@ -48,6 +49,12 @@ parseOptions cmdspc opts = check opts [] []
     check (o:os) xs ys = case optionSpecByName o optspec of
         Nothing -> check os (o:xs) ys
         Just s  -> check os xs (s:ys)
+
+checkHelp :: [String] -> [String] -> FunctionCommand -> IO ()
+checkHelp args opts func
+  | "-h"     `elem` opts
+ || "--help" `elem` opts = func undefined args undefined
+  | otherwise            = return ()
 
 checkOptions :: Either [String] [OptionSpec] -> ([String] -> IO ()) -> IO ()
 checkOptions (Left xs) func = func xs

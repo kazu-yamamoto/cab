@@ -88,7 +88,7 @@ commandDB = [
          command = Help
        , commandNames = ["help"]
        , document = undefined
-       , routing = RouteFunc helpCommand
+       , routing = RouteFunc helpCommandAndExit
        , options = []
        }
   ]
@@ -109,12 +109,14 @@ optionSpecByName x (ent:ents)
 
 ----------------------------------------------------------------
 
-helpCommand :: FunctionCommand
-helpCommand _ [] _ = helpAndExit
-helpCommand _ (cmd:_) _ = do
+-- FIXME: more description of a command
+helpCommandAndExit :: FunctionCommand
+helpCommandAndExit _ [] _ = helpAndExit
+helpCommandAndExit _ (cmd:_) _ = do
     case mcmdspec of
         Nothing -> helpAndExit
         Just cmdspec -> putStrLn $ document cmdspec
+    exitSuccess
   where
     mcmdspec = commandSpecByName cmd commandDB
 
