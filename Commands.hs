@@ -1,11 +1,12 @@
 module Commands where
 
 import Data.List
+import Installed
 import Outdated
 import Program
 import System.Exit
-import Types
 import System.IO
+import Types
 
 commandDB :: CommandDB
 commandDB = [
@@ -46,7 +47,7 @@ commandDB = [
          command = Installed
        , commandNames = ["installed", "list"]
        , document = "Listing installed packages"
-       , routing = RouteProc "ghc-pkg" ["list"]
+       , routing = RouteFunc installed
        , options = []
        }
   , CommandSpec {

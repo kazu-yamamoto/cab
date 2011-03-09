@@ -15,14 +15,18 @@ Executable cab
     GHC-Options:        -Wall -fno-warn-unused-do-bind
   else
     GHC-Options:        -Wall
-  Build-Depends:        base >= 4.0 && < 5, process, filepath,
+  Build-Depends:        base >= 4.0 && < 5, process, filepath, directory,
                         containers, bin-package-db, Cabal,
                         attoparsec, attoparsec-enumerator,
                         enumerator, bytestring
   Other-Modules:	Commands
-                        Types
+                        Installed
+                        Main
                         Outdated
+                        PkgDB
                         Program
+                        Setup
+                        Types
 Source-Repository head
   Type:                 git
   Location:             git://github.com/kazu-yamamoto/cab.git
