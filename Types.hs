@@ -13,6 +13,7 @@ data Command = Sync
              | Sdist
              | Unpack
              | Info
+             | Deps
              | Help
              deriving (Eq,Show)
 
@@ -46,4 +47,8 @@ type FunctionCommand = CommandSpec -> [String] -> [OptionSpec] -> IO ()
 
 data Route = RouteFunc FunctionCommand
            | RouteProc String [String]
+
+----------------------------------------------------------------
+
+data OldPkg = OldPkg String String String deriving Show
 

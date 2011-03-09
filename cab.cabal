@@ -16,16 +16,15 @@ Executable cab
   else
     GHC-Options:        -Wall
   Build-Depends:        base >= 4.0 && < 5, process, filepath, directory,
-                        containers, bin-package-db, Cabal,
+                        containers, Cabal,
                         attoparsec, attoparsec-enumerator,
                         enumerator, bytestring
   Other-Modules:	Commands
+                        Deps
                         Installed
-                        Main
                         Outdated
                         PkgDB
                         Program
-                        Setup
                         Types
 Source-Repository head
   Type:                 git

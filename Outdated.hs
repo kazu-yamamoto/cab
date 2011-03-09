@@ -3,26 +3,35 @@
 module Outdated where
 
 import Control.Applicative hiding (many)
+import Control.Monad
 import Data.Attoparsec.Char8
 import Data.Attoparsec.Enumerator
 import Data.ByteString (ByteString)
 import Data.Enumerator (Iteratee, run_, ($$))
 import Data.Enumerator.Binary (enumHandle)
 import qualified Data.Map as M
-import Data.Maybe
-import Distribution.InstalledPackageInfo
-import Distribution.InstalledPackageInfo.Binary
-import Distribution.Package
-import System.FilePath
 import System.IO
 import System.Process
 import Types
 
+import PkgDB
+
 outdated :: FunctionCommand
 outdated _ _ _ = do
-    olds <- infoFromCommand "cabal list --installed" cabalListParser
-            >>= userOnly
-    mapM_ printOld olds
+    pkgs <- toPkgList <$> getPkgDB <*> makeUserOnly
+    vs <- versionInfos
+    let m = M.fromList $ zip (map toPackageId vs) (map latestVersion vs)
+    forM_ pkgs $ \p -> do
+        case M.lookup (pkgSrcId p) m of
+            Nothing -> return ()
+            Just ver -> if versionToString (pkgVersion' p) /= ver
+               then putStrLn $ pkgName' p ++ " < " ++ ver
+               else return ()
+ where
+    latestVersion (OldPkg _ _ lver) = lver
+
+versionInfos :: IO [OldPkg]
+versionInfos = infoFromCommand "cabal list --installed" cabalListParser
 
 ----------------------------------------------------------------
 
@@ -43,8 +52,6 @@ infoFromCommand shellCommand parser = do
       }
 
 ----------------------------------------------------------------
-
-data OldPkg = OldPkg String String String deriving Show
 
 printOld :: OldPkg -> IO ()
 printOld (OldPkg name cur new) = putStrLn $ name ++ " " ++ cur ++ " < " ++ new
@@ -73,32 +80,3 @@ oldpkg = do
 
 nonEols :: Parser String
 nonEols = many1 $ satisfy (notInClass "\n")
-
-----------------------------------------------------------------
-
-type PackageInfo = InstalledPackageInfo_ String
-
-getUserPackageInfo :: FilePath -> IO [PackageInfo]
-getUserPackageInfo file = readBinPackageDB file :: IO [PackageInfo]
-
-getUserCacheFilePath :: IO FilePath
-getUserCacheFilePath =
-    (</> "package.cache") <$> infoFromCommand "ghc-pkg list" ghcPkgListParser
-
-ghcPkgListParser :: Iteratee ByteString IO FilePath
-ghcPkgListParser = iterParser $ do
-    nonEols *> endOfLine
-    many1 (char ' ' *> nonEols *> endOfLine)
-    endOfLine
-    nonColons <* char ':' <* endOfLine
-  where
-    nonColons = many1 $ satisfy (notInClass ":\n")
-
-userOnly :: [OldPkg] -> IO [OldPkg]
-userOnly olds = do
-    m <- toMap <$> (getUserCacheFilePath >>= getUserPackageInfo)
-    return $ filter (\(OldPkg x _ _) -> isJust (M.lookup x m)) olds
-  where
-    toMap ps = M.fromList $ zip (map toString ps) ps
-    toString = fromPackageName . pkgName . sourcePackageId
-    fromPackageName (PackageName x) = x

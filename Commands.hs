@@ -1,12 +1,14 @@
 module Commands where
 
 import Data.List
-import Installed
-import Outdated
 import Program
 import System.Exit
 import System.IO
 import Types
+
+import Deps
+import Installed
+import Outdated
 
 commandDB :: CommandDB
 commandDB = [
@@ -97,6 +99,13 @@ commandDB = [
        , commandNames = ["unpack"]
        , document = "Untar a package in the current directory"
        , routing = RouteProc "cabal" ["unpack"]
+       , options = []
+       }
+  , CommandSpec {
+         command = Deps
+       , commandNames = ["deps"]
+       , document = "Show dependencies of this package"
+       , routing = RouteFunc deps
        , options = []
        }
   , CommandSpec {

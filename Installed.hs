@@ -1,11 +1,10 @@
 module Installed where
 
+import Control.Applicative
 import PkgDB
-import System.Directory
 import Types
 
 installed :: FunctionCommand
 installed _ _ _ = do
-    userDirPref <- getAppUserDataDirectory ""
-    db <- getPkgDB
-    mapM_ putStrLn $ getPkgNames db (userOnly userDirPref)
+    pkgs <- toPkgList <$> getPkgDB <*> makeUserOnly
+    mapM_ putStrLn $ map pkgName' pkgs
