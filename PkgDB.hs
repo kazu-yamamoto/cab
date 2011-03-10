@@ -1,6 +1,9 @@
 module PkgDB where
 
 import Control.Monad
+import Data.List
+import Data.Map (Map)
+import qualified Data.Map as M
 import Distribution.Version
     (Version(..))
 import Distribution.InstalledPackageInfo
@@ -18,11 +21,8 @@ import Distribution.Simple.Program.Db
     (defaultProgramDb)
 import Distribution.Verbosity
     (normal)
-import Data.List
 import System.Directory
 import Utils
-import Data.Map (Map)
-import qualified Data.Map as M
 
 type PkgDB = PackageIndex
 type PkgInfo = InstalledPackageInfo

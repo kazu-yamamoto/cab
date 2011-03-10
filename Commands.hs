@@ -5,13 +5,11 @@ module Commands (
 import Control.Applicative hiding (many)
 import Control.Monad
 import PkgDB
-import Types
-import VerDB
-import Utils
-import System.IO
 import System.Exit
-import Distribution.Simple.PackageIndex
-import Distribution.InstalledPackageInfo
+import System.IO
+import Types
+import Utils
+import VerDB
 
 ----------------------------------------------------------------
 
