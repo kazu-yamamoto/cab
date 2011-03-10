@@ -1,11 +1,14 @@
 module CmdDB where
 
 import Commands
+import Control.Monad
 import Data.List
 import Program
 import System.Exit
 import System.IO
 import Types
+
+----------------------------------------------------------------
 
 commandDB :: CommandDB
 commandDB = [
@@ -21,33 +24,25 @@ commandDB = [
        , commandNames = ["install"]
        , document = "Install packages"
        , routing = RouteProc "cabal" ["install"]
-       , options = [
-           OptionSpec {
-                option = OptNoHarm
-              , optionNames = ["-n", "--dry-run"]
-              , actualOption = "--dry-run"
-              }
-         ]
+       , options = [(OptNoHarm, Just "--dry-run")]
        }
   , CommandSpec {
          command = Uninstall
        , commandNames = ["uninstall"]
        , document = "Uninstalling packages"
        , routing = RouteProc "ghc-pkg" ["unregister"]
-       , options = [
-           OptionSpec {
-                option = OptRecursive
-              , optionNames = ["-r", "--follow-dependents"]
-              , actualOption = []
-              }
-         ]
+       , options = [(OptNoHarm, Nothing) -- FIXME
+                   ,(OptRecursive, Nothing) -- FIXME
+                   ]
        }
   , CommandSpec {
          command = Installed
        , commandNames = ["installed", "list"]
        , document = "Listing installed packages"
        , routing = RouteFunc installed
-       , options = []
+       , options = [(OptRecursive, Nothing)
+                   ,(OptAll, Nothing)
+                   ]
        }
   , CommandSpec {
          command = Configure
@@ -75,7 +70,7 @@ commandDB = [
        , commandNames = ["outdated"]
        , document = "Displaying outdated packages"
        , routing = RouteFunc outdated
-       , options = []
+       , options = [(OptAll, Nothing)]
        }
   , CommandSpec {
          command = Info
@@ -103,7 +98,18 @@ commandDB = [
        , commandNames = ["deps"]
        , document = "Show dependencies of this package"
        , routing = RouteFunc deps
-       , options = []
+       , options = [(OptRecursive, Nothing)
+                   ,(OptAll, Nothing)
+                   ]
+       }
+  , CommandSpec {
+         command = RevDeps
+       , commandNames = ["revdeps", "dependents"]
+       , document = "Show reverse dependencies of this package"
+       , routing = RouteFunc revdeps
+       , options = [(OptRecursive, Nothing)
+                   ,(OptAll, Nothing)
+                   ]
        }
   , CommandSpec {
          command = Help
@@ -111,6 +117,27 @@ commandDB = [
        , document = undefined
        , routing = RouteFunc helpCommandAndExit
        , options = []
+       }
+  ]
+
+----------------------------------------------------------------
+
+optionDB :: OptionDB
+optionDB = [
+    OptionSpec {
+         option = OptNoHarm
+       , optionNames = ["-n", "--dry-run"]
+       , optionDesc = "Run without destructive operations"
+       }
+  , OptionSpec {
+         option = OptRecursive
+       , optionNames = ["-r", "--recursive"]
+       , optionDesc = "Follow dependencies recursively"
+       }
+  , OptionSpec {
+         option = OptAll
+       , optionNames = ["-a", "--all"]
+       , optionDesc = "Show global packages in addition to user ones"
        }
   ]
 
@@ -136,10 +163,27 @@ helpCommandAndExit _ [] _ = helpAndExit
 helpCommandAndExit _ (cmd:_) _ = do
     case mcmdspec of
         Nothing -> helpAndExit
-        Just cmdspec -> putStrLn $ document cmdspec
+        Just cmdspec -> do
+            putStrLn $ "Usage: " ++ cmd
+            putStr "\n"
+            putStrLn $ document cmdspec
+            putStr "\n"
+            printOptions cmdspec
     exitSuccess
   where
     mcmdspec = commandSpecByName cmd commandDB
+
+printOptions :: CommandSpec -> IO ()
+printOptions cmdspec =
+    forM_ opts (flip loop optionDB)
+  where
+    opts = map fst $ options cmdspec
+    loop _ [] = return ()
+    loop o (spec:specs)
+      | option spec == o = do
+          putStrLn $ (concat . intersperse "," . optionNames $ spec)
+                   ++ "\t" ++ optionDesc spec
+      | otherwise        = loop o specs
 
 helpAndExit :: IO ()
 helpAndExit = do

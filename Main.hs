@@ -25,8 +25,8 @@ main = flip catches handlers $ do
         params = tail args
         eoptspecs = parseOptions cmdspec opts
     checkOptions eoptspecs illegalOptionsAndExit
-    let Right optspecs = eoptspecs
-    run cmdspec params optspecs
+    let Right flags = eoptspecs
+    run cmdspec params flags
   where
     handlers = [Handler handleExit]
     handleExit :: ExitCode -> IO ()
@@ -40,15 +40,17 @@ argsOpts args = (args', opts)
     args' = filter (not . isPrefixOf "-") args
     opts = filter (isPrefixOf "-") args
 
-parseOptions :: CommandSpec -> [String] -> Either [String] [OptionSpec]
-parseOptions cmdspc opts = check opts [] []
+parseOptions :: CommandSpec -> [String] -> Either [String] Flags
+parseOptions cmdspc opts = check opts [] defaultFlags
   where
-    optspec = options cmdspc
-    check [] [] ys = Right ys
-    check [] xs _  = Left xs
-    check (o:os) xs ys = case optionSpecByName o optspec of
-        Nothing -> check os (o:xs) ys
-        Just s  -> check os xs (s:ys)
+    optMvals = options cmdspc
+    check [] [] fg = Right fg
+    check [] es _  = Left es
+    check (o:os) es fg = case optionSpecByName o optionDB of
+        Nothing -> check os (o:es) fg
+        Just x  -> case lookup (option x) optMvals of
+            Nothing   -> check os (o:es) fg
+            Just mval -> check os es (updateFlags (option x) mval fg)
 
 checkHelp :: [String] -> [String] -> FunctionCommand -> IO ()
 checkHelp args opts func
@@ -56,18 +58,19 @@ checkHelp args opts func
  || "--help" `elem` opts = func undefined args undefined
   | otherwise            = return ()
 
-checkOptions :: Either [String] [OptionSpec] -> ([String] -> IO ()) -> IO ()
+checkOptions :: Either [String] Flags -> ([String] -> IO ()) -> IO ()
 checkOptions (Left xs) func = func xs
 checkOptions _ _            = return ()
 
 ----------------------------------------------------------------
 
-run :: CommandSpec -> [String] -> [OptionSpec] -> IO ()
-run cmdspec params opts = case routing cmdspec of
-    RouteFunc func -> func cmdspec params opts
-    RouteProc subcmd subargs -> callProcess subcmd subargs params opts
+run :: CommandSpec -> [String] -> Flags -> IO ()
+run cmdspec params flags = case routing cmdspec of
+    RouteFunc func -> func cmdspec params flags
+    RouteProc subcmd subargs -> callProcess subcmd subargs params flags
 
-callProcess :: String ->[String] -> [String] -> [OptionSpec] -> IO ()
-callProcess pro args0 args1 opts = system script >> return ()
+callProcess :: String ->[String] -> [String] -> Flags -> IO ()
+callProcess pro args0 args1 flags = system script >> return ()
   where
-    script = concat . intersperse " " $ pro : args0 ++ args1
+    opts = flagsToOptions flags
+    script = concat . intersperse " " $ pro : opts ++ args0 ++ args1

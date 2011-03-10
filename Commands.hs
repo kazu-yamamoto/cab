@@ -1,5 +1,5 @@
 module Commands (
-    deps, installed, outdated
+    deps, revdeps, installed, outdated
   ) where
 
 import Control.Applicative hiding (many)
@@ -8,12 +8,22 @@ import PkgDB
 import Types
 import VerDB
 import Utils
+import Distribution.Simple.PackageIndex
+import Distribution.InstalledPackageInfo
 
 deps :: FunctionCommand
 deps _ [] _ = return () -- FIXME
 deps _ (pkgnm:_) _ = do
     db <- getPkgDB
     mapM_ (flip printPkg db) $ lookupByName pkgnm db
+
+revdeps :: FunctionCommand
+revdeps _ [] _ = return () -- FIXME
+revdeps _ (pkgnm:_) _ = do
+    db <- getPkgDB
+    let pinfos = map installedPackageId $ lookupByName pkgnm db
+        pkgs = topologicalOrder $ fromList $ reverseDependencyClosure db pinfos
+    mapM_ (putStrLn . nameOfPkgInfo) pkgs
 
 installed :: FunctionCommand
 installed _ _ _ = do
