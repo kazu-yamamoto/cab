@@ -237,5 +237,5 @@ illegalCommandAndExit x = do
 
 illegalOptionsAndExit :: [String] -> IO ()
 illegalOptionsAndExit xs = do -- FixME
-    hPutStrLn stderr $ "Illegal options: " ++ concat (intersperse " " xs)
+    hPutStrLn stderr $ "Illegal options: " ++ joinBy " " xs
     exitFailure

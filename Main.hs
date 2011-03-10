@@ -1,15 +1,16 @@
 module Main where
 
-import Control.Applicative
 import CmdDB
+import Control.Applicative
 import Control.Exception
 import Control.Monad
 import Data.List
 import Data.Maybe
 import System.Cmd
 import System.Environment (getArgs)
-import Types
 import System.Exit
+import Types
+import Utils
 
 ----------------------------------------------------------------
 
@@ -73,4 +74,4 @@ callProcess :: String ->[String] -> [String] -> Flags -> IO ()
 callProcess pro args0 args1 flags = system script >> return ()
   where
     opts = flagsToOptions flags
-    script = concat . intersperse " " $ pro : opts ++ args0 ++ args1
+    script = joinBy " " $ pro : opts ++ args0 ++ args1
