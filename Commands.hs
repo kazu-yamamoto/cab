@@ -13,22 +13,7 @@ import System.Exit
 import Distribution.Simple.PackageIndex
 import Distribution.InstalledPackageInfo
 
-deps :: FunctionCommand
-deps _ nmver flags = do
-    db' <- getPkgDB
-    db <- if allFlag flags
-          then return db'
-          else toPkgDB . flip toPkgList db' <$> userPkgs
-    pkg <- lookupPkg nmver db
-    printDeps (recursiveFlag flags) db 0 pkg
-
-revdeps :: FunctionCommand
-revdeps _ nmver _ = do
-    db <- getPkgDB
-    pkg <- lookupPkg nmver db
-    let pinfos = map installedPackageId [pkg]
-        pkgs = topologicalOrder $ fromList $ reverseDependencyClosure db pinfos
-    mapM_ (putStrLn . nameOfPkgInfo) pkgs
+----------------------------------------------------------------
 
 installed :: FunctionCommand
 installed _ _ flags = do
@@ -47,6 +32,24 @@ outdated _ _ flags = do
             Just ver -> if versionOfPkgInfo p /= ver
                then putStrLn $ nameOfPkgInfo p ++ " < " ++ toDotted ver
                else return ()
+
+----------------------------------------------------------------
+
+deps :: FunctionCommand
+deps _ nmver flags = printDepends nmver flags printDeps
+
+revdeps :: FunctionCommand
+revdeps _ nmver flags = printDepends nmver flags printRevDeps
+
+printDepends :: [String] -> Flags
+             -> (Bool -> PkgDB -> Int -> PkgInfo -> IO ()) -> IO ()
+printDepends nmver flags func = do
+    db' <- getPkgDB
+    db <- if allFlag flags
+          then return db'
+          else toPkgDB . flip toPkgList db' <$> userPkgs
+    pkg <- lookupPkg nmver db
+    func (recursiveFlag flags) db 0 pkg
 
 ----------------------------------------------------------------
 

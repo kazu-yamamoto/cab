@@ -21,6 +21,8 @@ import Distribution.Verbosity
 import Data.List
 import System.Directory
 import Utils
+import Data.Map (Map)
+import qualified Data.Map as M
 
 type PkgDB = PackageIndex
 type PkgInfo = InstalledPackageInfo
@@ -91,3 +93,40 @@ printDep rec db n pid = case lookupInstalledPackageId db pid of
         when rec $ printDeps rec db (n+1) pkgi
   where
     prefix = replicate (n * 4) ' '
+
+----------------------------------------------------------------
+
+type RevDB = Map InstalledPackageId [InstalledPackageId]
+
+printRevDeps :: Bool -> PkgDB -> Int -> PkgInfo -> IO ()
+printRevDeps rec db n pkgi = printRevDeps' rec db revdb n pkgi
+  where
+    revdb = makeRevDepDB db
+
+printRevDeps' :: Bool -> PkgDB -> RevDB -> Int -> PkgInfo -> IO ()
+printRevDeps' rec db revdb n pkgi = case M.lookup pkgid revdb of
+    Nothing -> return ()
+    Just pkgids -> mapM_ (printRevDep' rec db revdb n) $ pkgids
+  where
+    pkgid = installedPackageId pkgi
+
+printRevDep' :: Bool -> PkgDB -> RevDB -> Int -> InstalledPackageId -> IO ()
+printRevDep' rec db revdb n pid = case lookupInstalledPackageId db pid of
+    Nothing -> return ()
+    Just pkgi -> do
+        putStrLn $ prefix ++ nameOfPkgInfo pkgi
+        when rec $ printRevDeps' rec db revdb (n+1) pkgi
+  where
+    prefix = replicate (n * 4) ' '
+
+makeRevDepDB :: PkgDB -> RevDB
+makeRevDepDB db = M.fromList revdeps
+  where
+    pkgs = allPackages db
+    deps = map idDeps pkgs
+    idDeps pkg = (installedPackageId pkg, depends pkg)
+    kvs = sort $ concatMap decomp deps
+    decomp (k,vs) = map (\v -> (v,k)) vs
+    kvss = groupBy (\x y -> fst x == fst y) kvs
+    comp xs = (fst (head xs), map snd xs)
+    revdeps = map comp kvss
