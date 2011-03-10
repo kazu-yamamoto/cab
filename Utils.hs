@@ -9,4 +9,13 @@ fromDotted xs = case break (=='.') xs of
     (x,_:ys) -> (read x :: Int) : fromDotted ys
 
 toDotted :: [Int] -> String
-toDotted = concat . intersperse "." . map show
+toDotted = joinBy "." . map show
+
+joinBy :: String -> [String] -> String
+joinBy sep = concat . intersperse sep
+
+split :: Int -> [a] -> [[a]]
+split _ [] = []
+split n ss = x : split n rest
+  where
+    (x,rest) = splitAt n ss

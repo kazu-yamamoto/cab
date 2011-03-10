@@ -7,6 +7,7 @@ import Program
 import System.Exit
 import System.IO
 import Types
+import Utils
 
 ----------------------------------------------------------------
 
@@ -131,17 +132,17 @@ optionDB :: OptionDB
 optionDB = [
     OptionSpec {
          option = OptNoHarm
-       , optionNames = ["-n", "--dry-run"]
+       , optionNames = ["--dry-run", "-n"]
        , optionDesc = "Run without destructive operations"
        }
   , OptionSpec {
          option = OptRecursive
-       , optionNames = ["-r", "--recursive"]
+       , optionNames = ["--recursive", "-r"]
        , optionDesc = "Follow dependencies recursively"
        }
   , OptionSpec {
          option = OptAll
-       , optionNames = ["-a", "--all"]
+       , optionNames = ["--all", "-a"]
        , optionDesc = "Show global packages in addition to user packages"
        }
   ]
@@ -162,33 +163,43 @@ optionSpecByName x (ent:ents)
 
 ----------------------------------------------------------------
 
--- FIXME: more description of a command
 helpCommandAndExit :: FunctionCommand
 helpCommandAndExit _ [] _ = helpAndExit
 helpCommandAndExit _ (cmd:_) _ = do
     case mcmdspec of
         Nothing -> helpAndExit
         Just cmdspec -> do
-            putStrLn $ "Usage: " ++ cmd
+            putStrLn $ "Usage: " ++ cmd ++ " " ++ showOptions cmdspec
             putStr "\n"
             putStrLn $ document cmdspec
+            putStr "\n"
+            putStrLn $ "Aliases: " ++ showAliases cmdspec
             putStr "\n"
             printOptions cmdspec
     exitSuccess
   where
     mcmdspec = commandSpecByName cmd commandDB
+    showOptions cmdspec = joinBy " " $ concatMap (masterOption optionDB) (opts cmdspec)
+    opts = map fst . options
+    masterOption [] _ = []
+    masterOption (spec:specs) o
+      | option spec == o = (head . optionNames $ spec) : masterOption specs o
+      | otherwise        = masterOption specs o
+    showAliases = joinBy ", " . commandNames
 
 printOptions :: CommandSpec -> IO ()
 printOptions cmdspec =
-    forM_ opts (flip loop optionDB)
+    forM_ opts (printOption optionDB)
   where
     opts = map fst $ options cmdspec
-    loop _ [] = return ()
-    loop o (spec:specs)
-      | option spec == o = do
-          putStrLn $ (concat . intersperse "," . optionNames $ spec)
+    printOption [] _ = return ()
+    printOption (spec:specs) o
+      | option spec == o =
+          putStrLn $ (joinBy ", " . reverse . optionNames $ spec)
                    ++ "\t" ++ optionDesc spec
-      | otherwise        = loop o specs
+      | otherwise        = printOption specs o
+
+----------------------------------------------------------------
 
 helpAndExit :: IO ()
 helpAndExit = do
@@ -196,7 +207,7 @@ helpAndExit = do
     putStrLn ""
     putStrLn $ "Version: " ++ version
     putStrLn "Usage:"
-    putStrLn $ "\t" ++ programName ++ " help"
+    putStrLn $ "\t" ++ programName
     putStrLn $ "\t" ++ programName ++ " <command> [args...]"
     putStrLn $ "\t  where"
     printCommands (getCommands commandDB)
@@ -204,7 +215,7 @@ helpAndExit = do
   where
     getCommands = map concat
                 . split helpCommandNumber
-                . intersperse ","
+                . intersperse ", "
                 . map head
                 . map commandNames
     printCommands [] = return ()
@@ -215,16 +226,14 @@ helpAndExit = do
 helpCommandNumber :: Int
 helpCommandNumber = 10
 
-split :: Int -> [a] -> [[a]]
-split _ [] = []
-split n ss = x : split n rest
-  where
-    (x,rest) = splitAt n ss
+----------------------------------------------------------------
 
 illegalCommandAndExit :: String -> IO ()
 illegalCommandAndExit x = do
     hPutStrLn stderr $ "Illegal command: " ++ x
     exitFailure
+
+----------------------------------------------------------------
 
 illegalOptionsAndExit :: [String] -> IO ()
 illegalOptionsAndExit xs = do -- FixME
