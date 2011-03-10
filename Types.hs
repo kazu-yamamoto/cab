@@ -49,6 +49,3 @@ data Route = RouteFunc FunctionCommand
            | RouteProc String [String]
 
 ----------------------------------------------------------------
-
-data OldPkg = OldPkg String String String deriving Show
-

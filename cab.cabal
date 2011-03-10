@@ -19,13 +19,14 @@ Executable cab
                         containers, Cabal,
                         attoparsec, attoparsec-enumerator,
                         enumerator, bytestring
-  Other-Modules:	Commands
-                        Deps
-                        Installed
-                        Outdated
+  Other-Modules:	CmdDB
+                        Commands
                         PkgDB
+                        Process
                         Program
                         Types
+                        Utls
+                        VerDB
 Source-Repository head
   Type:                 git
   Location:             git://github.com/kazu-yamamoto/cab.git

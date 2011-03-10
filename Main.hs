@@ -1,7 +1,7 @@
 module Main where
 
 import Control.Applicative
-import Commands
+import CmdDB
 import Control.Exception
 import Control.Monad
 import Data.List
@@ -68,7 +68,6 @@ run cmdspec params opts = case routing cmdspec of
     RouteProc subcmd subargs -> callProcess subcmd subargs params opts
 
 callProcess :: String ->[String] -> [String] -> [OptionSpec] -> IO ()
-callProcess cmd args0 args1 opts = system script >> return ()
+callProcess pro args0 args1 opts = system script >> return ()
   where
-    cmdList = cmd : args0 ++ args1
-    script = concat . intersperse " " $ cmdList
+    script = concat . intersperse " " $ pro : args0 ++ args1
