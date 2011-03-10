@@ -40,9 +40,7 @@ commandDB = [
        , commandNames = ["installed", "list"]
        , document = "Listing installed packages"
        , routing = RouteFunc installed
-       , options = [(OptRecursive, Nothing)
-                   ,(OptAll, Nothing)
-                   ]
+       , options = [(OptAll, Nothing)]
        }
   , CommandSpec {
          command = Configure
@@ -112,6 +110,13 @@ commandDB = [
                    ]
        }
   , CommandSpec {
+         command = Check
+       , commandNames = ["check"]
+       , document = "Check consistency of packages"
+       , routing = RouteProc "ghc-pkg" ["check"]
+       , options = []
+       }
+  , CommandSpec {
          command = Help
        , commandNames = ["help"]
        , document = undefined
@@ -137,7 +142,7 @@ optionDB = [
   , OptionSpec {
          option = OptAll
        , optionNames = ["-a", "--all"]
-       , optionDesc = "Show global packages in addition to user ones"
+       , optionDesc = "Show global packages in addition to user packages"
        }
   ]
 

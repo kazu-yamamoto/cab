@@ -26,13 +26,15 @@ revdeps _ (pkgnm:_) _ = do
     mapM_ (putStrLn . nameOfPkgInfo) pkgs
 
 installed :: FunctionCommand
-installed _ _ _ = do
-    pkgs <- toPkgList <$> getPkgDB <*> makeUserOnly
+installed _ _ flags = do
+    flt <- if allFlag flags then return (const True) else makeUserOnly
+    pkgs <- flip toPkgList flt <$> getPkgDB
     mapM_ putStrLn $ map nameOfPkgInfo pkgs
 
 outdated :: FunctionCommand
-outdated _ _ _ = do
-    pkgs <- toPkgList <$> getPkgDB <*> makeUserOnly
+outdated _ _ flags = do
+    flt <- if allFlag flags then return (const True) else makeUserOnly
+    pkgs <- flip toPkgList flt <$> getPkgDB
     verDB <- getVerDB
     forM_ pkgs $ \p -> do
         case lookupLatestVersion (idOfPkgInfo p) verDB of
