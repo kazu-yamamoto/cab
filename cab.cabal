@@ -25,7 +25,7 @@ Executable cab
                         Process
                         Program
                         Types
-                        Utls
+                        Utils
                         VerDB
 Source-Repository head
   Type:                 git
