@@ -5,8 +5,14 @@ Maintainer:             Kazu Yamamoto <kazu@iij.ad.jp>
 License:                BSD3
 License-File:           LICENSE
 Synopsis:               A maintenance command of Haskell cabal packages
-Description:            A wrapper to ghc-pkg, cabal, and so on
-Category:               System
+Description:            This is a MacPorts-like maintenance command of
+   Haskell cabal packages. Some part of this program is a wrapper to
+   "ghc-pkg" and "cabal".
+   If you are always confused due to inconsistency of two commands,
+   or if you want a way to check all outdated packages,
+   or if you want a way to remove outdated packages recursively,
+   this command helps you.
+Category:               Distribution
 Cabal-Version:          >= 1.6
 Build-Type:             Simple
 Executable cab
