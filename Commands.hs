@@ -14,10 +14,13 @@ import Distribution.Simple.PackageIndex
 import Distribution.InstalledPackageInfo
 
 deps :: FunctionCommand
-deps _ nmver _ = do
-    db <- getPkgDB
+deps _ nmver flags = do
+    db' <- getPkgDB
+    db <- if allFlag flags
+          then return db'
+          else toPkgDB . flip toPkgList db' <$> userPkgs
     pkg <- lookupPkg nmver db
-    printPkg pkg db
+    printDeps pkg db
 
 revdeps :: FunctionCommand
 revdeps _ nmver _ = do
@@ -30,13 +33,13 @@ revdeps _ nmver _ = do
 installed :: FunctionCommand
 installed _ _ flags = do
     flt <- if allFlag flags then allPkgs else userPkgs
-    pkgs <- flip toPkgList flt <$> getPkgDB
+    pkgs <- toPkgList flt <$> getPkgDB
     mapM_ putStrLn $ map nameOfPkgInfo pkgs
 
 outdated :: FunctionCommand
 outdated _ _ flags = do
     flt <- if allFlag flags then allPkgs else userPkgs
-    pkgs <- flip toPkgList flt <$> getPkgDB
+    pkgs <- toPkgList flt <$> getPkgDB
     verDB <- getVerDB
     forM_ pkgs $ \p -> do
         case lookupLatestVersion (idOfPkgInfo p) verDB of

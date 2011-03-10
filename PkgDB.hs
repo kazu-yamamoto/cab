@@ -12,7 +12,7 @@ import Distribution.Simple.GHC
     (configure, getInstalledPackages)
 import Distribution.Simple.PackageIndex
     (lookupPackageName, lookupSourcePackageId, lookupInstalledPackageId
-    ,allPackages, PackageIndex)
+    , allPackages, fromList, PackageIndex)
 import Distribution.Simple.Program.Db
     (defaultProgramDb)
 import Distribution.Verbosity
@@ -23,6 +23,9 @@ import Utils
 
 type PkgDB = PackageIndex
 type PkgInfo = InstalledPackageInfo
+
+toPkgDB :: [PkgInfo] -> PkgDB
+toPkgDB = fromList
 
 ----------------------------------------------------------------
 
@@ -47,8 +50,8 @@ lookupByVersion name ver db = lookupSourcePackageId db src
 
 ----------------------------------------------------------------
 
-toPkgList :: PkgDB -> (PkgInfo -> Bool) -> [PkgInfo]
-toPkgList db prd = filter prd $ allPackages db
+toPkgList :: (PkgInfo -> Bool) -> PkgDB -> [PkgInfo]
+toPkgList prd db = filter prd $ allPackages db
 
 userPkgs :: IO (PkgInfo -> Bool)
 userPkgs = do
@@ -76,12 +79,10 @@ idOfPkgInfo = sourcePackageId
 
 ----------------------------------------------------------------
 
-printPkg :: PkgInfo -> PkgDB -> IO ()
-printPkg pkgi db = do
-    putStrLn $ nameOfPkgInfo pkgi
-    mapM_ (printDep db) $ depends pkgi
+printDeps :: PkgInfo -> PkgDB -> IO ()
+printDeps pkgi db = mapM_ (printDep db) $ depends pkgi
 
 printDep :: PkgDB -> InstalledPackageId -> IO ()
 printDep db pid = case lookupInstalledPackageId db pid of
     Nothing -> return ()
-    Just pkgi -> putStrLn $ "    " ++ nameOfPkgInfo pkgi
+    Just pkgi -> putStrLn $ nameOfPkgInfo pkgi
