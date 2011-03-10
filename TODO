@@ -1,8 +1,5 @@
 cabal-delete
 	https://github.com/iquiw/cabal-delete
 
-	file:///Library/Frameworks/GHC.framework/Versions/612/usr/share/doc/ghc/html/libraries/Cabal-1.8.0.6/Distribution-Simple-PackageIndex.html#v%3AallPackages
-	reverseTopologicalOrder
-
 cabal-dev
 	https://github.com/creswick/cabal-dev
