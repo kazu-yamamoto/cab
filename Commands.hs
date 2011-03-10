@@ -1,5 +1,5 @@
 module Commands (
-    deps, revdeps, installed, outdated
+    deps, revdeps, installed, outdated, uninstall
   ) where
 
 import Control.Applicative hiding (many)
@@ -10,6 +10,7 @@ import System.IO
 import Types
 import Utils
 import VerDB
+import System.Process
 
 ----------------------------------------------------------------
 
@@ -17,7 +18,7 @@ installed :: FunctionCommand
 installed _ _ flags = do
     flt <- if allFlag flags then allPkgs else userPkgs
     pkgs <- toPkgList flt <$> getPkgDB
-    mapM_ putStrLn $ map nameOfPkgInfo pkgs
+    mapM_ putStrLn $ map fullNameOfPkgInfo pkgs
 
 outdated :: FunctionCommand
 outdated _ _ flags = do
@@ -27,9 +28,37 @@ outdated _ _ flags = do
     forM_ pkgs $ \p -> do
         case lookupLatestVersion (idOfPkgInfo p) verDB of
             Nothing -> return ()
-            Just ver -> if versionOfPkgInfo p /= ver
-               then putStrLn $ nameOfPkgInfo p ++ " < " ++ toDotted ver
+            Just ver -> if numVersionOfPkgInfo p /= ver
+               then putStrLn $ fullNameOfPkgInfo p ++ " < " ++ toDotted ver
                else return ()
+
+----------------------------------------------------------------
+
+uninstall :: FunctionCommand
+uninstall _ nmver flags = do
+    db' <- getPkgDB
+    db <- toPkgDB . flip toPkgList db' <$> userPkgs
+    pkg <- lookupPkg nmver db
+    let sortedPkgs = topSortedPkgs pkg db
+    if onlyOne && length sortedPkgs /= 1
+       then do
+        hPutStrLn stderr $ "The following packages depend on this. Use the \"-r\" option."
+        mapM_ (hPutStrLn stderr . fullNameOfPkgInfo) (init sortedPkgs)
+       else do
+        unless doit $ putStrLn "The following packages are deleted without the \"-n\" option."
+        mapM_ (unregister doit) (map pairNameOfPkgInfo sortedPkgs)
+  where
+    onlyOne = not $ recursiveFlag flags
+    doit = not $ noHarmFlag flags
+
+unregister :: Bool -> (String,String) -> IO ()
+unregister doit (name,ver) = if doit
+    then do
+        putStrLn $ "Deleting " ++ name ++ " " ++ ver
+        when doit $ system script >> return ()
+    else putStrLn $ name ++ " " ++ ver
+  where
+    script = "ghc-pkg unregister " ++ name ++ "-" ++ ver
 
 ----------------------------------------------------------------
 
@@ -68,5 +97,5 @@ checkOne [] = do
 checkOne [pkg] = return pkg
 checkOne pkgs = do
     hPutStrLn stderr "Package version must be specified."
-    mapM_ (hPutStrLn stderr) $ map nameOfPkgInfo pkgs
+    mapM_ (hPutStrLn stderr) $ map fullNameOfPkgInfo pkgs
     exitFailure

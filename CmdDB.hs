@@ -29,12 +29,12 @@ commandDB = [
        }
   , CommandSpec {
          command = Uninstall
-       , commandNames = ["uninstall"]
+       , commandNames = ["uninstall", "delete", "remove", "unregister"]
        , document = "Uninstalling packages"
-       , routing = RouteProc "ghc-pkg" ["unregister"]
-       , options = [(OptNoHarm, Nothing) -- FIXME
-                   ,(OptRecursive, Nothing) -- FIXME
-                   ]
+       , routing = RouteFunc uninstall
+       , options = [(OptNoHarm, Nothing)
+                   ,(OptRecursive, Nothing)
+                   ] -- don't allow OptAll
        }
   , CommandSpec {
          command = Installed

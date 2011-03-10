@@ -16,7 +16,8 @@ import Distribution.Simple.GHC
     (configure, getInstalledPackages)
 import Distribution.Simple.PackageIndex
     (lookupPackageName, lookupSourcePackageId, lookupInstalledPackageId
-    , allPackages, fromList, PackageIndex)
+    , allPackages, fromList, reverseDependencyClosure
+    , topologicalOrder, PackageIndex)
 import Distribution.Simple.Program.Db
     (defaultProgramDb)
 import Distribution.Verbosity
@@ -27,15 +28,17 @@ import Utils
 type PkgDB = PackageIndex
 type PkgInfo = InstalledPackageInfo
 
-toPkgDB :: [PkgInfo] -> PkgDB
-toPkgDB = fromList
-
 ----------------------------------------------------------------
 
 getPkgDB :: IO PkgDB
 getPkgDB = do
     (_,pro) <- configure normal Nothing Nothing defaultProgramDb
     getInstalledPackages normal [GlobalPackageDB,UserPackageDB] pro
+
+toPkgDB :: [PkgInfo] -> PkgDB
+toPkgDB = fromList
+
+----------------------------------------------------------------
 
 lookupByName :: String -> PkgDB -> [PkgInfo]
 lookupByName name db = map (head . snd) $ lookupPackageName db (PackageName name)
@@ -66,16 +69,22 @@ allPkgs = return (const True)
 
 ----------------------------------------------------------------
 
-nameOfPkgInfo :: PkgInfo -> String
-nameOfPkgInfo = toName . sourcePackageId
-  where
-    toName pid = name pid ++ " " ++ ver pid
-    name = toString . pkgName
-    toString (PackageName x) = x
-    ver = toDotted . versionBranch . pkgVersion
+fullNameOfPkgInfo :: PkgInfo -> String
+fullNameOfPkgInfo pkgi = nameOfPkgInfo pkgi ++ " " ++ versionOfPkgInfo pkgi
 
-versionOfPkgInfo :: PkgInfo -> [Int]
-versionOfPkgInfo = versionBranch . pkgVersion . sourcePackageId
+pairNameOfPkgInfo :: PkgInfo -> (String,String)
+pairNameOfPkgInfo pkgi = (nameOfPkgInfo pkgi, versionOfPkgInfo pkgi)
+
+nameOfPkgInfo :: PkgInfo -> String
+nameOfPkgInfo = toString . pkgName . sourcePackageId
+  where
+    toString (PackageName x) = x
+
+versionOfPkgInfo :: PkgInfo -> String
+versionOfPkgInfo = toDotted . numVersionOfPkgInfo
+
+numVersionOfPkgInfo :: PkgInfo -> [Int]
+numVersionOfPkgInfo = versionBranch . pkgVersion . sourcePackageId
 
 idOfPkgInfo :: PkgInfo -> PackageId
 idOfPkgInfo = sourcePackageId
@@ -95,8 +104,6 @@ printDep rec db n pid = case lookupInstalledPackageId db pid of
     prefix = replicate (n * 4) ' '
 
 ----------------------------------------------------------------
-
-type RevDB = Map InstalledPackageId [InstalledPackageId]
 
 printRevDeps :: Bool -> PkgDB -> Int -> PkgInfo -> IO ()
 printRevDeps rec db n pkgi = printRevDeps' rec db revdb n pkgi
@@ -119,6 +126,10 @@ printRevDep' rec db revdb n pid = case lookupInstalledPackageId db pid of
   where
     prefix = replicate (n * 4) ' '
 
+----------------------------------------------------------------
+
+type RevDB = Map InstalledPackageId [InstalledPackageId]
+
 makeRevDepDB :: PkgDB -> RevDB
 makeRevDepDB db = M.fromList revdeps
   where
@@ -130,3 +141,11 @@ makeRevDepDB db = M.fromList revdeps
     kvss = groupBy (\x y -> fst x == fst y) kvs
     comp xs = (fst (head xs), map snd xs)
     revdeps = map comp kvss
+
+----------------------------------------------------------------
+
+topSortedPkgs :: PkgInfo -> PkgDB -> [PkgInfo]
+topSortedPkgs pkgi db = topSort $ pkgids [pkgi]
+  where
+    pkgids = map installedPackageId
+    topSort = topologicalOrder . fromList . reverseDependencyClosure db
