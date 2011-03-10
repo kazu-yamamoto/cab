@@ -1,5 +1,6 @@
 module PkgDB where
 
+import Control.Monad
 import Distribution.Version
     (Version(..))
 import Distribution.InstalledPackageInfo
@@ -79,10 +80,14 @@ idOfPkgInfo = sourcePackageId
 
 ----------------------------------------------------------------
 
-printDeps :: PkgInfo -> PkgDB -> IO ()
-printDeps pkgi db = mapM_ (printDep db) $ depends pkgi
+printDeps :: Bool -> PkgDB -> Int -> PkgInfo -> IO ()
+printDeps rec db n pkgi = mapM_ (printDep rec db n) $ depends pkgi
 
-printDep :: PkgDB -> InstalledPackageId -> IO ()
-printDep db pid = case lookupInstalledPackageId db pid of
+printDep :: Bool -> PkgDB -> Int -> InstalledPackageId -> IO ()
+printDep rec db n pid = case lookupInstalledPackageId db pid of
     Nothing -> return ()
-    Just pkgi -> putStrLn $ nameOfPkgInfo pkgi
+    Just pkgi -> do
+        putStrLn $ prefix ++ nameOfPkgInfo pkgi
+        when rec $ printDeps rec db (n+1) pkgi
+  where
+    prefix = replicate (n * 4) ' '

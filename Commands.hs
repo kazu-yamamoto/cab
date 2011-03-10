@@ -20,7 +20,7 @@ deps _ nmver flags = do
           then return db'
           else toPkgDB . flip toPkgList db' <$> userPkgs
     pkg <- lookupPkg nmver db
-    printDeps pkg db
+    printDeps (recursiveFlag flags) db 0 pkg
 
 revdeps :: FunctionCommand
 revdeps _ nmver _ = do
