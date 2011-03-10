@@ -98,7 +98,7 @@ printDep :: Bool -> PkgDB -> Int -> InstalledPackageId -> IO ()
 printDep rec db n pid = case lookupInstalledPackageId db pid of
     Nothing -> return ()
     Just pkgi -> do
-        putStrLn $ prefix ++ nameOfPkgInfo pkgi
+        putStrLn $ prefix ++ fullNameOfPkgInfo pkgi
         when rec $ printDeps rec db (n+1) pkgi
   where
     prefix = replicate (n * 4) ' '
@@ -121,7 +121,7 @@ printRevDep' :: Bool -> PkgDB -> RevDB -> Int -> InstalledPackageId -> IO ()
 printRevDep' rec db revdb n pid = case lookupInstalledPackageId db pid of
     Nothing -> return ()
     Just pkgi -> do
-        putStrLn $ prefix ++ nameOfPkgInfo pkgi
+        putStrLn $ prefix ++ fullNameOfPkgInfo pkgi
         when rec $ printRevDeps' rec db revdb (n+1) pkgi
   where
     prefix = replicate (n * 4) ' '
