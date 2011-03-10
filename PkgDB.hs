@@ -11,7 +11,8 @@ import Distribution.Simple.Compiler
 import Distribution.Simple.GHC
     (configure, getInstalledPackages)
 import Distribution.Simple.PackageIndex
-    (lookupPackageName, lookupInstalledPackageId, allPackages, PackageIndex)
+    (lookupPackageName, lookupSourcePackageId, lookupInstalledPackageId
+    ,allPackages, PackageIndex)
 import Distribution.Simple.Program.Db
     (defaultProgramDb)
 import Distribution.Verbosity
@@ -31,17 +32,31 @@ getPkgDB = do
     getInstalledPackages normal [GlobalPackageDB,UserPackageDB] pro
 
 lookupByName :: String -> PkgDB -> [PkgInfo]
-lookupByName x db = map (head . snd) $ lookupPackageName db (PackageName x)
+lookupByName name db = map (head . snd) $ lookupPackageName db (PackageName name)
+
+lookupByVersion :: String -> String -> PkgDB -> [PkgInfo]
+lookupByVersion name ver db = lookupSourcePackageId db src
+  where
+    src = PackageIdentifier {
+        pkgName = PackageName name
+      , pkgVersion = Version {
+          versionBranch = fromDotted ver
+        , versionTags = []
+        }
+      }
 
 ----------------------------------------------------------------
 
 toPkgList :: PkgDB -> (PkgInfo -> Bool) -> [PkgInfo]
 toPkgList db prd = filter prd $ allPackages db
 
-makeUserOnly :: IO (PkgInfo -> Bool)
-makeUserOnly = do
+userPkgs :: IO (PkgInfo -> Bool)
+userPkgs = do
     userDirPref <- getAppUserDataDirectory ""
     return $ \pkgi -> userDirPref `isPrefixOf` (head $ libraryDirs pkgi)
+
+allPkgs :: IO (PkgInfo -> Bool)
+allPkgs = return (const True)
 
 ----------------------------------------------------------------
 
