@@ -1,5 +1,6 @@
 module PkgDB where
 
+import Control.Applicative
 import Control.Monad
 import Data.List
 import Data.Map (Map)
@@ -22,6 +23,7 @@ import Distribution.Simple.Program.Db
     (defaultProgramDb)
 import Distribution.Verbosity
     (normal)
+import System.FilePath
 import System.Directory
 import Utils
 
@@ -61,10 +63,11 @@ toPkgList prd db = filter prd $ allPackages db
 
 userPkgs :: IO (PkgInfo -> Bool)
 userPkgs = do
-    userDirPref <- getAppUserDataDirectory ""
+    -- drop "/."
+    userDirPref <- takeDirectory <$> getAppUserDataDirectory ""
     return $ \pkgi -> case libraryDirs pkgi of
-        []   -> True -- FIXME
-        x:xs -> userDirPref `isPrefixOf` x
+        []   -> False -- haskell-platform for example
+        x:_ -> userDirPref `isPrefixOf` x
 
 allPkgs :: IO (PkgInfo -> Bool)
 allPkgs = return (const True)
