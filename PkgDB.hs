@@ -9,7 +9,7 @@ import Distribution.Version
 import Distribution.InstalledPackageInfo
     (InstalledPackageInfo_(..), InstalledPackageInfo)
 import Distribution.Package
-    (PackageName(..), PackageId, PackageIdentifier(..), InstalledPackageId)
+    (PackageName(..), PackageIdentifier(..), InstalledPackageId)
 import Distribution.Simple.Compiler
     (PackageDB(..))
 import Distribution.Simple.GHC
@@ -85,9 +85,6 @@ versionOfPkgInfo = toDotted . numVersionOfPkgInfo
 
 numVersionOfPkgInfo :: PkgInfo -> [Int]
 numVersionOfPkgInfo = versionBranch . pkgVersion . sourcePackageId
-
-idOfPkgInfo :: PkgInfo -> PackageId
-idOfPkgInfo = sourcePackageId
 
 ----------------------------------------------------------------
 

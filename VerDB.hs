@@ -5,49 +5,32 @@ module VerDB (
   ) where
 
 import Control.Applicative hiding (many)
+import Control.Arrow (second)
 import Data.Attoparsec.Char8
 import Data.Attoparsec.Enumerator
 import Data.ByteString (ByteString)
 import Data.Map (Map)
 import qualified Data.Map as M
 import Data.Maybe
-import Distribution.Package (PackageId, PackageIdentifier(..), PackageName(..))
-import Distribution.Version (Version(..))
 import Process
 
 ----------------------------------------------------------------
 
-data VerInfo = VerInfo {
-    packageName :: String
-  , currentVersion :: [Int]
-  , latestVersion :: Maybe [Int]
-  } deriving Show
+type VerInfo = (String, Maybe [Int])
 
-data VerDB = VerDB (Map PackageId [Int])
+data VerDB = VerDB (Map String [Int])
 
 ----------------------------------------------------------------
 
 getVerDB :: IO VerDB
-getVerDB = do
-    verInfos <- infoFromProcess "cabal list --installed" cabalListParser
-    let verInfos' = filter (isJust . latestVersion) verInfos
-        pkgIDs = map toPackageId verInfos'
-        vers = map (fromJust . latestVersion) verInfos'
-        verDB = M.fromList $ zip pkgIDs vers
-    return (VerDB verDB)
-
-toPackageId :: VerInfo -> PackageId
-toPackageId veri = PackageIdentifier {
-    pkgName = PackageName (packageName veri)
-  , pkgVersion = Version {
-        versionBranch = currentVersion veri
-      , versionTags = []
-      }
-  }
+getVerDB = VerDB . M.fromList . justOnly <$> verInfos
+  where
+    verInfos = infoFromProcess "cabal list --installed" cabalListParser
+    justOnly = map (second fromJust) . filter (isJust . snd)
 
 ----------------------------------------------------------------
 
-lookupLatestVersion :: PackageId -> VerDB -> Maybe [Int]
+lookupLatestVersion :: String -> VerDB -> Maybe [Int]
 lookupLatestVersion pkgid (VerDB db) = M.lookup pkgid db
 
 ----------------------------------------------------------------
@@ -62,16 +45,13 @@ verinfo :: Parser VerInfo
 verinfo = do
     name <- string "* " *> nonEols <* endOfLine
     synpsis
-    lat <- string "    Latest version available: " *> latest <* endOfLine
-    cur <- string "    Latest version installed: " *> dotted <* endOfLine
+    lat <- latestLabel *> latest <* endOfLine
     many skip
     endOfLine
-    return $ VerInfo {
-        packageName = name
-      , currentVersion = cur
-      , latestVersion = lat
-      }
+    return (name, lat)
   where
+    latestLabel = string "    Default available version: "
+              <|> string "    Latest version available: "
     skip = many1 nonEols *> endOfLine
     synpsis = string "    Synopsis:" *> nonEols *> endOfLine *> more
           <|> return ()

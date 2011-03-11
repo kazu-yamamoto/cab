@@ -26,7 +26,7 @@ outdated _ _ flags = do
     pkgs <- toPkgList flt <$> getPkgDB
     verDB <- getVerDB
     forM_ pkgs $ \p -> do
-        case lookupLatestVersion (idOfPkgInfo p) verDB of
+        case lookupLatestVersion (nameOfPkgInfo p) verDB of
             Nothing -> return ()
             Just ver -> if numVersionOfPkgInfo p /= ver
                then putStrLn $ fullNameOfPkgInfo p ++ " < " ++ toDotted ver
