@@ -19,6 +19,7 @@ commandDB = [
        , document = "Fetch the latest package index"
        , routing = RouteProc "cabal" ["update"]
        , options = []
+       , manual = Nothing
        }
   , CommandSpec {
          command = Install
@@ -26,6 +27,7 @@ commandDB = [
        , document = "Install packages"
        , routing = RouteProc "cabal" ["install"]
        , options = [(OptNoHarm, Just "--dry-run")]
+       , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
          command = Uninstall
@@ -35,6 +37,7 @@ commandDB = [
        , options = [(OptNoHarm, Nothing)
                    ,(OptRecursive, Nothing)
                    ] -- don't allow OptAll
+       , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
          command = Installed
@@ -42,6 +45,7 @@ commandDB = [
        , document = "List installed packages"
        , routing = RouteFunc installed
        , options = [(OptAll, Nothing)]
+       , manual = Nothing
        }
   , CommandSpec {
          command = Configure
@@ -49,6 +53,7 @@ commandDB = [
        , document = "Configure a cabal package"
        , routing = RouteProc "cabal" ["configure"]
        , options = []
+       , manual = Nothing
        }
   , CommandSpec {
          command = Build
@@ -56,6 +61,7 @@ commandDB = [
        , document = "Build a cabal package"
        , routing = RouteProc "cabal" ["build"]
        , options = []
+       , manual = Nothing
        }
   , CommandSpec {
          command = Clean
@@ -63,6 +69,7 @@ commandDB = [
        , document = "Clean up a build directory"
        , routing = RouteProc "cabal" ["clean"]
        , options = []
+       , manual = Nothing
        }
   , CommandSpec {
          command = Outdated
@@ -70,6 +77,7 @@ commandDB = [
        , document = "Display outdated packages"
        , routing = RouteFunc outdated
        , options = [(OptAll, Nothing)]
+       , manual = Nothing
        }
   , CommandSpec {
          command = Info
@@ -77,6 +85,7 @@ commandDB = [
        , document = "Display information of a package"
        , routing = RouteProc "cabal" ["info"]
        , options = []
+       , manual = Just "<package>"
        }
   , CommandSpec {
          command = Sdist
@@ -84,6 +93,7 @@ commandDB = [
        , document = "Make tar.gz for source distribution"
        , routing = RouteProc "cabal" ["sdist"]
        , options = []
+       , manual = Nothing
        }
   , CommandSpec {
          command = Unpack
@@ -91,6 +101,7 @@ commandDB = [
        , document = "Untar a package in the current directory"
        , routing = RouteProc "cabal" ["unpack"]
        , options = []
+       , manual = Just "<package>"
        }
   , CommandSpec {
          command = Deps
@@ -100,6 +111,7 @@ commandDB = [
        , options = [(OptRecursive, Nothing)
                    ,(OptAll, Nothing)
                    ]
+       , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
          command = RevDeps
@@ -109,6 +121,7 @@ commandDB = [
        , options = [(OptRecursive, Nothing)
                    ,(OptAll, Nothing)
                    ]
+       , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
          command = Check
@@ -116,6 +129,7 @@ commandDB = [
        , document = "Check consistency of packages"
        , routing = RouteProc "ghc-pkg" ["check"]
        , options = []
+       , manual = Nothing
        }
   , CommandSpec {
          command = Search
@@ -123,6 +137,7 @@ commandDB = [
        , document = "Search available packages by package name"
        , routing = RouteFunc search
        , options = []
+       , manual = Just "<key>"
        }
   , CommandSpec {
          command = Help
@@ -130,6 +145,7 @@ commandDB = [
        , document = "Display the help message of the command"
        , routing = RouteFunc helpCommandAndExit
        , options = []
+       , manual = Just "[<command>]"
        }
   ]
 
@@ -176,7 +192,7 @@ helpCommandAndExit _ (cmd:_) _ = do
     case mcmdspec of
         Nothing -> helpAndExit
         Just cmdspec -> do
-            putStrLn $ "Usage: " ++ cmd ++ " " ++ showOptions cmdspec
+            putStrLn $ "Usage: " ++ cmd ++ " " ++ showOptions cmdspec ++ showArgs cmdspec
             putStr "\n"
             putStrLn $ document cmdspec
             putStr "\n"
@@ -187,6 +203,7 @@ helpCommandAndExit _ (cmd:_) _ = do
   where
     mcmdspec = commandSpecByName cmd commandDB
     showOptions cmdspec = joinBy " " $ concatMap (masterOption optionDB) (opts cmdspec)
+    showArgs cmdspec = maybe "" (" " ++) $ manual cmdspec
     opts = map fst . options
     masterOption [] _ = []
     masterOption (spec:specs) o

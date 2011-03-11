@@ -28,6 +28,7 @@ data CommandSpec = CommandSpec {
   , document :: String
   , routing :: Route
   , options :: [(Option, Maybe String)]
+  , manual  :: Maybe String
   }
 
 type CommandDB = [CommandSpec]
