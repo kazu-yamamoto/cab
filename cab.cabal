@@ -12,6 +12,7 @@ Description:            This is a MacPorts-like maintenance command of
    or if you want a way to check all outdated packages,
    or if you want a way to remove outdated packages recursively,
    this command helps you.
+Homepage:               http://www.mew.org/~kazu/proj/cab/
 Category:               Distribution
 Cabal-Version:          >= 1.6
 Build-Type:             Simple
