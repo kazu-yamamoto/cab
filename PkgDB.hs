@@ -62,7 +62,9 @@ toPkgList prd db = filter prd $ allPackages db
 userPkgs :: IO (PkgInfo -> Bool)
 userPkgs = do
     userDirPref <- getAppUserDataDirectory ""
-    return $ \pkgi -> userDirPref `isPrefixOf` (head $ libraryDirs pkgi)
+    return $ \pkgi -> case libraryDirs pkgi of
+        []   -> True -- FIXME
+        x:xs -> userDirPref `isPrefixOf` x
 
 allPkgs :: IO (PkgInfo -> Bool)
 allPkgs = return (const True)
