@@ -50,8 +50,8 @@ verinfo = do
     endOfLine
     return (name, lat)
   where
-    latestLabel = string "    Default available version: "
-              <|> string "    Latest version available: "
+    latestLabel = string "    Default available version: " -- cabal 0.10
+              <|> string "    Latest version available: "  -- cabal 0.8
     skip = many1 nonEols *> endOfLine
     synpsis = string "    Synopsis:" *> nonEols *> endOfLine *> more
           <|> return ()
@@ -64,4 +64,4 @@ dotted :: Parser [Int]
 dotted = decimal `sepBy` char '.'
 
 nonEols :: Parser String
-nonEols = many1 $ satisfy (notInClass "\n")
+nonEols = many1 $ satisfy (notInClass "\r\n")

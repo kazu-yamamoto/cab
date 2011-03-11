@@ -16,7 +16,7 @@ commandDB = [
     CommandSpec {
          command = Sync
        , commandNames = ["sync", "update"]
-       , document = "Fetchinwg the latest package index"
+       , document = "Fetch the latest package index"
        , routing = RouteProc "cabal" ["update"]
        , options = []
        }
@@ -30,7 +30,7 @@ commandDB = [
   , CommandSpec {
          command = Uninstall
        , commandNames = ["uninstall", "delete", "remove", "unregister"]
-       , document = "Uninstalling packages"
+       , document = "Uninstall packages"
        , routing = RouteFunc uninstall
        , options = [(OptNoHarm, Nothing)
                    ,(OptRecursive, Nothing)
@@ -39,35 +39,35 @@ commandDB = [
   , CommandSpec {
          command = Installed
        , commandNames = ["installed", "list"]
-       , document = "Listing installed packages"
+       , document = "List installed packages"
        , routing = RouteFunc installed
        , options = [(OptAll, Nothing)]
        }
   , CommandSpec {
          command = Configure
        , commandNames = ["configure", "conf"]
-       , document = "Configuring a cabal package"
+       , document = "Configure a cabal package"
        , routing = RouteProc "cabal" ["configure"]
        , options = []
        }
   , CommandSpec {
          command = Build
        , commandNames = ["build"]
-       , document = "Building a cabal package"
+       , document = "Build a cabal package"
        , routing = RouteProc "cabal" ["build"]
        , options = []
        }
   , CommandSpec {
          command = Clean
        , commandNames = ["clean"]
-       , document = "Cleaning a build directory"
+       , document = "Clean up a build directory"
        , routing = RouteProc "cabal" ["clean"]
        , options = []
        }
   , CommandSpec {
          command = Outdated
        , commandNames = ["outdated"]
-       , document = "Displaying outdated packages"
+       , document = "Display outdated packages"
        , routing = RouteFunc outdated
        , options = [(OptAll, Nothing)]
        }
@@ -80,7 +80,7 @@ commandDB = [
        }
   , CommandSpec {
          command = Sdist
-       , commandNames = ["sdist"]
+       , commandNames = ["sdist", "pack"]
        , document = "Make tar.gz for source distribution"
        , routing = RouteProc "cabal" ["sdist"]
        , options = []
