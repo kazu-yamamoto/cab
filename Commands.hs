@@ -18,7 +18,7 @@ import Data.Char
 
 search :: FunctionCommand
 search _ [x] _ = do
-    nvls <- getVerAlist
+    nvls <- getVerAlist False
     forM_ (lok nvls) $ \(n,v) -> putStrLn $ n ++ " " ++ toDotted v
   where
     key = map toLower x

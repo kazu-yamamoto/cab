@@ -23,12 +23,15 @@ data VerDB = VerDB (Map String [Int])
 ----------------------------------------------------------------
 
 getVerDB :: IO VerDB
-getVerDB = VerDB . M.fromList <$> getVerAlist
+getVerDB = VerDB . M.fromList <$> getVerAlist True
 
-getVerAlist :: IO [(String,[Int])]
-getVerAlist = justOnly <$> verInfos
+getVerAlist :: Bool -> IO [(String,[Int])]
+getVerAlist installedOnly = justOnly <$> verInfos
   where
-    verInfos = infoFromProcess "cabal list --installed" cabalListParser
+    script = if installedOnly
+             then "cabal list --installed"
+             else "cabal list"
+    verInfos = infoFromProcess script cabalListParser
     justOnly = map (second fromJust) . filter (isJust . snd)
 
 ----------------------------------------------------------------

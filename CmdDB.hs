@@ -120,7 +120,7 @@ commandDB = [
   , CommandSpec {
          command = Search
        , commandNames = ["search"]
-       , document = "Search packages by package name"
+       , document = "Search available packages by package name"
        , routing = RouteFunc search
        , options = []
        }
