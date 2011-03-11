@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module VerDB (
-    VerDB, getVerDB, lookupLatestVersion
+    VerDB, getVerDB, lookupLatestVersion, getVerAlist
   ) where
 
 import Control.Applicative hiding (many)
@@ -23,7 +23,10 @@ data VerDB = VerDB (Map String [Int])
 ----------------------------------------------------------------
 
 getVerDB :: IO VerDB
-getVerDB = VerDB . M.fromList . justOnly <$> verInfos
+getVerDB = VerDB . M.fromList <$> getVerAlist
+
+getVerAlist :: IO [(String,[Int])]
+getVerAlist = justOnly <$> verInfos
   where
     verInfos = infoFromProcess "cabal list --installed" cabalListParser
     justOnly = map (second fromJust) . filter (isJust . snd)

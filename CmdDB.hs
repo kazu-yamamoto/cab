@@ -118,9 +118,16 @@ commandDB = [
        , options = []
        }
   , CommandSpec {
+         command = Search
+       , commandNames = ["search"]
+       , document = "Search packages by package name"
+       , routing = RouteFunc search
+       , options = []
+       }
+  , CommandSpec {
          command = Help
        , commandNames = ["help"]
-       , document = undefined
+       , document = "Display the help message of the command"
        , routing = RouteFunc helpCommandAndExit
        , options = []
        }

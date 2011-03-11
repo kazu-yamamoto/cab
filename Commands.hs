@@ -1,5 +1,5 @@
 module Commands (
-    deps, revdeps, installed, outdated, uninstall
+    deps, revdeps, installed, outdated, uninstall, search
   ) where
 
 import Control.Applicative hiding (many)
@@ -11,6 +11,25 @@ import Types
 import Utils
 import VerDB
 import System.Process
+import Data.List
+import Data.Char
+
+----------------------------------------------------------------
+
+search :: FunctionCommand
+search _ [x] _ = do
+    nvls <- getVerAlist
+    forM_ (lok nvls) $ \(n,v) -> putStrLn $ n ++ " " ++ toDotted v
+  where
+    key = map toLower x
+    check (n,_) = key `isPrefixOf` map toLower n
+    lok [] = []
+    lok (e:es)
+      | check e   = e : lok es
+      | otherwise = lok es
+search _ _ _ = do
+    hPutStrLn stderr "One search-key should be specified."
+    exitFailure
 
 ----------------------------------------------------------------
 

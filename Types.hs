@@ -18,6 +18,7 @@ data Command = Sync
              | Deps
              | RevDeps
              | Check
+             | Search
              | Help
              deriving (Eq,Show)
 
