@@ -43,7 +43,7 @@ toPkgDB = fromList
 ----------------------------------------------------------------
 
 lookupByName :: String -> PkgDB -> [PkgInfo]
-lookupByName name db = map (head . snd) $ lookupPackageName db (PackageName name)
+lookupByName name db = concatMap snd $ lookupPackageName db (PackageName name)
 
 lookupByVersion :: String -> String -> PkgDB -> [PkgInfo]
 lookupByVersion name ver db = lookupSourcePackageId db src
@@ -66,8 +66,8 @@ userPkgs = do
     -- drop "/."
     userDirPref <- takeDirectory <$> getAppUserDataDirectory ""
     return $ \pkgi -> case libraryDirs pkgi of
-        []   -> False -- haskell-platform for example
-        x:_ -> userDirPref `isPrefixOf` x
+        [] -> False -- haskell-platform for example
+        xs -> any (userDirPref `isPrefixOf`) xs
 
 allPkgs :: IO (PkgInfo -> Bool)
 allPkgs = return (const True)
