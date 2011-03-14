@@ -85,7 +85,7 @@ commandDB = [
        , document = "Display information of a package"
        , routing = RouteProc "cabal" ["info"]
        , options = []
-       , manual = Just "<package>"
+       , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
          command = Sdist
@@ -101,7 +101,7 @@ commandDB = [
        , document = "Untar a package in the current directory"
        , routing = RouteProc "cabal" ["unpack"]
        , options = []
-       , manual = Just "<package>"
+       , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
          command = Deps

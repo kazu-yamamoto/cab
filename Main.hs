@@ -74,4 +74,6 @@ callProcess :: String ->[String] -> [String] -> Flags -> IO ()
 callProcess pro args0 args1 flags = system script >> return ()
   where
     opts = flagsToOptions flags
-    script = joinBy " " $ pro : opts ++ args0 ++ args1
+    script = joinBy " " $ pro : opts ++ args0 ++ cat args1
+    cat [pkg,ver] = [pkg ++ "-" ++ ver]
+    cat x         = x
