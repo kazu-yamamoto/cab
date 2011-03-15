@@ -91,10 +91,10 @@ printDepends :: [String] -> Flags
              -> (Bool -> PkgDB -> Int -> PkgInfo -> IO ()) -> IO ()
 printDepends nmver flags func = do
     db' <- getPkgDB
+    pkg <- lookupPkg nmver db'
     db <- if allFlag flags
           then return db'
           else toPkgDB . flip toPkgList db' <$> userPkgs
-    pkg <- lookupPkg nmver db
     func (recursiveFlag flags) db 0 pkg
 
 ----------------------------------------------------------------
