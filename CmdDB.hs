@@ -26,7 +26,7 @@ commandDB = [
        , commandNames = ["install"]
        , document = "Install packages"
        , routing = RouteProc "cabal" ["install"]
-       , options = [(OptNoHarm, Just "--dry-run")]
+       , options = [(OptNoHarm, Just "--dry-run -v")]
        , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
