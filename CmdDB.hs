@@ -18,7 +18,7 @@ commandDB = [
          command = Sync
        , commandNames = ["sync", "update"]
        , document = "Fetch the latest package index"
-       , routing = RouteProc "cabal" ["update"]
+       , routing = RouteCabal ["update"]
        , switches = []
        , manual = Nothing
        }
@@ -26,7 +26,7 @@ commandDB = [
          command = Install
        , commandNames = ["install"]
        , document = "Install packages"
-       , routing = RouteProc "cabal" ["install"]
+       , routing = RouteCabal ["install"]
        , switches = [(SwNoharm, Just "--dry-run -v")
                     ,(SwSandbox, Just "-s")
                     ]
@@ -57,7 +57,7 @@ commandDB = [
          command = Configure
        , commandNames = ["configure", "conf"]
        , document = "Configure a cabal package"
-       , routing = RouteProc "cabal" ["configure"]
+       , routing = RouteCabal ["configure"]
        , switches = []
        , manual = Nothing
        }
@@ -65,7 +65,7 @@ commandDB = [
          command = Build
        , commandNames = ["build"]
        , document = "Build a cabal package"
-       , routing = RouteProc "cabal" ["build"]
+       , routing = RouteCabal ["build"]
        , switches = []
        , manual = Nothing
        }
@@ -73,7 +73,7 @@ commandDB = [
          command = Clean
        , commandNames = ["clean"]
        , document = "Clean up a build directory"
-       , routing = RouteProc "cabal" ["clean"]
+       , routing = RouteCabal ["clean"]
        , switches = []
        , manual = Nothing
        }
@@ -90,7 +90,7 @@ commandDB = [
          command = Info
        , commandNames = ["info"]
        , document = "Display information of a package"
-       , routing = RouteProc "cabal" ["info"]
+       , routing = RouteCabal ["info"]
        , switches = [(SwSandbox, Just "-s")]
        , manual = Just "<package> [<ver>]"
        }
@@ -98,7 +98,7 @@ commandDB = [
          command = Sdist
        , commandNames = ["sdist", "pack"]
        , document = "Make tar.gz for source distribution"
-       , routing = RouteProc "cabal" ["sdist"]
+       , routing = RouteCabal ["sdist"]
        , switches = []
        , manual = Nothing
        }
@@ -106,7 +106,7 @@ commandDB = [
          command = Unpack
        , commandNames = ["unpack"]
        , document = "Untar a package in the current directory"
-       , routing = RouteProc "cabal" ["unpack"]
+       , routing = RouteCabal ["unpack"]
        , switches = []
        , manual = Just "<package> [<ver>]"
        }

@@ -58,16 +58,17 @@ checkOptions2 opts cmdspec oargs func = do
 
 run :: CommandSpec -> [Arg] -> [Option] -> IO ()
 run cmdspec params opts = case routing cmdspec of
-    RouteFunc func -> func cmdspec params opts
-    RouteProc subcmd subargs -> callProcess subcmd subargs params opts (switches cmdspec)
+    RouteFunc func           -> func cmdspec params opts
+    RouteProc subcmd subargs -> callProcess subcmd subargs params opts sws
+    RouteCabal subargs       -> callProcess pro    subargs params opts sws
+  where
+    pro = cabalCommand opts
+    sws = switches cmdspec
 
 callProcess :: String -> [String] -> [Arg] -> [Option] -> [SwitchSpec] -> IO ()
 callProcess pro args0 args1 opts sws = system script >> return ()
   where
     swchs = optionsToString opts sws
-    pro'
-      | SwSandbox `elem` (map toSwitch opts) = "cabal-dev"
-      | otherwise                            = pro
-    script = joinBy " " $ pro' : swchs ++ args0 ++ cat args1
+    script = joinBy " " $ pro : swchs ++ args0 ++ cat args1
     cat [pkg,ver] = [pkg ++ "-" ++ ver]
     cat x         = x

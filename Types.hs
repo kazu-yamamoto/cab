@@ -82,5 +82,11 @@ type FunctionCommand = CommandSpec -> [String] -> [Option] -> IO ()
 
 data Route = RouteFunc FunctionCommand
            | RouteProc String [String]
+           | RouteCabal [String]
+
+cabalCommand :: [Option] -> String
+cabalCommand opts
+    | SwSandbox `elem` (map toSwitch opts) = "cabal-dev"
+    | otherwise                            = "cabal"
 
 ----------------------------------------------------------------
