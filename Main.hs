@@ -18,9 +18,11 @@ main = flip catches handlers $ do
     oargs <- getArgs
     let pargs = parseArgs getOptDB oargs
     checkOptions1 pargs illegalOptionsAndExit
-    let Right (args,opts) = pargs
+    let Right (args,opts') = pargs
     when (args == []) helpAndExit
-    let act:params = args
+    when (OptHelp `elem` opts') $ helpCommandAndExit undefined args undefined
+    let opts = filter (/= OptHelp) opts'
+        act:params = args
         mcmdspec = commandSpecByName act commandDB
     when (isNothing mcmdspec) (illegalCommandAndExit act)
     let Just cmdspec = mcmdspec

@@ -19,6 +19,7 @@ data Option = OptNoharm
             | OptRecursive
             | OptAll
             | OptSandbox String
+            | OptHelp
             deriving (Eq,Show)
 
 toSwitch :: Option -> Switch
@@ -26,6 +27,7 @@ toSwitch OptNoharm      = SwNoharm
 toSwitch OptRecursive   = SwRecursive
 toSwitch OptAll         = SwAll
 toSwitch (OptSandbox _) = SwSandbox
+toSwitch _              = error "toSwitch"
 
 getSandbox :: [Option] -> Maybe FilePath
 getSandbox opts = case find isSandbox opts of

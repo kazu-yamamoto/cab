@@ -168,34 +168,29 @@ commandSpecByName x (ent:ents)
 
 ----------------------------------------------------------------
 
-optionDB :: OptionDB
-optionDB = [
-    (SwNoharm
-    ,Option ['n'] ["dry-run"]
-     (NoArg OptNoharm)
-     "Run without destructive operations"
-    )
-  , (SwRecursive
-    ,Option ['r'] ["recursive"]
-     (NoArg OptRecursive)
-     "Follow dependencies recursively"
-    )
-  , (SwAll
-    ,Option ['a'] ["all"]
-     (NoArg OptAll)
-     "Show global packages in addition to user packages"
-    )
-  , (SwSandbox
-    ,Option ['s'] ["sandbox"]
-     (ReqArg OptSandbox "DIR")
-     "Specify a sandbox directory"
-    )
+getOptDB :: GetOptDB
+getOptDB = [
+    Option ['n'] ["dry-run"]
+      (NoArg OptNoharm)
+      "Run without destructive operations"
+  , Option ['r'] ["recursive"]
+      (NoArg OptRecursive)
+      "Follow dependencies recursively"
+  , Option ['a'] ["all"]
+      (NoArg OptAll)
+      "Show global packages in addition to user packages"
+  , Option ['s'] ["sandbox"]
+      (ReqArg OptSandbox "DIR")
+      "Specify a sandbox directory"
+  , Option ['h'] ["help"]
+      (NoArg OptHelp)
+      "Show help message"
   ]
 
-----------------------------------------------------------------
+optionDB :: OptionDB
+optionDB = zip [SwNoharm,SwRecursive,SwAll,SwSandbox] getOptDB
 
-getOptDB :: GetOptDB
-getOptDB = map snd optionDB
+----------------------------------------------------------------
 
 optionName :: OptionSpec -> String
 optionName (_,(Option (c:_) _ _ _)) = '-':[c]
