@@ -1,12 +1,14 @@
 module Main where
 
 import CmdDB
+import Control.Applicative
 import Control.Exception
 import Control.Monad
 import Data.Maybe
+import Prelude hiding (catch)
 import System.Cmd
 import System.Console.GetOpt
-import System.Environment (getArgs)
+import System.Environment
 import System.Exit
 import Types
 import Utils
@@ -18,15 +20,16 @@ main = flip catches handlers $ do
     oargs <- getArgs
     let pargs = parseArgs getOptDB oargs
     checkOptions1 pargs illegalOptionsAndExit
-    let Right (args,opts') = pargs
+    let Right (args,opts0) = pargs
     when (args == []) helpAndExit
-    when (OptHelp `elem` opts') $ helpCommandAndExit undefined args undefined
-    let opts = filter (/= OptHelp) opts'
+    when (OptHelp `elem` opts0) $ helpCommandAndExit undefined args undefined
+    let opts1 = filter (/= OptHelp) opts0
         act:params = args
         mcmdspec = commandSpecByName act commandDB
     when (isNothing mcmdspec) (illegalCommandAndExit act)
     let Just cmdspec = mcmdspec
-    checkOptions2 opts cmdspec oargs illegalOptionsAndExit
+    checkOptions2 opts1 cmdspec oargs illegalOptionsAndExit
+    opts <- sandboxEnv cmdspec opts1
     run cmdspec params opts
   where
     handlers = [Handler handleExit]
@@ -55,6 +58,21 @@ checkOptions2 opts cmdspec oargs func = do
       | otherwise   = x : check xs ys
     specified = map toSwitch opts
     supported = map fst $ switches cmdspec
+
+sandboxEnv :: CommandSpec -> [Option] -> IO [Option]
+sandboxEnv cmdspec opts =
+    if hasSandboxOption cmdspec && command cmdspec /= Env
+       then tryEnv `catch` ignore
+       else return opts
+  where
+    tryEnv = (\path -> OptSandbox path : opts) <$> getEnv cabEnvVar
+    ignore :: SomeException -> IO [Option]
+    ignore _ = return opts
+
+hasSandboxOption :: CommandSpec -> Bool
+hasSandboxOption cmdspec = maybe False (const True) msand
+  where
+    msand = lookup SwSandbox (switches cmdspec)
 
 ----------------------------------------------------------------
 

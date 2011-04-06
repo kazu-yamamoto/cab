@@ -151,6 +151,14 @@ commandDB = [
        , manual = Just "<key>"
        }
   , CommandSpec {
+         command = Env
+       , commandNames = ["env"]
+       , document = "Show environment variables"
+       , routing = RouteFunc env
+       , switches = [(SwSandbox, Just "-s")]
+       , manual = Nothing
+       }
+  , CommandSpec {
          command = Help
        , commandNames = ["help"]
        , document = "Display the help message of the command"

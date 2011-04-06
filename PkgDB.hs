@@ -37,12 +37,21 @@ type PkgInfo = InstalledPackageInfo
 getPkgDB :: Maybe FilePath -> IO PkgDB
 getPkgDB mpath = do
     (com,pro) <- configure normal Nothing Nothing defaultProgramDb
-    let CompilerId _ ver = compilerId com
-        version = toDotted . versionBranch $ ver
-    getInstalledPackages normal [GlobalPackageDB,(userDB version)] pro
+    let userDB = case mpath of
+            Nothing -> UserPackageDB
+            Just path -> SpecificPackageDB $ packageConf path com
+    getInstalledPackages normal [GlobalPackageDB,userDB] pro
+
+getPackageConf :: FilePath -> IO FilePath
+getPackageConf path = do
+    (com,_) <- configure normal Nothing Nothing defaultProgramDb
+    return $ packageConf path com
+
+packageConf :: FilePath -> Compiler -> FilePath
+packageConf path com = path </> "packages-" ++ version ++ ".conf"
   where
-    userDB v = maybe UserPackageDB (pathdb v) mpath
-    pathdb v path = SpecificPackageDB $ path </> "packages-" ++ v ++ ".conf"
+    CompilerId _ ver = compilerId com
+    version = toDotted . versionBranch $ ver
 
 toPkgDB :: [PkgInfo] -> PkgDB
 toPkgDB = fromList

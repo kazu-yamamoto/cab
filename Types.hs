@@ -70,6 +70,7 @@ data Command = Sync
              | RevDeps
              | Check
              | Search
+             | Env
              | Help
              deriving (Eq,Show)
 
@@ -98,3 +99,9 @@ cabalCommand opts
     | otherwise                            = "cabal"
 
 ----------------------------------------------------------------
+
+cabEnvVar :: String
+cabEnvVar = "CAB_SANDBOX_PATH"
+
+ghcEnvVar :: String
+ghcEnvVar = "GHC_PACKAGE_PATH"

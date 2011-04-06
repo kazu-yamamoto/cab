@@ -1,5 +1,5 @@
 module Commands (
-    deps, revdeps, installed, outdated, uninstall, search
+    deps, revdeps, installed, outdated, uninstall, search, env
   ) where
 
 import Control.Applicative hiding (many)
@@ -10,7 +10,7 @@ import System.IO
 import Types
 import Utils
 import VerDB
-import System.Process
+import System.Process hiding (env)
 import Data.List
 import Data.Char
 
@@ -118,3 +118,19 @@ checkOne pkgs = do
     hPutStrLn stderr "Package version must be specified."
     mapM_ (hPutStrLn stderr) $ map fullNameOfPkgInfo pkgs
     exitFailure
+
+----------------------------------------------------------------
+
+env :: FunctionCommand
+env _ _ opts = case getSandbox opts of
+    Nothing -> do
+        putStrLn $ "unset GHC_PACKAGE_PATH"
+        putStrLn $ "unset CAB_SANDBOX_PATH"
+        putStrLn $ "unsetenv GHC_PACKAGE_PATH"
+        putStrLn $ "unsetenv CAB_SANDBOX_PATH"
+    Just path -> do
+        pkgConf <- getPackageConf path
+        putStrLn $ "export GHC_PACKAGE_PATH=" ++ pkgConf
+        putStrLn $ "export CAB_SANDBOX_PATH=" ++ path
+        putStrLn $ "setenv GHC_PACKAGE_PATH " ++ pkgConf
+        putStrLn $ "setenv CAB_SANDBOX_PATH " ++ path
