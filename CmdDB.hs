@@ -198,18 +198,18 @@ getOptDB :: GetOptDB
 getOptDB = map snd optionDB
 
 optionName :: OptionSpec -> String
-optionName (_,(Option (c:_) _ _ _)) = [c]
+optionName (_,(Option (c:_) _ _ _)) = '-':[c]
 optionName _                        = ""
 
 optionNames :: OptionSpec -> [String]
-optionNames (_,(Option (c:_) (s:_) _ _)) = [[c],s]
+optionNames (_,(Option (c:_) (s:_) _ _)) = ['-':[c],'-':'-':s]
 optionNames _                            = []
 
 optionDesc :: OptionSpec -> String
 optionDesc (_,(Option _ _ _ desc)) = desc
 
 getOptNames :: GetOptSpec -> (String,String)
-getOptNames (Option (c:_) (s:_) _ _) = ('-':[c],"--"++s)
+getOptNames (Option (c:_) (s:_) _ _) = ('-':[c],'-':'-':s)
 getOptNames _                        = error "getOptNames"
 
 resolveOptionString :: [Arg] -> Switch -> [UnknownOpt]
