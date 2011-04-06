@@ -28,7 +28,9 @@ commandDB = [
        , document = "Install packages"
        , routing = RouteCabal ["install"]
        , switches = [(SwNoharm, Just "--dry-run -v")
+                     -- FIXME cabal-dev not support --dry-run
                     ,(SwSandbox, Just "-s")
+                    ,(SwFlag, Just "-f")
                     ]
        , manual = Just "<package> [<ver>]"
        }
@@ -58,7 +60,7 @@ commandDB = [
        , commandNames = ["configure", "conf"]
        , document = "Configure a cabal package"
        , routing = RouteCabal ["configure"]
-       , switches = []
+       , switches = [(SwFlag, Just "-f")]
        , manual = Nothing
        }
   , CommandSpec {
@@ -182,6 +184,9 @@ getOptDB = [
   , Option ['s'] ["sandbox"]
       (ReqArg OptSandbox "DIR")
       "Specify a sandbox directory"
+  , Option ['f'] ["flags"]
+      (ReqArg OptFlag "STRING")
+      "Specify flags"
   , Option ['h'] ["help"]
       (NoArg OptHelp)
       "Show help message"
@@ -224,6 +229,7 @@ optionsToString opts swdb = concatMap suboption opts
         Just Nothing  -> []
         Just (Just x) -> case opt of
             OptSandbox dir -> [x, dir]
+            OptFlag flags  -> [x, flags]
             _              -> [x]
 
 ----------------------------------------------------------------

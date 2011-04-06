@@ -13,12 +13,14 @@ data Switch = SwNoharm
             | SwRecursive
             | SwAll
             | SwSandbox
+            | SwFlag
             deriving (Eq,Show)
 
 data Option = OptNoharm
             | OptRecursive
             | OptAll
             | OptSandbox String
+            | OptFlag String
             | OptHelp
             deriving (Eq,Show)
 
@@ -27,16 +29,20 @@ toSwitch OptNoharm      = SwNoharm
 toSwitch OptRecursive   = SwRecursive
 toSwitch OptAll         = SwAll
 toSwitch (OptSandbox _) = SwSandbox
+toSwitch (OptFlag _)    = SwFlag
 toSwitch _              = error "toSwitch"
 
 getSandbox :: [Option] -> Maybe FilePath
-getSandbox opts = case find isSandbox opts of
+getSandbox = getValue (\x -> toSwitch x == SwSandbox)
+
+getFlag :: [Option] -> Maybe FilePath
+getFlag = getValue (\x -> toSwitch x == SwFlag)
+
+getValue :: (Option -> Bool) -> [Option] -> Maybe FilePath
+getValue p opts = case find p opts of
     Nothing                -> Nothing
     Just (OptSandbox path) -> Just path
     _                      -> error "getSandbox"
-  where
-    isSandbox (OptSandbox _) = True
-    isSandbox _              = False
 
 type SwitchSpec = (Switch, Maybe String)
 type SwitchDB = [SwitchSpec]

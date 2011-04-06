@@ -71,6 +71,6 @@ callProcess :: String -> [String] -> [Arg] -> [Option] -> [SwitchSpec] -> IO ()
 callProcess pro args0 args1 opts sws = system script >> return ()
   where
     swchs = optionsToString opts sws
-    script = joinBy " " $ pro : swchs ++ args0 ++ cat args1
+    script = joinBy " " $ pro : args0 ++ cat args1 ++ swchs
     cat [pkg,ver] = [pkg ++ "-" ++ ver]
     cat x         = x
