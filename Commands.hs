@@ -124,13 +124,16 @@ checkOne pkgs = do
 env :: FunctionCommand
 env _ _ opts = case getSandbox opts of
     Nothing -> do
-        putStrLn $ "unset GHC_PACKAGE_PATH"
         putStrLn $ "unset CAB_SANDBOX_PATH"
-        putStrLn $ "unsetenv GHC_PACKAGE_PATH"
         putStrLn $ "unsetenv CAB_SANDBOX_PATH"
+        putStrLn ""
+        putStrLn $ "unset GHC_PACKAGE_PATH"
+        putStrLn $ "unsetenv GHC_PACKAGE_PATH"
     Just path -> do
         pkgConf <- getPackageConf path
-        putStrLn $ "export GHC_PACKAGE_PATH=" ++ pkgConf
         putStrLn $ "export CAB_SANDBOX_PATH=" ++ path
-        putStrLn $ "setenv GHC_PACKAGE_PATH " ++ pkgConf
         putStrLn $ "setenv CAB_SANDBOX_PATH " ++ path
+        putStrLn ""
+        putStrLn $ "The following commands are not necessary in normal case."
+        putStrLn $ "export GHC_PACKAGE_PATH=" ++ pkgConf
+        putStrLn $ "setenv GHC_PACKAGE_PATH " ++ pkgConf
