@@ -59,25 +59,31 @@ uninstall _ nmver opts = do
     db <- toPkgDB . flip toPkgList db' <$> userPkgs
     pkg <- lookupPkg nmver db
     let sortedPkgs = topSortedPkgs pkg db
+    mpkgConf <- case getSandbox opts of
+        Nothing -> return Nothing
+        Just path -> Just <$> getPackageConf path
     if onlyOne && length sortedPkgs /= 1
        then do
         hPutStrLn stderr $ "The following packages depend on this. Use the \"-r\" option."
         mapM_ (hPutStrLn stderr . fullNameOfPkgInfo) (init sortedPkgs)
        else do
         unless doit $ putStrLn "The following packages are deleted without the \"-n\" option."
-        mapM_ (unregister doit) (map pairNameOfPkgInfo sortedPkgs)
+        mapM_ (unregister doit mpkgConf) (map pairNameOfPkgInfo sortedPkgs)
   where
     onlyOne = OptRecursive `notElem` opts
     doit = OptNoharm `notElem` opts
 
-unregister :: Bool -> (String,String) -> IO ()
-unregister doit (name,ver) = if doit
+unregister :: Bool -> Maybe String -> (String,String) -> IO ()
+unregister doit mpkgConf (name,ver) = if doit
     then do
         putStrLn $ "Deleting " ++ name ++ " " ++ ver
         when doit $ system script >> return ()
     else putStrLn $ name ++ " " ++ ver
   where
-    script = "ghc-pkg unregister " ++ name ++ "-" ++ ver
+    script = "ghc-pkg unregister " ++ option ++ name ++ "-" ++ ver
+    option = case mpkgConf of
+        Nothing -> ""
+        Just pkgConf -> "--package-conf=" ++ pkgConf ++ " "
 
 ----------------------------------------------------------------
 
