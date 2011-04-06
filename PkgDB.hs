@@ -32,10 +32,13 @@ type PkgInfo = InstalledPackageInfo
 
 ----------------------------------------------------------------
 
-getPkgDB :: IO PkgDB
-getPkgDB = do
+getPkgDB :: Maybe FilePath -> IO PkgDB
+getPkgDB mpath = do
     (_,pro) <- configure normal Nothing Nothing defaultProgramDb
-    getInstalledPackages normal [GlobalPackageDB,UserPackageDB] pro
+    getInstalledPackages normal [GlobalPackageDB,userDB] pro
+  where
+    userDB = maybe UserPackageDB pathdb mpath
+    pathdb path = SpecificPackageDB $ path </> "packages-7.0.2.conf"
 
 toPkgDB :: [PkgInfo] -> PkgDB
 toPkgDB = fromList

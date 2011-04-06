@@ -1,6 +1,49 @@
 module Types where
 
-import Data.Maybe
+import Data.List
+import System.Console.GetOpt
+
+type Arg = String
+type UnknownOpt = String
+type ParsedArgs = Either [UnknownOpt] ([Arg],[Option])
+
+----------------------------------------------------------------
+
+data Switch = SwNoharm
+            | SwRecursive
+            | SwAll
+            | SwSandbox
+            deriving (Eq,Show)
+
+data Option = OptNoharm
+            | OptRecursive
+            | OptAll
+            | OptSandbox String
+            deriving (Eq,Show)
+
+toSwitch :: Option -> Switch
+toSwitch OptNoharm      = SwNoharm
+toSwitch OptRecursive   = SwRecursive
+toSwitch OptAll         = SwAll
+toSwitch (OptSandbox _) = SwSandbox
+
+getSandbox :: [Option] -> Maybe FilePath
+getSandbox opts = case find isSandbox opts of
+    Nothing                -> Nothing
+    Just (OptSandbox path) -> Just path
+    _                      -> error "getSandbox"
+  where
+    isSandbox (OptSandbox _) = True
+    isSandbox _              = False
+
+type SwitchSpec = (Switch, Maybe String)
+type SwitchDB = [SwitchSpec]
+
+type GetOptSpec = OptDescr Option
+type GetOptDB = [GetOptSpec]
+
+type OptionSpec = (Switch,GetOptSpec)
+type OptionDB = [OptionSpec]
 
 ----------------------------------------------------------------
 
@@ -27,7 +70,7 @@ data CommandSpec = CommandSpec {
   , commandNames :: [String]
   , document :: String
   , routing :: Route
-  , options :: [(Option, Maybe String)]
+  , switches :: SwitchDB
   , manual  :: Maybe String
   }
 
@@ -35,62 +78,7 @@ type CommandDB = [CommandSpec]
 
 ----------------------------------------------------------------
 
-data Option = OptNoHarm
-            | OptRecursive
-            | OptAll
-            deriving (Eq,Show)
-
-data OptionSpec = OptionSpec {
-    option :: Option
-  , optionNames :: [String]
-  , optionDesc :: String
-  }
-
-type OptionDB  = [OptionSpec]
-
-data Flags = Flags {
-    noHarmFlag :: Bool
-  , noHarmOption :: Maybe String
-  , recursiveFlag :: Bool
-  , recursiveOption :: Maybe String
-  , allFlag :: Bool
-  , allOption :: Maybe String
-  }
-
-defaultFlags :: Flags
-defaultFlags = Flags {
-    noHarmFlag = False
-  , noHarmOption = Nothing
-  , recursiveFlag = False
-  , recursiveOption = Nothing
-  , allFlag = False
-  , allOption = Nothing
-  }
-
-updateFlags :: Option -> Maybe String -> Flags -> Flags
-updateFlags OptNoHarm val flg = flg {
-    noHarmFlag = True
-  , noHarmOption = val
-  }
-updateFlags OptRecursive val flg = flg {
-    recursiveFlag = True
-  , recursiveOption = val
-  }
-updateFlags OptAll val flg = flg {
-      allFlag = True
-    , allOption = val
-    }
-
-flagsToOptions :: Flags -> [String]
-flagsToOptions flags = catMaybes [
-    noHarmOption flags
-  , recursiveOption flags
-  , allOption flags
-  ]
-
-----------------------------------------------------------------
-
-type FunctionCommand = CommandSpec -> [String] -> Flags -> IO ()
+type FunctionCommand = CommandSpec -> [String] -> [Option] -> IO ()
 
 data Route = RouteFunc FunctionCommand
            | RouteProc String [String]

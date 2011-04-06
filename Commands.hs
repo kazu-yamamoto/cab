@@ -34,15 +34,15 @@ search _ _ _ = do
 ----------------------------------------------------------------
 
 installed :: FunctionCommand
-installed _ _ flags = do
-    flt <- if allFlag flags then allPkgs else userPkgs
-    pkgs <- toPkgList flt <$> getPkgDB
+installed _ _ opts = do
+    flt <- if OptAll `elem` opts then allPkgs else userPkgs
+    pkgs <- toPkgList flt <$> getPkgDB (getSandbox opts)
     mapM_ putStrLn $ map fullNameOfPkgInfo pkgs
 
 outdated :: FunctionCommand
-outdated _ _ flags = do
-    flt <- if allFlag flags then allPkgs else userPkgs
-    pkgs <- toPkgList flt <$> getPkgDB
+outdated _ _ opts = do
+    flt <- if OptAll `elem` opts then allPkgs else userPkgs
+    pkgs <- toPkgList flt <$> getPkgDB (getSandbox opts)
     verDB <- getVerDB
     forM_ pkgs $ \p -> do
         case lookupLatestVersion (nameOfPkgInfo p) verDB of
@@ -54,8 +54,8 @@ outdated _ _ flags = do
 ----------------------------------------------------------------
 
 uninstall :: FunctionCommand
-uninstall _ nmver flags = do
-    db' <- getPkgDB
+uninstall _ nmver opts = do
+    db' <- getPkgDB (getSandbox opts)
     db <- toPkgDB . flip toPkgList db' <$> userPkgs
     pkg <- lookupPkg nmver db
     let sortedPkgs = topSortedPkgs pkg db
@@ -67,8 +67,8 @@ uninstall _ nmver flags = do
         unless doit $ putStrLn "The following packages are deleted without the \"-n\" option."
         mapM_ (unregister doit) (map pairNameOfPkgInfo sortedPkgs)
   where
-    onlyOne = not $ recursiveFlag flags
-    doit = not $ noHarmFlag flags
+    onlyOne = OptRecursive `notElem` opts
+    doit = OptNoharm `notElem` opts
 
 unregister :: Bool -> (String,String) -> IO ()
 unregister doit (name,ver) = if doit
@@ -82,20 +82,20 @@ unregister doit (name,ver) = if doit
 ----------------------------------------------------------------
 
 deps :: FunctionCommand
-deps _ nmver flags = printDepends nmver flags printDeps
+deps _ nmver opts = printDepends nmver opts printDeps
 
 revdeps :: FunctionCommand
-revdeps _ nmver flags = printDepends nmver flags printRevDeps
+revdeps _ nmver opts = printDepends nmver opts printRevDeps
 
-printDepends :: [String] -> Flags
+printDepends :: [String] -> [Option]
              -> (Bool -> PkgDB -> Int -> PkgInfo -> IO ()) -> IO ()
-printDepends nmver flags func = do
-    db' <- getPkgDB
+printDepends nmver opts func = do
+    db' <- getPkgDB (getSandbox opts)
     pkg <- lookupPkg nmver db'
-    db <- if allFlag flags
+    db <- if OptAll `elem` opts
           then return db'
           else toPkgDB . flip toPkgList db' <$> userPkgs
-    func (recursiveFlag flags) db 0 pkg
+    func (OptRecursive `elem` opts) db 0 pkg
 
 ----------------------------------------------------------------
 

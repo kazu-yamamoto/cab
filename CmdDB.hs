@@ -4,6 +4,7 @@ import Commands
 import Control.Monad
 import Data.List
 import Program
+import System.Console.GetOpt
 import System.Exit
 import System.IO
 import Types
@@ -18,7 +19,7 @@ commandDB = [
        , commandNames = ["sync", "update"]
        , document = "Fetch the latest package index"
        , routing = RouteProc "cabal" ["update"]
-       , options = []
+       , switches = []
        , manual = Nothing
        }
   , CommandSpec {
@@ -26,7 +27,9 @@ commandDB = [
        , commandNames = ["install"]
        , document = "Install packages"
        , routing = RouteProc "cabal" ["install"]
-       , options = [(OptNoHarm, Just "--dry-run -v")]
+       , switches = [(SwNoharm, Just "--dry-run -v")
+                    ,(SwSandbox, Just "-s")
+                    ]
        , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
@@ -34,9 +37,10 @@ commandDB = [
        , commandNames = ["uninstall", "delete", "remove", "unregister"]
        , document = "Uninstall packages"
        , routing = RouteFunc uninstall
-       , options = [(OptNoHarm, Nothing)
-                   ,(OptRecursive, Nothing)
-                   ] -- don't allow OptAll
+       , switches = [(SwNoharm, Nothing)
+                    ,(SwRecursive, Nothing)
+                    ,(SwSandbox, Just "-s")
+                    ] -- don't allow SwAll
        , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
@@ -44,7 +48,9 @@ commandDB = [
        , commandNames = ["installed", "list"]
        , document = "List installed packages"
        , routing = RouteFunc installed
-       , options = [(OptAll, Nothing)]
+       , switches = [(SwAll, Nothing)
+                    ,(SwSandbox, Just "-s")
+                    ]
        , manual = Nothing
        }
   , CommandSpec {
@@ -52,7 +58,7 @@ commandDB = [
        , commandNames = ["configure", "conf"]
        , document = "Configure a cabal package"
        , routing = RouteProc "cabal" ["configure"]
-       , options = []
+       , switches = []
        , manual = Nothing
        }
   , CommandSpec {
@@ -60,7 +66,7 @@ commandDB = [
        , commandNames = ["build"]
        , document = "Build a cabal package"
        , routing = RouteProc "cabal" ["build"]
-       , options = []
+       , switches = []
        , manual = Nothing
        }
   , CommandSpec {
@@ -68,7 +74,7 @@ commandDB = [
        , commandNames = ["clean"]
        , document = "Clean up a build directory"
        , routing = RouteProc "cabal" ["clean"]
-       , options = []
+       , switches = []
        , manual = Nothing
        }
   , CommandSpec {
@@ -76,7 +82,8 @@ commandDB = [
        , commandNames = ["outdated"]
        , document = "Display outdated packages"
        , routing = RouteFunc outdated
-       , options = [(OptAll, Nothing)]
+       , switches = [(SwAll, Nothing)
+                    ,(SwSandbox, Just "-s")]
        , manual = Nothing
        }
   , CommandSpec {
@@ -84,7 +91,7 @@ commandDB = [
        , commandNames = ["info"]
        , document = "Display information of a package"
        , routing = RouteProc "cabal" ["info"]
-       , options = []
+       , switches = [(SwSandbox, Just "-s")]
        , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
@@ -92,7 +99,7 @@ commandDB = [
        , commandNames = ["sdist", "pack"]
        , document = "Make tar.gz for source distribution"
        , routing = RouteProc "cabal" ["sdist"]
-       , options = []
+       , switches = []
        , manual = Nothing
        }
   , CommandSpec {
@@ -100,7 +107,7 @@ commandDB = [
        , commandNames = ["unpack"]
        , document = "Untar a package in the current directory"
        , routing = RouteProc "cabal" ["unpack"]
-       , options = []
+       , switches = []
        , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
@@ -108,9 +115,10 @@ commandDB = [
        , commandNames = ["deps"]
        , document = "Show dependencies of this package"
        , routing = RouteFunc deps
-       , options = [(OptRecursive, Nothing)
-                   ,(OptAll, Nothing)
-                   ]
+       , switches = [(SwRecursive, Nothing)
+                    ,(SwAll, Nothing)
+                    ,(SwSandbox, Just "-s")
+                    ]
        , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
@@ -118,9 +126,10 @@ commandDB = [
        , commandNames = ["revdeps", "dependents"]
        , document = "Show reverse dependencies of this package"
        , routing = RouteFunc revdeps
-       , options = [(OptRecursive, Nothing)
-                   ,(OptAll, Nothing)
-                   ]
+       , switches = [(SwRecursive, Nothing)
+                    ,(SwAll, Nothing)
+                    ,(SwSandbox, Just "-s")
+                    ]
        , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
@@ -128,7 +137,7 @@ commandDB = [
        , commandNames = ["check"]
        , document = "Check consistency of packages"
        , routing = RouteProc "ghc-pkg" ["check"]
-       , options = []
+       , switches = [(SwSandbox, Just "-s")]
        , manual = Nothing
        }
   , CommandSpec {
@@ -136,7 +145,7 @@ commandDB = [
        , commandNames = ["search"]
        , document = "Search available packages by package name"
        , routing = RouteFunc search
-       , options = []
+       , switches = []
        , manual = Just "<key>"
        }
   , CommandSpec {
@@ -144,29 +153,8 @@ commandDB = [
        , commandNames = ["help"]
        , document = "Display the help message of the command"
        , routing = RouteFunc helpCommandAndExit
-       , options = []
+       , switches = []
        , manual = Just "[<command>]"
-       }
-  ]
-
-----------------------------------------------------------------
-
-optionDB :: OptionDB
-optionDB = [
-    OptionSpec {
-         option = OptNoHarm
-       , optionNames = ["--dry-run", "-n"]
-       , optionDesc = "Run without destructive operations"
-       }
-  , OptionSpec {
-         option = OptRecursive
-       , optionNames = ["--recursive", "-r"]
-       , optionDesc = "Follow dependencies recursively"
-       }
-  , OptionSpec {
-         option = OptAll
-       , optionNames = ["--all", "-a"]
-       , optionDesc = "Show global packages in addition to user packages"
        }
   ]
 
@@ -178,11 +166,70 @@ commandSpecByName x (ent:ents)
     | x `elem` commandNames ent = Just ent
     | otherwise                 = commandSpecByName x ents
 
-optionSpecByName :: String -> OptionDB -> Maybe OptionSpec
-optionSpecByName _ [] = Nothing
-optionSpecByName x (ent:ents)
-    | x `elem` optionNames ent = Just ent
-    | otherwise                = optionSpecByName x ents
+----------------------------------------------------------------
+
+optionDB :: OptionDB
+optionDB = [
+    (SwNoharm
+    ,Option ['n'] ["dry-run"]
+     (NoArg OptNoharm)
+     "Run without destructive operations"
+    )
+  , (SwRecursive
+    ,Option ['r'] ["recursive"]
+     (NoArg OptRecursive)
+     "Follow dependencies recursively"
+    )
+  , (SwAll
+    ,Option ['a'] ["all"]
+     (NoArg OptAll)
+     "Show global packages in addition to user packages"
+    )
+  , (SwSandbox
+    ,Option ['s'] ["sandbox"]
+     (ReqArg OptSandbox "DIR")
+     "Specify a sandbox directory"
+    )
+  ]
+
+----------------------------------------------------------------
+
+getOptDB :: GetOptDB
+getOptDB = map snd optionDB
+
+optionName :: OptionSpec -> String
+optionName (_,(Option (c:_) _ _ _)) = [c]
+optionName _                        = ""
+
+optionNames :: OptionSpec -> [String]
+optionNames (_,(Option (c:_) (s:_) _ _)) = [[c],s]
+optionNames _                            = []
+
+optionDesc :: OptionSpec -> String
+optionDesc (_,(Option _ _ _ desc)) = desc
+
+getOptNames :: GetOptSpec -> (String,String)
+getOptNames (Option (c:_) (s:_) _ _) = ('-':[c],"--"++s)
+getOptNames _                        = error "getOptNames"
+
+resolveOptionString :: [Arg] -> Switch -> [UnknownOpt]
+resolveOptionString oargs sw = case lookup sw optionDB of
+    Nothing    -> error "resolveOptionString"
+    Just gspec -> let (s,l) = getOptNames gspec
+                  in checkShort s ++ checkLong l
+  where
+    checkShort s = filter (==s) oargs
+    checkLong  l = filter (l `isPrefixOf`) oargs
+
+optionsToString :: [Option] -> SwitchDB -> [String]
+optionsToString opts swdb = concatMap suboption opts
+  where
+    suboption opt = case lookup (toSwitch opt) swdb of
+        Nothing       -> []
+        Just Nothing  -> []
+        Just (Just x) -> case opt of
+            OptSandbox dir -> [x, dir]
+            _              -> [x]
 
 ----------------------------------------------------------------
 
@@ -204,21 +251,21 @@ helpCommandAndExit _ (cmd:_) _ = do
     mcmdspec = commandSpecByName cmd commandDB
     showOptions cmdspec = joinBy " " $ concatMap (masterOption optionDB) (opts cmdspec)
     showArgs cmdspec = maybe "" (" " ++) $ manual cmdspec
-    opts = map fst . options
+    opts = map fst . switches
     masterOption [] _ = []
     masterOption (spec:specs) o
-      | option spec == o = (head . optionNames $ spec) : masterOption specs o
-      | otherwise        = masterOption specs o
+      | fst spec == o = (optionName spec) : masterOption specs o
+      | otherwise     = masterOption specs o
     showAliases = joinBy ", " . commandNames
 
 printOptions :: CommandSpec -> IO ()
 printOptions cmdspec =
     forM_ opts (printOption optionDB)
   where
-    opts = map fst $ options cmdspec
+    opts = map fst $ switches cmdspec
     printOption [] _ = return ()
     printOption (spec:specs) o
-      | option spec == o =
+      | fst spec == o =
           putStrLn $ (joinBy ", " . reverse . optionNames $ spec)
                    ++ "\t" ++ optionDesc spec
       | otherwise        = printOption specs o
@@ -259,7 +306,7 @@ illegalCommandAndExit x = do
 
 ----------------------------------------------------------------
 
-illegalOptionsAndExit :: [String] -> IO ()
+illegalOptionsAndExit :: [UnknownOpt] -> IO ()
 illegalOptionsAndExit xs = do -- FixME
     hPutStrLn stderr $ "Illegal options: " ++ joinBy " " xs
     exitFailure

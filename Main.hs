@@ -1,12 +1,11 @@
 module Main where
 
 import CmdDB
-import Control.Applicative
 import Control.Exception
 import Control.Monad
-import Data.List
 import Data.Maybe
 import System.Cmd
+import System.Console.GetOpt
 import System.Environment (getArgs)
 import System.Exit
 import Types
@@ -16,18 +15,17 @@ import Utils
 
 main :: IO ()
 main = flip catches handlers $ do
-    (args,opts) <- argsOpts <$> getArgs
+    oargs <- getArgs
+    let pargs = parseArgs getOptDB oargs
+    checkOptions1 pargs illegalOptionsAndExit
+    let Right (args,opts) = pargs
     when (args == []) helpAndExit
-    checkHelp args opts helpCommandAndExit
-    let act = head args
+    let act:params = args
         mcmdspec = commandSpecByName act commandDB
     when (isNothing mcmdspec) (illegalCommandAndExit act)
     let Just cmdspec = mcmdspec
-        params = tail args
-        eoptspecs = parseOptions cmdspec opts
-    checkOptions eoptspecs illegalOptionsAndExit
-    let Right flags = eoptspecs
-    run cmdspec params flags
+    checkOptions2 opts cmdspec oargs illegalOptionsAndExit
+    run cmdspec params opts
   where
     handlers = [Handler handleExit]
     handleExit :: ExitCode -> IO ()
@@ -35,45 +33,41 @@ main = flip catches handlers $ do
 
 ----------------------------------------------------------------
 
-argsOpts :: [String] -> ([String],[String])
-argsOpts args = (args', opts)
+parseArgs :: [GetOptSpec] -> [Arg] -> ParsedArgs
+parseArgs db args = case getOpt' Permute db args of
+    (o,n,[],[])      -> Right (n,o)
+    (_,_,unknowns,_) -> Left unknowns
+
+checkOptions1 :: ParsedArgs -> ([UnknownOpt] -> IO ()) -> IO ()
+checkOptions1 (Left es) func = func es
+checkOptions1 _ _            = return ()
+
+checkOptions2 :: [Option] -> CommandSpec -> [Arg] -> ([UnknownOpt] -> IO ()) -> IO ()
+checkOptions2 opts cmdspec oargs func = do
+    let unknowns = check specified supported
+    when (unknowns /= []) $ func (concatMap (resolveOptionString oargs) unknowns)
   where
-    args' = filter (not . isPrefixOf "-") args
-    opts = filter (isPrefixOf "-") args
-
-parseOptions :: CommandSpec -> [String] -> Either [String] Flags
-parseOptions cmdspc opts = check opts [] defaultFlags
-  where
-    optMvals = options cmdspc
-    check [] [] fg = Right fg
-    check [] es _  = Left es
-    check (o:os) es fg = case optionSpecByName o optionDB of
-        Nothing -> check os (o:es) fg
-        Just x  -> case lookup (option x) optMvals of
-            Nothing   -> check os (o:es) fg
-            Just mval -> check os es (updateFlags (option x) mval fg)
-
-checkHelp :: [String] -> [String] -> FunctionCommand -> IO ()
-checkHelp args opts func
-  | "-h"     `elem` opts
- || "--help" `elem` opts = func undefined args undefined
-  | otherwise            = return ()
-
-checkOptions :: Either [String] Flags -> ([String] -> IO ()) -> IO ()
-checkOptions (Left xs) func = func xs
-checkOptions _ _            = return ()
+    check [] _     = []
+    check (x:xs) ys
+      | x `elem` ys = check xs ys
+      | otherwise   = x : check xs ys
+    specified = map toSwitch opts
+    supported = map fst $ switches cmdspec
 
 ----------------------------------------------------------------
 
-run :: CommandSpec -> [String] -> Flags -> IO ()
-run cmdspec params flags = case routing cmdspec of
-    RouteFunc func -> func cmdspec params flags
-    RouteProc subcmd subargs -> callProcess subcmd subargs params flags
+run :: CommandSpec -> [Arg] -> [Option] -> IO ()
+run cmdspec params opts = case routing cmdspec of
+    RouteFunc func -> func cmdspec params opts
+    RouteProc subcmd subargs -> callProcess subcmd subargs params opts (switches cmdspec)
 
-callProcess :: String ->[String] -> [String] -> Flags -> IO ()
-callProcess pro args0 args1 flags = system script >> return ()
+callProcess :: String -> [String] -> [Arg] -> [Option] -> [SwitchSpec] -> IO ()
+callProcess pro args0 args1 opts sws = system script >> return ()
   where
-    opts = flagsToOptions flags
-    script = joinBy " " $ pro : opts ++ args0 ++ cat args1
+    swchs = optionsToString opts sws
+    pro'
+      | SwSandbox `elem` (map toSwitch opts) = "cabal-dev"
+      | otherwise                            = pro
+    script = joinBy " " $ pro' : swchs ++ args0 ++ cat args1
     cat [pkg,ver] = [pkg ++ "-" ++ ver]
     cat x         = x
