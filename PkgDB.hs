@@ -5,6 +5,8 @@ import Control.Monad
 import Data.List
 import Data.Map (Map)
 import qualified Data.Map as M
+import Distribution.Compiler
+    (CompilerId(..))
 import Distribution.Version
     (Version(..))
 import Distribution.InstalledPackageInfo
@@ -12,7 +14,7 @@ import Distribution.InstalledPackageInfo
 import Distribution.Package
     (PackageName(..), PackageIdentifier(..), InstalledPackageId)
 import Distribution.Simple.Compiler
-    (PackageDB(..))
+    (PackageDB(..),Compiler(..))
 import Distribution.Simple.GHC
     (configure, getInstalledPackages)
 import Distribution.Simple.PackageIndex
@@ -34,11 +36,13 @@ type PkgInfo = InstalledPackageInfo
 
 getPkgDB :: Maybe FilePath -> IO PkgDB
 getPkgDB mpath = do
-    (_,pro) <- configure normal Nothing Nothing defaultProgramDb
-    getInstalledPackages normal [GlobalPackageDB,userDB] pro
+    (com,pro) <- configure normal Nothing Nothing defaultProgramDb
+    let CompilerId _ ver = compilerId com
+        version = toDotted . versionBranch $ ver
+    getInstalledPackages normal [GlobalPackageDB,(userDB version)] pro
   where
-    userDB = maybe UserPackageDB pathdb mpath
-    pathdb path = SpecificPackageDB $ path </> "packages-7.0.2.conf"
+    userDB v = maybe UserPackageDB (pathdb v) mpath
+    pathdb v path = SpecificPackageDB $ path </> "packages-" ++ v ++ ".conf"
 
 toPkgDB :: [PkgInfo] -> PkgDB
 toPkgDB = fromList
