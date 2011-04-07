@@ -60,7 +60,8 @@ commandDB = [
        , commandNames = ["configure", "conf"]
        , document = "Configure a cabal package"
        , routing = RouteCabal ["configure"]
-       , switches = [(SwFlag, Just "-f")]
+       , switches = [(SwSandbox, Just "-s")
+                     ,(SwFlag, Just "-f")]
        , manual = Nothing
        }
   , CommandSpec {
