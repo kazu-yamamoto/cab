@@ -1,5 +1,5 @@
 module Commands (
-    deps, revdeps, installed, outdated, uninstall, search, env
+    deps, revdeps, installed, outdated, uninstall, search, env, check
   ) where
 
 import Control.Applicative hiding (many)
@@ -22,10 +22,10 @@ search _ [x] _ = do
     forM_ (lok nvls) $ \(n,v) -> putStrLn $ n ++ " " ++ toDotted v
   where
     key = map toLower x
-    check (n,_) = key `isPrefixOf` map toLower n
+    sat (n,_) = key `isPrefixOf` map toLower n
     lok [] = []
     lok (e:es)
-      | check e   = e : lok es
+      | sat e   = e : lok es
       | otherwise = lok es
 search _ _ _ = do
     hPutStrLn stderr "One search-key should be specified."
@@ -57,31 +57,43 @@ uninstall _ nmver opts = do
     db <- toPkgDB . flip toPkgList db' <$> userPkgs
     pkg <- lookupPkg nmver db
     let sortedPkgs = topSortedPkgs pkg db
-    mpkgConf <- case getSandbox opts of
-        Nothing -> return Nothing
-        Just path -> Just <$> getPackageConf path
     if onlyOne && length sortedPkgs /= 1
        then do
         hPutStrLn stderr "The following packages depend on this. Use the \"-r\" option."
         mapM_ (hPutStrLn stderr . fullNameOfPkgInfo) (init sortedPkgs)
        else do
         unless doit $ putStrLn "The following packages are deleted without the \"-n\" option."
-        mapM_ (unregister doit mpkgConf . pairNameOfPkgInfo) sortedPkgs
+        mapM_ (unregister doit opts . pairNameOfPkgInfo) sortedPkgs
   where
     onlyOne = OptRecursive `notElem` opts
     doit = OptNoharm `notElem` opts
 
-unregister :: Bool -> Maybe String -> (String,String) -> IO ()
-unregister doit mpkgConf (name,ver) = if doit
+unregister :: Bool -> [Option] -> (String,String) -> IO ()
+unregister doit opts (name,ver) = if doit
     then do
         putStrLn $ "Deleting " ++ name ++ " " ++ ver
-        when doit $ system script >> return ()
+        pkgconf <- pkgConfOpt opts
+        when doit $ system (script pkgconf) >> return ()
     else putStrLn $ name ++ " " ++ ver
   where
-    script = "ghc-pkg unregister " ++ option ++ name ++ "-" ++ ver
-    option = case mpkgConf of
-        Nothing -> ""
-        Just pkgConf -> "--package-conf=" ++ pkgConf ++ " "
+    script pkgconf = "ghc-pkg unregister " ++ pkgconf ++ name ++ "-" ++ ver
+
+pkgConfOpt :: [Option] -> IO String
+pkgConfOpt opts = case getSandbox opts of
+    Nothing -> return ""
+    Just path -> do
+        pkgConf <- getPackageConf path
+        return $ "--package-conf=" ++ pkgConf ++ " "
+
+----------------------------------------------------------------
+
+check :: FunctionCommand
+check _ _ opts = do
+    pkgconf <- pkgConfOpt opts
+    system (script pkgconf)
+    return ()
+  where
+   script pkgconf = "ghc-pkg check " ++ pkgconf
 
 ----------------------------------------------------------------
 

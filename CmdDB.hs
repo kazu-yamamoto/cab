@@ -138,7 +138,7 @@ commandDB = [
          command = Check
        , commandNames = ["check"]
        , document = "Check consistency of packages"
-       , routing = RouteProc "ghc-pkg" ["check"]
+       , routing = RouteFunc check
        , switches = [(SwSandbox, Just "-s")]
        , manual = Nothing
        }

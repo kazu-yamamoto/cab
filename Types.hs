@@ -90,7 +90,6 @@ type CommandDB = [CommandSpec]
 type FunctionCommand = CommandSpec -> [String] -> [Option] -> IO ()
 
 data Route = RouteFunc FunctionCommand
-           | RouteProc String [String]
            | RouteCabal [String]
 
 cabalCommand :: [Option] -> String

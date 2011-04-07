@@ -76,9 +76,8 @@ hasSandboxOption cmdspec = isJust $ lookup SwSandbox (switches cmdspec)
 
 run :: CommandSpec -> [Arg] -> [Option] -> IO ()
 run cmdspec params opts = case routing cmdspec of
-    RouteFunc func           -> func cmdspec params opts
-    RouteProc subcmd subargs -> callProcess subcmd subargs params opts sws
-    RouteCabal subargs       -> callProcess pro    subargs params opts sws
+    RouteFunc func     -> func cmdspec params opts
+    RouteCabal subargs -> callProcess pro subargs params opts sws
   where
     pro = cabalCommand opts
     sws = switches cmdspec
