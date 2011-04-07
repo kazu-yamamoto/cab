@@ -12,7 +12,7 @@ toDotted :: [Int] -> String
 toDotted = joinBy "." . map show
 
 joinBy :: String -> [String] -> String
-joinBy sep = concat . intersperse sep
+joinBy = intercalate
 
 split :: Int -> [a] -> [[a]]
 split _ [] = []

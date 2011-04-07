@@ -70,9 +70,7 @@ sandboxEnv cmdspec opts =
     ignore _ = return opts
 
 hasSandboxOption :: CommandSpec -> Bool
-hasSandboxOption cmdspec = maybe False (const True) msand
-  where
-    msand = lookup SwSandbox (switches cmdspec)
+hasSandboxOption cmdspec = isJust $ lookup SwSandbox (switches cmdspec)
 
 ----------------------------------------------------------------
 

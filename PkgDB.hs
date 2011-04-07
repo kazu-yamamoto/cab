@@ -131,7 +131,7 @@ printRevDeps rec db n pkgi = printRevDeps' rec db revdb n pkgi
 printRevDeps' :: Bool -> PkgDB -> RevDB -> Int -> PkgInfo -> IO ()
 printRevDeps' rec db revdb n pkgi = case M.lookup pkgid revdb of
     Nothing -> return ()
-    Just pkgids -> mapM_ (printRevDep' rec db revdb n) $ pkgids
+    Just pkgids -> mapM_ (printRevDep' rec db revdb n) pkgids
   where
     pkgid = installedPackageId pkgi
 

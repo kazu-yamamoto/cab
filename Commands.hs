@@ -37,19 +37,17 @@ installed :: FunctionCommand
 installed _ _ opts = do
     flt <- if OptAll `elem` opts then allPkgs else userPkgs
     pkgs <- toPkgList flt <$> getPkgDB (getSandbox opts)
-    mapM_ putStrLn $ map fullNameOfPkgInfo pkgs
+    mapM_ (putStrLn . fullNameOfPkgInfo) pkgs
 
 outdated :: FunctionCommand
 outdated _ _ opts = do
     flt <- if OptAll `elem` opts then allPkgs else userPkgs
     pkgs <- toPkgList flt <$> getPkgDB (getSandbox opts)
     verDB <- getVerDB
-    forM_ pkgs $ \p -> do
-        case lookupLatestVersion (nameOfPkgInfo p) verDB of
-            Nothing -> return ()
-            Just ver -> if numVersionOfPkgInfo p /= ver
-               then putStrLn $ fullNameOfPkgInfo p ++ " < " ++ toDotted ver
-               else return ()
+    forM_ pkgs $ \p -> case lookupLatestVersion (nameOfPkgInfo p) verDB of
+        Nothing -> return ()
+        Just ver -> when (numVersionOfPkgInfo p /= ver) $
+                        putStrLn $ fullNameOfPkgInfo p ++ " < " ++ toDotted ver
 
 ----------------------------------------------------------------
 
@@ -64,11 +62,11 @@ uninstall _ nmver opts = do
         Just path -> Just <$> getPackageConf path
     if onlyOne && length sortedPkgs /= 1
        then do
-        hPutStrLn stderr $ "The following packages depend on this. Use the \"-r\" option."
+        hPutStrLn stderr "The following packages depend on this. Use the \"-r\" option."
         mapM_ (hPutStrLn stderr . fullNameOfPkgInfo) (init sortedPkgs)
        else do
         unless doit $ putStrLn "The following packages are deleted without the \"-n\" option."
-        mapM_ (unregister doit mpkgConf) (map pairNameOfPkgInfo sortedPkgs)
+        mapM_ (unregister doit mpkgConf . pairNameOfPkgInfo) sortedPkgs
   where
     onlyOne = OptRecursive `notElem` opts
     doit = OptNoharm `notElem` opts
@@ -122,7 +120,7 @@ checkOne [] = do
 checkOne [pkg] = return pkg
 checkOne pkgs = do
     hPutStrLn stderr "Package version must be specified."
-    mapM_ (hPutStrLn stderr) $ map fullNameOfPkgInfo pkgs
+    mapM_ (hPutStrLn stderr . fullNameOfPkgInfo) pkgs
     exitFailure
 
 ----------------------------------------------------------------
@@ -130,16 +128,16 @@ checkOne pkgs = do
 env :: FunctionCommand
 env _ _ opts = case getSandbox opts of
     Nothing -> do
-        putStrLn $ "unset CAB_SANDBOX_PATH"
-        putStrLn $ "unsetenv CAB_SANDBOX_PATH"
+        putStrLn "unset CAB_SANDBOX_PATH"
+        putStrLn "unsetenv CAB_SANDBOX_PATH"
         putStrLn ""
-        putStrLn $ "unset GHC_PACKAGE_PATH"
-        putStrLn $ "unsetenv GHC_PACKAGE_PATH"
+        putStrLn "unset GHC_PACKAGE_PATH"
+        putStrLn "unsetenv GHC_PACKAGE_PATH"
     Just path -> do
         pkgConf <- getPackageConf path
         putStrLn $ "export CAB_SANDBOX_PATH=" ++ path
         putStrLn $ "setenv CAB_SANDBOX_PATH " ++ path
         putStrLn ""
-        putStrLn $ "The following commands are not necessary in normal case."
+        putStrLn "The following commands are not necessary in normal case."
         putStrLn $ "export GHC_PACKAGE_PATH=" ++ pkgConf
         putStrLn $ "setenv GHC_PACKAGE_PATH " ++ pkgConf

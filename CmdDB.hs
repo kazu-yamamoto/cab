@@ -206,15 +206,15 @@ optionDB = zip [SwNoharm,SwRecursive,SwAll,SwSandbox] getOptDB
 ----------------------------------------------------------------
 
 optionName :: OptionSpec -> String
-optionName (_,(Option (c:_) _ _ _)) = '-':[c]
+optionName (_,Option (c:_) _ _ _) = '-':[c]
 optionName _                        = ""
 
 optionNames :: OptionSpec -> [String]
-optionNames (_,(Option (c:_) (s:_) _ _)) = ['-':[c],'-':'-':s]
+optionNames (_,Option (c:_) (s:_) _ _) = ['-':[c],'-':'-':s]
 optionNames _                            = []
 
 optionDesc :: OptionSpec -> String
-optionDesc (_,(Option _ _ _ desc)) = desc
+optionDesc (_,Option _ _ _ desc) = desc
 
 getOptNames :: GetOptSpec -> (String,String)
 getOptNames (Option (c:_) (s:_) _ _) = ('-':[c],'-':'-':s)
@@ -263,7 +263,7 @@ helpCommandAndExit _ (cmd:_) _ = do
     opts = map fst . switches
     masterOption [] _ = []
     masterOption (spec:specs) o
-      | fst spec == o = (optionName spec) : masterOption specs o
+      | fst spec == o = optionName spec : masterOption specs o
       | otherwise     = masterOption specs o
     showAliases = joinBy ", " . commandNames
 
@@ -296,8 +296,7 @@ helpAndExit = do
     getCommands = map concat
                 . split helpCommandNumber
                 . intersperse ", "
-                . map head
-                . map commandNames
+                . map (head . commandNames)
     printCommands [] = return ()
     printCommands (x:xs) = do
         putStrLn $ "\t    <command> = " ++ x

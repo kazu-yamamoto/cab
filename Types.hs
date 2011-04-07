@@ -95,8 +95,8 @@ data Route = RouteFunc FunctionCommand
 
 cabalCommand :: [Option] -> String
 cabalCommand opts
-    | SwSandbox `elem` (map toSwitch opts) = "cabal-dev"
-    | otherwise                            = "cabal"
+    | SwSandbox `elem` map toSwitch opts = "cabal-dev"
+    | otherwise                          = "cabal"
 
 ----------------------------------------------------------------
 
