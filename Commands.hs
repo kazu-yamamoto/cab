@@ -1,5 +1,5 @@
 module Commands (
-    deps, revdeps, installed, outdated, uninstall, search, env, check
+    deps, revdeps, installed, outdated, uninstall, search, env, check, add
   ) where
 
 import Control.Applicative hiding (many)
@@ -161,3 +161,14 @@ env _ _ opts = case getSandbox opts of
         putStrLn "The following commands are not necessary in normal case."
         putStrLn $ "export GHC_PACKAGE_PATH=" ++ pkgConf
         putStrLn $ "setenv GHC_PACKAGE_PATH " ++ pkgConf
+
+----------------------------------------------------------------
+
+add :: FunctionCommand
+add _ params opts = case getSandbox opts of
+    Nothing -> hPutStrLn stderr "A sandbox must be specified with \"-s\" option."
+    Just sbox -> case params of
+        [src] -> do
+            system $ "cabal-dev add-source " ++ src ++ " -s " ++ sbox
+            return ()
+        _ -> hPutStrLn stderr "A source path be specified."
