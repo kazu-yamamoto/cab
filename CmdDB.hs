@@ -51,6 +51,7 @@ commandDB = [
        , document = "List installed packages"
        , routing = RouteFunc installed
        , switches = [(SwAll, Nothing)
+                    ,(SwRecursive, Nothing)
                     ,(SwSandbox, Just "-s")
                     ]
        , manual = Nothing

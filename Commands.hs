@@ -36,8 +36,12 @@ search _ _ _ = do
 installed :: FunctionCommand
 installed _ _ opts = do
     flt <- if OptAll `elem` opts then allPkgs else userPkgs
-    pkgs <- toPkgList flt <$> getPkgDB (getSandbox opts)
-    mapM_ (putStrLn . fullNameOfPkgInfo) pkgs
+    db <- getPkgDB (getSandbox opts)
+    let pkgs = toPkgList flt db
+        rec = OptRecursive `elem` opts
+    forM_ pkgs $ \pkg -> do
+        putStrLn . fullNameOfPkgInfo $ pkg
+        when rec $ printRevDeps True db 1 pkg
 
 outdated :: FunctionCommand
 outdated _ _ opts = do
