@@ -162,7 +162,7 @@ commandDB = [
        }
   , CommandSpec {
          command = Add
-       , commandNames = ["add" "add-source"]
+       , commandNames = ["add", "add-source"]
        , document = "Add a source directory"
        , routing = RouteFunc add
        , switches = [(SwSandbox, Just "-s")]
@@ -200,10 +200,10 @@ getOptDB = [
       (NoArg OptAll)
       "Show global packages in addition to user packages"
   , Option ['s'] ["sandbox"]
-      (ReqArg OptSandbox "DIR")
+      (ReqArg OptSandbox "<sandbox>")
       "Specify a sandbox directory"
   , Option ['f'] ["flags"]
-      (ReqArg OptFlag "STRING")
+      (ReqArg OptFlag "<flags>")
       "Specify flags"
   , Option ['h'] ["help"]
       (NoArg OptHelp)
@@ -211,17 +211,18 @@ getOptDB = [
   ]
 
 optionDB :: OptionDB
-optionDB = zip [SwNoharm,SwRecursive,SwAll,SwSandbox] getOptDB
+optionDB = zip [SwNoharm,SwRecursive,SwAll,SwSandbox,SwFlag] getOptDB
 
 ----------------------------------------------------------------
 
 optionName :: OptionSpec -> String
-optionName (_,Option (c:_) _ _ _) = '-':[c]
-optionName _                        = ""
+optionName (_,Option (c:_) _ (ReqArg _ arg) _) = '-':c:' ':arg
+optionName (_,Option (c:_) _ _ _)              = '-':[c]
+optionName _                                   = ""
 
 optionNames :: OptionSpec -> [String]
 optionNames (_,Option (c:_) (s:_) _ _) = ['-':[c],'-':'-':s]
-optionNames _                            = []
+optionNames _                          = []
 
 optionDesc :: OptionSpec -> String
 optionDesc (_,Option _ _ _ desc) = desc
@@ -268,7 +269,7 @@ helpCommandAndExit _ (cmd:_) _ = do
     exitSuccess
   where
     mcmdspec = commandSpecByName cmd commandDB
-    showOptions cmdspec = joinBy " " $ concatMap (masterOption optionDB) (opts cmdspec)
+    showOptions cmdspec = "[" ++ (joinBy "] [" $ concatMap (masterOption optionDB) (opts cmdspec)) ++ "]"
     showArgs cmdspec = maybe "" (" " ++) $ manual cmdspec
     opts = map fst . switches
     masterOption [] _ = []
