@@ -162,11 +162,11 @@ commandDB = [
        }
   , CommandSpec {
          command = Add
-       , commandNames = ["add"]
+       , commandNames = ["add" "add-source"]
        , document = "Add a source directory"
        , routing = RouteFunc add
        , switches = [(SwSandbox, Just "-s")]
-       , manual = Nothing
+       , manual = Just "<source>"
        }
   , CommandSpec {
          command = Help
