@@ -4,15 +4,16 @@ module Commands (
 
 import Control.Applicative hiding (many)
 import Control.Monad
+import Data.Char
+import Data.List
+import Data.Maybe
 import PkgDB
 import System.Exit
 import System.IO
+import System.Process hiding (env)
 import Types
 import Utils
 import VerDB
-import System.Process hiding (env)
-import Data.List
-import Data.Char
 
 ----------------------------------------------------------------
 
@@ -155,12 +156,20 @@ env _ _ opts = case getSandbox opts of
         putStrLn "unsetenv GHC_PACKAGE_PATH"
     Just path -> do
         pkgConf <- getPackageConf path
+        gPkgConf <- globalPackageDB
         putStrLn $ "export CAB_SANDBOX_PATH=" ++ path
         putStrLn $ "setenv CAB_SANDBOX_PATH " ++ path
         putStrLn ""
         putStrLn "The following commands are not necessary in normal case."
-        putStrLn $ "export GHC_PACKAGE_PATH=" ++ pkgConf
-        putStrLn $ "setenv GHC_PACKAGE_PATH " ++ pkgConf
+        let confs = gPkgConf ++ ":" ++ pkgConf
+        putStrLn $ "export GHC_PACKAGE_PATH=" ++ confs
+        putStrLn $ "setenv GHC_PACKAGE_PATH " ++ confs
+
+globalPackageDB :: IO String
+globalPackageDB = do
+    res <- readProcess "ghc" ["--info"] []
+    let alist = read res :: [(String,String)]
+    return . fromJust $ lookup "Global Package DB" alist
 
 ----------------------------------------------------------------
 
