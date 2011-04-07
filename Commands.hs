@@ -35,13 +35,17 @@ search _ _ _ = do
 
 installed :: FunctionCommand
 installed _ _ opts = do
-    flt <- if OptAll `elem` opts then allPkgs else userPkgs
-    db <- getPkgDB (getSandbox opts)
-    let pkgs = toPkgList flt db
-        rec = OptRecursive `elem` opts
+    let optall = OptAll `elem` opts
+        optrec = OptRecursive `elem` opts
+    flt <- if optall then allPkgs else userPkgs
+    db' <- getPkgDB (getSandbox opts)
+    let pkgs = toPkgList flt db'
+    db <- if optall
+          then return db'
+          else toPkgDB . flip toPkgList db' <$> userPkgs
     forM_ pkgs $ \pkg -> do
         putStrLn . fullNameOfPkgInfo $ pkg
-        when rec $ printDeps True db 1 pkg
+        when optrec $ printDeps True db 1 pkg
 
 outdated :: FunctionCommand
 outdated _ _ opts = do
