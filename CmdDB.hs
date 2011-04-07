@@ -269,7 +269,7 @@ helpCommandAndExit _ (cmd:_) _ = do
     exitSuccess
   where
     mcmdspec = commandSpecByName cmd commandDB
-    showOptions cmdspec = "[" ++ (joinBy "] [" $ concatMap (masterOption optionDB) (opts cmdspec)) ++ "]"
+    showOptions cmdspec = "[" ++ joinBy "] [" (concatMap (masterOption optionDB) (opts cmdspec)) ++ "]"
     showArgs cmdspec = maybe "" (" " ++) $ manual cmdspec
     opts = map fst . switches
     masterOption [] _ = []
@@ -300,7 +300,7 @@ helpAndExit = do
     putStrLn "Usage:"
     putStrLn $ "\t" ++ programName
     putStrLn $ "\t" ++ programName ++ " <command> [args...]"
-    putStrLn $ "\t  where"
+    putStrLn   "\t  where"
     printCommands (getCommands commandDB)
     exitSuccess
   where
