@@ -41,7 +41,7 @@ installed _ _ opts = do
         rec = OptRecursive `elem` opts
     forM_ pkgs $ \pkg -> do
         putStrLn . fullNameOfPkgInfo $ pkg
-        when rec $ printRevDeps True db 1 pkg
+        when rec $ printDeps True db 1 pkg
 
 outdated :: FunctionCommand
 outdated _ _ opts = do
