@@ -32,6 +32,7 @@ Executable cab
      Build-Depends:     unix
   Other-Modules:	CmdDB
                         Commands
+                        Env
                         PkgDB
                         Process
                         Program
