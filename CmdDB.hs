@@ -29,8 +29,8 @@ commandDB = [
        , routing = RouteCabal ["install"]
        , switches = [(SwNoharm, Just "--dry-run -v")
                      -- FIXME cabal-dev not support --dry-run
-                    ,(SwSandbox, Just "-s")
-                    ,(SwFlag, Just "-f")
+                    ,(SwSandbox, Just "--sandbox")
+                    ,(SwFlag, Just "--flags")
                     ]
        , manual = Just "<package> [<ver>]"
        }
@@ -41,7 +41,7 @@ commandDB = [
        , routing = RouteFunc uninstall
        , switches = [(SwNoharm, Nothing)
                     ,(SwRecursive, Nothing)
-                    ,(SwSandbox, Just "-s")
+                    ,(SwSandbox, Just "--sandbox")
                     ] -- don't allow SwAll
        , manual = Just "<package> [<ver>]"
        }
@@ -52,7 +52,7 @@ commandDB = [
        , routing = RouteFunc installed
        , switches = [(SwAll, Nothing)
                     ,(SwRecursive, Nothing)
-                    ,(SwSandbox, Just "-s")
+                    ,(SwSandbox, Just "--sandbox")
                     ]
        , manual = Nothing
        }
@@ -61,8 +61,8 @@ commandDB = [
        , commandNames = ["configure", "conf"]
        , document = "Configure a cabal package"
        , routing = RouteCabal ["configure"]
-       , switches = [(SwSandbox, Just "-s")
-                     ,(SwFlag, Just "-f")]
+       , switches = [(SwSandbox, Just "--sandbox")
+                     ,(SwFlag, Just "--flags")]
        , manual = Nothing
        }
   , CommandSpec {
@@ -87,7 +87,7 @@ commandDB = [
        , document = "Display outdated packages"
        , routing = RouteFunc outdated
        , switches = [(SwAll, Nothing)
-                    ,(SwSandbox, Just "-s")]
+                    ,(SwSandbox, Just "--sandbox")]
        , manual = Nothing
        }
   , CommandSpec {
@@ -95,7 +95,7 @@ commandDB = [
        , commandNames = ["info"]
        , document = "Display information of a package"
        , routing = RouteCabal ["info"]
-       , switches = [(SwSandbox, Just "-s")]
+       , switches = [(SwSandbox, Just "--sandbox")]
        , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
@@ -121,7 +121,7 @@ commandDB = [
        , routing = RouteFunc deps
        , switches = [(SwRecursive, Nothing)
                     ,(SwAll, Nothing)
-                    ,(SwSandbox, Just "-s")
+                    ,(SwSandbox, Just "--sandbox")
                     ]
        , manual = Just "<package> [<ver>]"
        }
@@ -132,7 +132,7 @@ commandDB = [
        , routing = RouteFunc revdeps
        , switches = [(SwRecursive, Nothing)
                     ,(SwAll, Nothing)
-                    ,(SwSandbox, Just "-s")
+                    ,(SwSandbox, Just "--sandbox")
                     ]
        , manual = Just "<package> [<ver>]"
        }
@@ -141,7 +141,7 @@ commandDB = [
        , commandNames = ["check"]
        , document = "Check consistency of packages"
        , routing = RouteFunc check
-       , switches = [(SwSandbox, Just "-s")]
+       , switches = [(SwSandbox, Just "--sandbox")]
        , manual = Nothing
        }
   , CommandSpec {
@@ -157,7 +157,7 @@ commandDB = [
        , commandNames = ["env"]
        , document = "Show environment variables"
        , routing = RouteFunc env
-       , switches = [(SwSandbox, Just "-s")]
+       , switches = [(SwSandbox, Just "--sandbox")]
        , manual = Nothing
        }
   , CommandSpec {
@@ -165,7 +165,7 @@ commandDB = [
        , commandNames = ["add", "add-source"]
        , document = "Add a source directory"
        , routing = RouteFunc add
-       , switches = [(SwSandbox, Just "-s")]
+       , switches = [(SwSandbox, Just "--sandbox")]
        , manual = Just "<source>"
        }
   , CommandSpec {
@@ -247,8 +247,8 @@ optionsToString opts swdb = concatMap suboption opts
         Nothing       -> []
         Just Nothing  -> []
         Just (Just x) -> case opt of
-            OptSandbox dir -> [x, dir]
-            OptFlag flags  -> [x, flags]
+            OptSandbox dir -> [x++"="++dir]
+            OptFlag flags  -> [x++"="++flags]
             _              -> [x]
 
 ----------------------------------------------------------------
