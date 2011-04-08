@@ -26,6 +26,10 @@ Executable cab
                         containers, Cabal,
                         attoparsec, attoparsec-enumerator,
                         enumerator, bytestring
+  if os(windows)
+     Build-Depends:
+  else
+     Build-Depends:     unix
   Other-Modules:	CmdDB
                         Commands
                         PkgDB

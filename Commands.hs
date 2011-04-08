@@ -38,12 +38,11 @@ installed :: FunctionCommand
 installed _ _ opts = do
     let optall = OptAll `elem` opts
         optrec = OptRecursive `elem` opts
-    flt <- if optall then allPkgs else userPkgs
     db' <- getPkgDB (getSandbox opts)
+    flt <- if optall then allPkgs else userPkgs
+    -- FIXME: the optall case does unnecessary conversion
     let pkgs = toPkgList flt db'
-    db <- if optall
-          then return db'
-          else toPkgDB . flip toPkgList db' <$> userPkgs
+        db = toPkgDB pkgs
     forM_ pkgs $ \pkg -> do
         putStrLn . fullNameOfPkgInfo $ pkg
         when optrec $ printDeps True db 1 pkg

@@ -10,6 +10,7 @@ import System.Cmd
 import System.Console.GetOpt
 import System.Environment
 import System.Exit
+import Env
 import Types
 import Utils
 
@@ -17,6 +18,7 @@ import Utils
 
 main :: IO ()
 main = flip catches handlers $ do
+    unsetEnv "GHC_PACKAGE_PATH"
     oargs <- getArgs
     let pargs = parseArgs getOptDB oargs
     checkOptions1 pargs illegalOptionsAndExit
