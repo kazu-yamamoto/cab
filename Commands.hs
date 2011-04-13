@@ -101,7 +101,7 @@ check _ _ opts = do
     system (script pkgconf)
     return ()
   where
-   script pkgconf = "ghc-pkg check " ++ pkgconf
+   script pkgconf = "ghc-pkg check -v " ++ pkgconf
 
 ----------------------------------------------------------------
 
