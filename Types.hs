@@ -12,6 +12,7 @@ type ParsedArgs = Either [UnknownOpt] ([Arg],[Option])
 data Switch = SwNoharm
             | SwRecursive
             | SwAll
+            | SwInfo
             | SwSandbox
             | SwFlag
             deriving (Eq,Show)
@@ -19,6 +20,7 @@ data Switch = SwNoharm
 data Option = OptNoharm
             | OptRecursive
             | OptAll
+            | OptInfo
             | OptSandbox String
             | OptFlag String
             | OptHelp
@@ -28,6 +30,7 @@ toSwitch :: Option -> Switch
 toSwitch OptNoharm      = SwNoharm
 toSwitch OptRecursive   = SwRecursive
 toSwitch OptAll         = SwAll
+toSwitch OptInfo        = SwInfo
 toSwitch (OptSandbox _) = SwSandbox
 toSwitch (OptFlag _)    = SwFlag
 toSwitch _              = error "toSwitch"

@@ -7,6 +7,8 @@ import Data.Map (Map)
 import qualified Data.Map as M
 import Distribution.Compiler
     (CompilerId(..))
+import Distribution.License
+    (License(..))
 import Distribution.Version
     (Version(..))
 import Distribution.InstalledPackageInfo
@@ -48,13 +50,15 @@ getPackageConf path = do
     return $ packageConf path com
 
 packageConf :: FilePath -> Compiler -> FilePath
-packageConf path com = path </> "packages-" ++ version ++ ".conf"
+packageConf path com = path </> "packages-" ++ version ver ++ ".conf"
   where
     CompilerId _ ver = compilerId com
-    version = toDotted . versionBranch $ ver
 
 toPkgDB :: [PkgInfo] -> PkgDB
 toPkgDB = fromList
+
+version :: Version -> String
+version = toDotted . versionBranch
 
 ----------------------------------------------------------------
 
@@ -109,38 +113,59 @@ numVersionOfPkgInfo = versionBranch . pkgVersion . sourcePackageId
 
 ----------------------------------------------------------------
 
-printDeps :: Bool -> PkgDB -> Int -> PkgInfo -> IO ()
-printDeps rec db n pkgi = mapM_ (printDep rec db n) $ depends pkgi
-
-printDep :: Bool -> PkgDB -> Int -> InstalledPackageId -> IO ()
-printDep rec db n pid = case lookupInstalledPackageId db pid of
-    Nothing -> return ()
-    Just pkgi -> do
-        putStrLn $ prefix ++ fullNameOfPkgInfo pkgi
-        when rec $ printDeps rec db (n+1) pkgi
+extraInfo :: Bool -> PkgInfo -> IO ()
+extraInfo False _ = return ()
+extraInfo True pkgi = putStr $ " " ++ lcns ++ " \"" ++  auth ++ "\""
   where
-    prefix = replicate (n * 4) ' '
+    lcns = showLicense (license pkgi)
+    auth = author pkgi
 
 ----------------------------------------------------------------
 
-printRevDeps :: Bool -> PkgDB -> Int -> PkgInfo -> IO ()
-printRevDeps rec db n pkgi = printRevDeps' rec db revdb n pkgi
+printDeps :: Bool -> Bool -> PkgDB -> Int -> PkgInfo -> IO ()
+printDeps rec info db n pkgi = mapM_ (printDep rec info db n) $ depends pkgi
+
+printDep :: Bool -> Bool -> PkgDB -> Int -> InstalledPackageId -> IO ()
+printDep rec info db n pid = case lookupInstalledPackageId db pid of
+    Nothing -> return ()
+    Just pkgi -> do
+        putStr $ prefix ++ fullNameOfPkgInfo pkgi
+        extraInfo info pkgi
+        putStrLn ""
+        when rec $ printDeps rec info db (n+1) pkgi
+  where
+    prefix = replicate (n * 4) ' '
+
+showLicense :: License -> String
+showLicense (GPL (Just v))     = "GPL" ++ version v
+showLicense (GPL Nothing)      = "GPL"
+showLicense (LGPL (Just v))    = "LGPL" ++ version v
+showLicense (LGPL Nothing)     = "LGPL"
+showLicense (UnknownLicense s) = s
+showLicense x                  = show x
+
+----------------------------------------------------------------
+
+printRevDeps :: Bool -> Bool -> PkgDB -> Int -> PkgInfo -> IO ()
+printRevDeps rec info db n pkgi = printRevDeps' rec info db revdb n pkgi
   where
     revdb = makeRevDepDB db
 
-printRevDeps' :: Bool -> PkgDB -> RevDB -> Int -> PkgInfo -> IO ()
-printRevDeps' rec db revdb n pkgi = case M.lookup pkgid revdb of
+printRevDeps' :: Bool -> Bool -> PkgDB -> RevDB -> Int -> PkgInfo -> IO ()
+printRevDeps' rec info db revdb n pkgi = case M.lookup pkgid revdb of
     Nothing -> return ()
-    Just pkgids -> mapM_ (printRevDep' rec db revdb n) pkgids
+    Just pkgids -> mapM_ (printRevDep' rec info db revdb n) pkgids
   where
     pkgid = installedPackageId pkgi
 
-printRevDep' :: Bool -> PkgDB -> RevDB -> Int -> InstalledPackageId -> IO ()
-printRevDep' rec db revdb n pid = case lookupInstalledPackageId db pid of
+printRevDep' :: Bool -> Bool -> PkgDB -> RevDB -> Int -> InstalledPackageId -> IO ()
+printRevDep' rec info db revdb n pid = case lookupInstalledPackageId db pid of
     Nothing -> return ()
     Just pkgi -> do
-        putStrLn $ prefix ++ fullNameOfPkgInfo pkgi
-        when rec $ printRevDeps' rec db revdb (n+1) pkgi
+        putStr $ prefix ++ fullNameOfPkgInfo pkgi
+        extraInfo info pkgi
+        putStrLn ""
+        when rec $ printRevDeps' rec info db revdb (n+1) pkgi
   where
     prefix = replicate (n * 4) ' '
 

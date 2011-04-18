@@ -52,6 +52,7 @@ commandDB = [
        , routing = RouteFunc installed
        , switches = [(SwAll, Nothing)
                     ,(SwRecursive, Nothing)
+                    ,(SwInfo, Nothing)
                     ,(SwSandbox, Just "--sandbox")
                     ]
        , manual = Nothing
@@ -121,6 +122,7 @@ commandDB = [
        , routing = RouteFunc deps
        , switches = [(SwRecursive, Nothing)
                     ,(SwAll, Nothing)
+                    ,(SwInfo, Nothing)
                     ,(SwSandbox, Just "--sandbox")
                     ]
        , manual = Just "<package> [<ver>]"
@@ -132,6 +134,7 @@ commandDB = [
        , routing = RouteFunc revdeps
        , switches = [(SwRecursive, Nothing)
                     ,(SwAll, Nothing)
+                    ,(SwInfo, Nothing)
                     ,(SwSandbox, Just "--sandbox")
                     ]
        , manual = Just "<package> [<ver>]"
@@ -199,6 +202,9 @@ getOptDB = [
   , Option ['a'] ["all"]
       (NoArg OptAll)
       "Show global packages in addition to user packages"
+  , Option ['i'] ["info"]
+      (NoArg OptInfo)
+      "Show additional information"
   , Option ['s'] ["sandbox"]
       (ReqArg OptSandbox "<sandbox>")
       "Specify a sandbox directory"
@@ -211,7 +217,7 @@ getOptDB = [
   ]
 
 optionDB :: OptionDB
-optionDB = zip [SwNoharm,SwRecursive,SwAll,SwSandbox,SwFlag] getOptDB
+optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwSandbox,SwFlag] getOptDB
 
 ----------------------------------------------------------------
 

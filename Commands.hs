@@ -43,9 +43,13 @@ installed _ _ opts = do
     -- FIXME: the optall case does unnecessary conversion
     let pkgs = toPkgList flt db'
         db = toPkgDB pkgs
-    forM_ pkgs $ \pkg -> do
-        putStrLn . fullNameOfPkgInfo $ pkg
-        when optrec $ printDeps True db 1 pkg
+    forM_ pkgs $ \pkgi -> do
+        putStr $ fullNameOfPkgInfo pkgi
+        extraInfo info pkgi
+        putStrLn ""
+        when optrec $ printDeps True info db 1 pkgi
+  where
+    info = OptInfo `elem` opts
 
 outdated :: FunctionCommand
 outdated _ _ opts = do
@@ -112,14 +116,17 @@ revdeps :: FunctionCommand
 revdeps _ nmver opts = printDepends nmver opts printRevDeps
 
 printDepends :: [String] -> [Option]
-             -> (Bool -> PkgDB -> Int -> PkgInfo -> IO ()) -> IO ()
+             -> (Bool -> Bool -> PkgDB -> Int -> PkgInfo -> IO ()) -> IO ()
 printDepends nmver opts func = do
     db' <- getPkgDB (getSandbox opts)
     pkg <- lookupPkg nmver db'
     db <- if OptAll `elem` opts
           then return db'
           else toPkgDB . flip toPkgList db' <$> userPkgs
-    func (OptRecursive `elem` opts) db 0 pkg
+    func rec info db 0 pkg
+  where
+    rec = OptRecursive `elem` opts
+    info = OptInfo `elem` opts
 
 ----------------------------------------------------------------
 
