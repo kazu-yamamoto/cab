@@ -32,7 +32,7 @@ commandDB = [
                     ,(SwSandbox, Just "--sandbox")
                     ,(SwFlag, Just "--flags")
                     ]
-       , manual = Just "<package> [<ver>]"
+       , manual = Just "[<package> [<ver>]]"
        }
   , CommandSpec {
          command = Uninstall
@@ -204,7 +204,7 @@ getOptDB = [
       "Show global packages in addition to user packages"
   , Option ['i'] ["info"]
       (NoArg OptInfo)
-      "Show additional information"
+      "Show license and author information"
   , Option ['s'] ["sandbox"]
       (ReqArg OptSandbox "<sandbox>")
       "Specify a sandbox directory"
