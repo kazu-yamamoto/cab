@@ -1,7 +1,7 @@
 module Program where
 
 version :: String
-version = "0.1.4"
+version = "0.1.5"
 
 programName :: String
 programName = "cab"
