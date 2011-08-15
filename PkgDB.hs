@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module PkgDB where
 
 import Control.Applicative
@@ -83,8 +85,12 @@ toPkgList prd db = filter prd $ allPackages db
 
 userPkgs :: IO (PkgInfo -> Bool)
 userPkgs = do
+#ifdef darwin_HOST_OS
     -- drop "/."
     userDirPref <- takeDirectory <$> getAppUserDataDirectory ""
+#else
+    userDirPref <- getAppUserDataDirectory ""
+#endif
     return $ \pkgi -> case libraryDirs pkgi of
         [] -> False -- haskell-platform for example
         xs -> any (userDirPref `isPrefixOf`) xs
