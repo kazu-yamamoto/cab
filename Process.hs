@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module Process (
     Iteratee, infoFromProcess
   ) where
@@ -22,4 +24,7 @@ infoFromProcess shellCommand parser = do
       , std_out = CreatePipe
       , std_err = Inherit
       , close_fds = True
+#if __GLASGOW_HASKELL__ >= 702
+      , create_group = True
+#endif
       }
