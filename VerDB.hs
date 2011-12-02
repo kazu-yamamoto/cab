@@ -4,9 +4,9 @@ module VerDB (
     VerDB, getVerDB, lookupLatestVersion, getVerAlist
   ) where
 
-import Control.Applicative hiding (many)
+import Control.Applicative
 import Control.Arrow (second)
-import Data.Attoparsec.Char8
+import Data.Attoparsec.ByteString.Char8
 import Data.Attoparsec.Enumerator
 import Data.ByteString (ByteString)
 import Data.Map (Map)

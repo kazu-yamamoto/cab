@@ -1,5 +1,5 @@
 Name:                   cab
-Version:                0.1.6
+Version:                0.1.7
 Author:                 Kazu Yamamoto <kazu@iij.ad.jp>
 Maintainer:             Kazu Yamamoto <kazu@iij.ad.jp>
 License:                BSD3
@@ -24,7 +24,7 @@ Executable cab
     GHC-Options:        -Wall
   Build-Depends:        base >= 4.0 && < 5, process, filepath, directory,
                         containers, Cabal,
-                        attoparsec, attoparsec-enumerator,
+                        attoparsec >= 0.10.0.0, attoparsec-enumerator,
                         enumerator, bytestring
   if os(windows)
      Build-Depends:
