@@ -67,6 +67,7 @@ data Command = Sync
              | Clean
              | Outdated
              | Sdist
+             | Upload
              | Unpack
              | Info
              | Deps

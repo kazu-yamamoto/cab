@@ -108,6 +108,14 @@ commandDB = [
        , manual = Nothing
        }
   , CommandSpec {
+         command = Upload
+       , commandNames = ["upload", "up"]
+       , document = "Uploading tar.gz to HackageDB"
+       , routing = RouteCabal ["upload"]
+       , switches = [(SwNoharm, Just "-c")]
+       , manual = Nothing
+       }
+  , CommandSpec {
          command = Unpack
        , commandNames = ["unpack"]
        , document = "Untar a package in the current directory"
