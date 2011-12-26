@@ -18,22 +18,23 @@ genPaths = do
     case mnv of
         Nothing       -> hPutStrLn stderr "cabal file does not exist"
         Just (nm,ver) -> do
-            let file = "Paths_" ++ nm ++ ".hs"
+            let file = "Paths_" ++ nm' ++ ".hs"
             exist <- doesFileExist file
             if exist then
                 hPutStrLn stderr $ file ++ " already exists"
             else do
                 putStrLn $ "Writing " ++ file ++ "..."
                 writeFile file $
-                     "module Paths_" ++ nm ++ "  where\n"
+                     "module Paths_" ++ nm' ++ "  where\n"
                   ++ "import Data.Version\n"
                   ++ "\n"
                   ++ "version :: Version\n"
                   ++ "version = Version [" ++ ver' ++ "] []\n"
           where
-            ver' = map trans ver
-            trans c
-              | c == '.'  = ','
+            nm'  = map (trans '-' '_') nm
+            ver' = map (trans '.' ',') ver
+            trans c1 c2 c
+              | c == c1   = c2
               | otherwise = c
 
 getNameVersion :: IO (Maybe (String,String))
