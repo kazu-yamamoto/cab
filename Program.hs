@@ -1,7 +1,10 @@
-module Program where
+module Program (
+    version, showVersion
+  , programName, description
+  ) where
 
-version :: String
-version = "0.1.6"
+import Paths_cab
+import Data.Version
 
 programName :: String
 programName = "cab"

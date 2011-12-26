@@ -1,5 +1,5 @@
 Name:                   cab
-Version:                0.1.7
+Version:                0.1.8
 Author:                 Kazu Yamamoto <kazu@iij.ad.jp>
 Maintainer:             Kazu Yamamoto <kazu@iij.ad.jp>
 License:                BSD3
@@ -39,6 +39,7 @@ Executable cab
                         Types
                         Utils
                         VerDB
+                        Paths_cab
 Source-Repository head
   Type:                 git
   Location:             git://github.com/kazu-yamamoto/cab.git

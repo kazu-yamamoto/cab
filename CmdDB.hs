@@ -310,7 +310,7 @@ helpAndExit :: IO ()
 helpAndExit = do
     putStrLn $ programName ++ " " ++ " -- " ++ description
     putStrLn ""
-    putStrLn $ "Version: " ++ version
+    putStrLn $ "Version: " ++ showVersion version
     putStrLn "Usage:"
     putStrLn $ "\t" ++ programName
     putStrLn $ "\t" ++ programName ++ " <command> [args...]"
