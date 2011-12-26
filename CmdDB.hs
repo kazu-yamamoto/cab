@@ -156,6 +156,14 @@ commandDB = [
        , manual = Nothing
        }
   , CommandSpec {
+         command = GenPaths
+       , commandNames = ["genpaths", "genpath"]
+       , document = "Generate Paths_<pkg>.hs"
+       , routing = RouteFunc genpaths
+       , switches = []
+       , manual = Nothing
+       }
+  , CommandSpec {
          command = Search
        , commandNames = ["search"]
        , document = "Search available packages by package name"

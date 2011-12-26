@@ -73,6 +73,7 @@ data Command = Sync
              | Deps
              | RevDeps
              | Check
+             | GenPaths
              | Search
              | Env
              | Add

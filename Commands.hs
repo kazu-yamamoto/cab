@@ -1,5 +1,6 @@
 module Commands (
-    deps, revdeps, installed, outdated, uninstall, search, env, check, add
+    deps, revdeps, installed, outdated, uninstall, search, env
+  , genpaths, check, add
   ) where
 
 import Control.Applicative hiding (many)
@@ -7,6 +8,7 @@ import Control.Monad
 import Data.Char
 import Data.List
 import Data.Maybe
+import GenPaths
 import PkgDB
 import System.Exit
 import System.IO
@@ -96,6 +98,11 @@ pkgConfOpt opts = case getSandbox opts of
     Just path -> do
         pkgConf <- getPackageConf path
         return $ "--package-conf=" ++ pkgConf ++ " "
+
+----------------------------------------------------------------
+
+genpaths :: FunctionCommand
+genpaths _ _ _ = genPaths
 
 ----------------------------------------------------------------
 
