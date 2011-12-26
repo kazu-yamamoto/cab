@@ -33,6 +33,7 @@ Executable cab
   Other-Modules:	CmdDB
                         Commands
                         Env
+                        GenPaths
                         PkgDB
                         Process
                         Program
