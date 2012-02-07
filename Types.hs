@@ -77,6 +77,7 @@ data Command = Sync
              | Search
              | Env
              | Add
+             | Test
              | Help
              deriving (Eq,Show)
 

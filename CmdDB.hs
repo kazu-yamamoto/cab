@@ -188,6 +188,14 @@ commandDB = [
        , manual = Just "<source>"
        }
   , CommandSpec {
+         command = Test
+       , commandNames = ["test"]
+       , document = "run tests"
+       , routing = RouteCabal ["test"]
+       , switches = []
+       , manual = Nothing
+       }
+  , CommandSpec {
          command = Help
        , commandNames = ["help"]
        , document = "Display the help message of the command"

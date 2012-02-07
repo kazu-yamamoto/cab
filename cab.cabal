@@ -16,16 +16,23 @@ Homepage:               http://www.mew.org/~kazu/proj/cab/
 Category:               Distribution
 Cabal-Version:          >= 1.6
 Build-Type:             Simple
+
 Executable cab
   Main-Is:              Main.hs
   if impl(ghc >= 6.12)
     GHC-Options:        -Wall -fno-warn-unused-do-bind
   else
     GHC-Options:        -Wall
-  Build-Depends:        base >= 4.0 && < 5, process, filepath, directory,
-                        containers, Cabal,
-                        attoparsec >= 0.10.0.0, attoparsec-enumerator,
-                        enumerator, bytestring
+  Build-Depends:        base >= 4.0 && < 5
+                      , Cabal
+                      , attoparsec >= 0.10.0.0
+                      , attoparsec-enumerator
+                      , bytestring
+                      , containers
+                      , directory
+                      , enumerator
+                      , filepath
+                      , process
   if os(windows)
      Build-Depends:
   else
@@ -43,4 +50,4 @@ Executable cab
                         Paths_cab
 Source-Repository head
   Type:                 git
-  Location:             git://github.com/kazu-yamamoto/cab.git
+  Location:             git clone git://github.com/kazu-yamamoto/cab.git

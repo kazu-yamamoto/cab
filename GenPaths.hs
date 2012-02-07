@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, DoAndIfThenElse #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module GenPaths (genPaths) where
 
@@ -22,7 +22,7 @@ genPaths = do
             exist <- doesFileExist file
             if exist then
                 hPutStrLn stderr $ file ++ " already exists"
-            else do
+              else do
                 putStrLn $ "Writing " ++ file ++ "..."
                 writeFile file $
                      "module Paths_" ++ nm' ++ "  where\n"
