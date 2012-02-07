@@ -26,13 +26,16 @@ Executable cab
   Build-Depends:        base >= 4.0 && < 5
                       , Cabal
                       , attoparsec >= 0.10.0.0
+                      , attoparsec-conduit
                       , attoparsec-enumerator
                       , bytestring
+                      , conduit
                       , containers
                       , directory
                       , enumerator
                       , filepath
                       , process
+                      , process-conduit
   if os(windows)
      Build-Depends:
   else
@@ -42,7 +45,6 @@ Executable cab
                         Env
                         GenPaths
                         PkgDB
-                        Process
                         Program
                         Types
                         Utils

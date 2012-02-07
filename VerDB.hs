@@ -7,12 +7,13 @@ module VerDB (
 import Control.Applicative
 import Control.Arrow (second)
 import Data.Attoparsec.ByteString.Char8
-import Data.Attoparsec.Enumerator
 import Data.ByteString (ByteString)
+import Data.Conduit
+import Data.Conduit.Attoparsec
+import Data.Conduit.Process
 import Data.Map (Map)
 import qualified Data.Map as M
 import Data.Maybe
-import Process
 
 ----------------------------------------------------------------
 
@@ -31,7 +32,7 @@ getVerAlist installedOnly = justOnly <$> verInfos
     script = if installedOnly
              then "cabal list --installed"
              else "cabal list"
-    verInfos = infoFromProcess script cabalListParser
+    verInfos = runResourceT $ sourceCmd script $$ cabalListParser
     justOnly = map (second fromJust) . filter (isJust . snd)
 
 ----------------------------------------------------------------
@@ -41,8 +42,8 @@ lookupLatestVersion pkgid (VerDB db) = M.lookup pkgid db
 
 ----------------------------------------------------------------
 
-cabalListParser :: Iteratee ByteString IO [VerInfo]
-cabalListParser = iterParser verinfos
+cabalListParser :: Sink ByteString IO [VerInfo]
+cabalListParser = sinkParser verinfos
 
 verinfos :: Parser [VerInfo]
 verinfos = many1 verinfo
