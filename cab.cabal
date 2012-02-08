@@ -27,15 +27,13 @@ Executable cab
                       , Cabal
                       , attoparsec >= 0.10.0.0
                       , attoparsec-conduit
-                      , attoparsec-enumerator
                       , bytestring
                       , conduit
                       , containers
                       , directory
-                      , enumerator
                       , filepath
                       , process
-                      , process-conduit
+                      , process-conduit >= 0.0.0.3
   if os(windows)
      Build-Depends:
   else

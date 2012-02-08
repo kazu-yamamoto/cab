@@ -3,83 +3,53 @@
 module GenPaths (genPaths) where
 
 import Control.Applicative
+import Control.Exception
 import Control.Monad
-import Data.Attoparsec.ByteString.Char8
-import Data.Attoparsec.Enumerator
-import Data.Enumerator (run, ($$))
-import Data.Enumerator.Binary (enumFile)
-import Data.List
+import Data.List (intercalate, isSuffixOf)
+import Distribution.Package
+import Distribution.PackageDescription
+import Distribution.PackageDescription.Parse (readPackageDescription)
+import Distribution.Verbosity (silent)
+import Distribution.Version
 import System.Directory
 import System.IO
 
 genPaths :: IO ()
 genPaths = do
-    mnv <- getNameVersion
-    case mnv of
-        Nothing       -> hPutStrLn stderr "cabal file does not exist"
-        Just (nm,ver) -> do
-            let file = "Paths_" ++ nm' ++ ".hs"
-            exist <- doesFileExist file
-            if exist then
-                hPutStrLn stderr $ file ++ " already exists"
-              else do
-                putStrLn $ "Writing " ++ file ++ "..."
-                writeFile file $
-                     "module Paths_" ++ nm' ++ "  where\n"
-                  ++ "import Data.Version\n"
-                  ++ "\n"
-                  ++ "version :: Version\n"
-                  ++ "version = Version [" ++ ver' ++ "] []\n"
-          where
-            nm'  = map (trans '-' '_') nm
-            ver' = map (trans '.' ',') ver
-            trans c1 c2 c
-              | c == c1   = c2
-              | otherwise = c
+    (nm,ver) <- getCabalFile >>= getNameVersion
+    let file = "Paths_" ++ nm ++ ".hs"
+    check file >> do
+        putStrLn $ "Writing " ++ file ++ "..."
+        writeFile file $ "module Paths_" ++ nm ++ "  where\n"
+                      ++ "import Data.Version\n"
+                      ++ "\n"
+                      ++ "version :: Version\n"
+                      ++ "version = Version [" ++ ver ++ "] []\n"
+  where
+    check file = do
+        exist <- doesFileExist file
+        unless exist $ hPutStrLn stderr $ file ++ " already exists"
 
-getNameVersion :: IO (Maybe (String,String))
-getNameVersion = do
-    mcfile <- getCabalFile
-    case mcfile of
-        Nothing -> return Nothing
-        Just cfile -> do
-            mn <- parseCabalFile cfile name
-            mv <- parseCabalFile cfile version
-            return $ do
-                n <- mn
-                v <- mv
-                return (n,v)
+getNameVersion :: FilePath -> IO (String,String)
+getNameVersion file = do
+    desc <- readPackageDescription silent file
+    let pkg = package . packageDescription $ desc
+        PackageName nm = pkgName pkg
+        name = map (trans '-' '_') nm
+        ver = versionBranch . pkgVersion $ pkg
+        version = intercalate "." $ map show ver
+    return (name, version)
+  where
+    trans c1 c2 c
+      | c == c1   = c2
+      | otherwise = c
 
-getCabalFile :: IO (Maybe FilePath)
+getCabalFile :: IO FilePath
 getCabalFile = do
     cnts <- (filter isCabal <$> getDirectoryContents ".")
-            >>= filterM (\file -> doesFileExist file)
+            >>= filterM doesFileExist
     case cnts of
-        []      -> return Nothing
-        cfile:_ -> return (Just cfile)
+        []      -> throwIO $ userError "Cabal file does not exist"
+        cfile:_ -> return cfile
   where
     isCabal nm = ".cabal" `isSuffixOf` nm && length nm > 6
-
-parseCabalFile :: FilePath -> Parser a -> IO (Maybe a)
-parseCabalFile file parser = do
-    res <- run (enumFile file $$ iterParser (findTarget parser))
-    case res of
-        Right x -> return x
-        Left  _ -> return Nothing
-
-findTarget :: Parser a -> Parser (Maybe a)
-findTarget parser = (Just <$> parser)
-         <|> (anyChar >> findTarget parser)
-         <|> (Nothing <$ endOfInput)
-
-name :: Parser String
-name = do
-    stringCI "name:"
-    many (char ' ')
-    many1 (satisfy $ notInClass " ,\t\n")
-
-version :: Parser String
-version = do
-    stringCI "version:"
-    many (char ' ')
-    many1 (satisfy $ inClass "0-9.")
