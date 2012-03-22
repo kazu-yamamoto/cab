@@ -35,15 +35,14 @@ getVerAlist installedOnly = justOnly <$> verInfos
     verInfos = runResourceT $ sourceCmd script $$ cabalListParser
     justOnly = map (second fromJust) . filter (isJust . snd)
 
+    cabalListParser = sinkParser verinfos
+
 ----------------------------------------------------------------
 
 lookupLatestVersion :: String -> VerDB -> Maybe [Int]
 lookupLatestVersion pkgid (VerDB db) = M.lookup pkgid db
 
 ----------------------------------------------------------------
-
-cabalListParser :: Sink ByteString IO [VerInfo]
-cabalListParser = sinkParser verinfos
 
 verinfos :: Parser [VerInfo]
 verinfos = many1 verinfo
