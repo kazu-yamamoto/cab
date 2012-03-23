@@ -87,7 +87,7 @@ unregister doit opts (name,ver) =
         putStrLn $ "Deleting " ++ name ++ " " ++ ver
         pkgconf <- pkgConfOpt opts
         when doit $ system (script pkgconf) >> return ()
-      else 
+      else
         putStrLn $ name ++ " " ++ ver
   where
     script pkgconf = "ghc-pkg unregister " ++ pkgconf ++ name ++ "-" ++ ver
