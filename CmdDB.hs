@@ -192,7 +192,7 @@ commandDB = [
        , commandNames = ["test"]
        , document = "run tests"
        , routing = RouteCabal ["test"]
-       , switches = []
+       , switches = [(SwSandbox, Just "--sandbox")]
        , manual = Nothing
        }
   , CommandSpec {
