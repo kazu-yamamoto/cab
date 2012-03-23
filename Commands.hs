@@ -71,11 +71,10 @@ uninstall _ nmver opts = do
     db <- toPkgDB . flip toPkgList db' <$> userPkgs
     pkg <- lookupPkg nmver db
     let sortedPkgs = topSortedPkgs pkg db
-    if onlyOne && length sortedPkgs /= 1
-       then do
+    if onlyOne && length sortedPkgs /= 1 then do
         hPutStrLn stderr "The following packages depend on this. Use the \"-r\" option."
         mapM_ (hPutStrLn stderr . fullNameOfPkgInfo) (init sortedPkgs)
-       else do
+      else do
         unless doit $ putStrLn "The following packages are deleted without the \"-n\" option."
         mapM_ (unregister doit opts . pairNameOfPkgInfo) sortedPkgs
   where
@@ -83,12 +82,13 @@ uninstall _ nmver opts = do
     doit = OptNoharm `notElem` opts
 
 unregister :: Bool -> [Option] -> (String,String) -> IO ()
-unregister doit opts (name,ver) = if doit
-    then do
+unregister doit opts (name,ver) =
+    if doit then do
         putStrLn $ "Deleting " ++ name ++ " " ++ ver
         pkgconf <- pkgConfOpt opts
         when doit $ system (script pkgconf) >> return ()
-    else putStrLn $ name ++ " " ++ ver
+      else 
+        putStrLn $ name ++ " " ++ ver
   where
     script pkgconf = "ghc-pkg unregister " ++ pkgconf ++ name ++ "-" ++ ver
 
