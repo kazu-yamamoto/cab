@@ -50,4 +50,4 @@ Executable cab
                         Paths_cab
 Source-Repository head
   Type:                 git
-  Location:             git clone git://github.com/kazu-yamamoto/cab.git
+  Location:             git://github.com/kazu-yamamoto/cab.git
