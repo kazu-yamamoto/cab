@@ -26,14 +26,14 @@ Executable cab
   Build-Depends:        base >= 4.0 && < 5
                       , Cabal
                       , attoparsec >= 0.10.0.0
-                      , attoparsec-conduit
+                      , attoparsec-conduit >= 0.3
                       , bytestring
-                      , conduit
+                      , conduit >= 0.3
                       , containers
                       , directory
                       , filepath
                       , process
-                      , process-conduit >= 0.0.0.3
+                      , process-conduit >= 0.1
   if os(windows)
      Build-Depends:
   else
