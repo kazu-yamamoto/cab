@@ -78,6 +78,7 @@ data Command = Sync
              | Env
              | Add
              | Test
+             | Doc
              | Help
              deriving (Eq,Show)
 

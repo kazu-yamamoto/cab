@@ -196,6 +196,14 @@ commandDB = [
        , manual = Nothing
        }
   , CommandSpec {
+         command = Doc
+       , commandNames = ["doc", "haddock", "man"]
+       , document = "generate manuals"
+       , routing = RouteCabal ["haddock", "--hyperlink-source"]
+       , switches = []
+       , manual = Nothing
+       }
+  , CommandSpec {
          command = Help
        , commandNames = ["help"]
        , document = "Display the help message of the command"
