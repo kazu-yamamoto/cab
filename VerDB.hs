@@ -7,7 +7,6 @@ module VerDB (
 import Control.Applicative
 import Control.Arrow (second)
 import Data.Attoparsec.ByteString.Char8
-import Data.ByteString (ByteString)
 import Data.Conduit
 import Data.Conduit.Attoparsec
 import Data.Conduit.Process

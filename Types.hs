@@ -15,6 +15,7 @@ data Switch = SwNoharm
             | SwInfo
             | SwSandbox
             | SwFlag
+            | SwTest
             deriving (Eq,Show)
 
 data Option = OptNoharm
@@ -23,6 +24,7 @@ data Option = OptNoharm
             | OptInfo
             | OptSandbox String
             | OptFlag String
+            | OptTest
             | OptHelp
             deriving (Eq,Show)
 
@@ -33,6 +35,7 @@ toSwitch OptAll         = SwAll
 toSwitch OptInfo        = SwInfo
 toSwitch (OptSandbox _) = SwSandbox
 toSwitch (OptFlag _)    = SwFlag
+toSwitch OptTest        = SwTest
 toSwitch _              = error "toSwitch"
 
 getSandbox :: [Option] -> Maybe FilePath

@@ -63,7 +63,8 @@ commandDB = [
        , document = "Configure a cabal package"
        , routing = RouteCabal ["configure"]
        , switches = [(SwSandbox, Just "--sandbox")
-                     ,(SwFlag, Just "--flags")]
+                    ,(SwFlag, Just "--flags")
+                    ,(SwTest, Just "--enable-tests")]
        , manual = Nothing
        }
   , CommandSpec {
@@ -190,7 +191,7 @@ commandDB = [
   , CommandSpec {
          command = Test
        , commandNames = ["test"]
-       , document = "run tests"
+       , document = "Run tests"
        , routing = RouteCabal ["test"]
        , switches = [(SwSandbox, Just "--sandbox")]
        , manual = Nothing
@@ -198,7 +199,7 @@ commandDB = [
   , CommandSpec {
          command = Doc
        , commandNames = ["doc", "haddock", "man"]
-       , document = "generate manuals"
+       , document = "Generate manuals"
        , routing = RouteCabal ["haddock", "--hyperlink-source"]
        , switches = []
        , manual = Nothing
@@ -243,13 +244,16 @@ getOptDB = [
   , Option ['f'] ["flags"]
       (ReqArg OptFlag "<flags>")
       "Specify flags"
+  , Option ['t'] ["test"]
+      (NoArg OptTest)
+      "Enable test"
   , Option ['h'] ["help"]
       (NoArg OptHelp)
       "Show help message"
   ]
 
 optionDB :: OptionDB
-optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwSandbox,SwFlag] getOptDB
+optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwSandbox,SwFlag,SwTest] getOptDB
 
 ----------------------------------------------------------------
 
