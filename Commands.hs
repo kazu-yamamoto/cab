@@ -1,6 +1,6 @@
 module Commands (
     deps, revdeps, installed, outdated, uninstall, search, env
-  , genpaths, check, add
+  , genpaths, check, add, ghci
   ) where
 
 import Control.Applicative hiding (many)
@@ -194,3 +194,12 @@ add _ params opts = case getSandbox opts of
             system $ "cabal-dev add-source " ++ src ++ " -s " ++ sbox
             return ()
         _ -> hPutStrLn stderr "A source path be specified."
+
+----------------------------------------------------------------
+
+ghci :: FunctionCommand
+ghci _ _ opts = case getSandbox opts of
+    Nothing -> hPutStrLn stderr "A sandbox must be specified with \"-s\" option."
+    Just sbox -> do
+      system $ "cabal-dev -s " ++ sbox ++ " ghci"
+      return ()
