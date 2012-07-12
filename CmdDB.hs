@@ -205,6 +205,14 @@ commandDB = [
        , manual = Nothing
        }
   , CommandSpec {
+         command = Ghci
+       , commandNames = ["ghci"]
+       , document = "Run GHCi within a sandbox"
+       , routing = RouteFunc ghci
+       , switches = [(SwSandbox, Just "--sandbox")]
+       , manual = Nothing
+       }
+  , CommandSpec {
          command = Help
        , commandNames = ["help"]
        , document = "Display the help message of the command"
