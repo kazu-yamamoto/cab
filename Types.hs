@@ -80,6 +80,7 @@ data Command = Sync
              | Search
              | Env
              | Add
+             | Ghci
              | Test
              | Doc
              | Help
