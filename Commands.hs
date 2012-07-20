@@ -41,7 +41,7 @@ installed _ _ opts = do
     let optall = OptAll `elem` opts
         optrec = OptRecursive `elem` opts
     db' <- getPkgDB (getSandbox opts)
-    flt <- if optall then allPkgs else userPkgs
+    flt <- if optall then allPkgs else userPkgs (getSandbox opts)
     -- FIXME: the optall case does unnecessary conversion
     let pkgs = toPkgList flt db'
         db = toPkgDB pkgs
@@ -55,7 +55,7 @@ installed _ _ opts = do
 
 outdated :: FunctionCommand
 outdated _ _ opts = do
-    flt <- if OptAll `elem` opts then allPkgs else userPkgs
+    flt <- if OptAll `elem` opts then allPkgs else userPkgs (getSandbox opts)
     pkgs <- toPkgList flt <$> getPkgDB (getSandbox opts)
     verDB <- getVerDB
     forM_ pkgs $ \p -> case lookupLatestVersion (nameOfPkgInfo p) verDB of
@@ -68,7 +68,7 @@ outdated _ _ opts = do
 uninstall :: FunctionCommand
 uninstall _ nmver opts = do
     db' <- getPkgDB (getSandbox opts)
-    db <- toPkgDB . flip toPkgList db' <$> userPkgs
+    db <- toPkgDB . flip toPkgList db' <$> userPkgs (getSandbox opts)
     pkg <- lookupPkg nmver db
     let sortedPkgs = topSortedPkgs pkg db
     if onlyOne && length sortedPkgs /= 1 then do
@@ -129,7 +129,7 @@ printDepends nmver opts func = do
     pkg <- lookupPkg nmver db'
     db <- if OptAll `elem` opts
           then return db'
-          else toPkgDB . flip toPkgList db' <$> userPkgs
+          else toPkgDB . flip toPkgList db' <$> userPkgs (getSandbox opts)
     func rec info db 0 pkg
   where
     rec = OptRecursive `elem` opts

@@ -83,14 +83,15 @@ lookupByVersion name ver db = lookupSourcePackageId db src
 toPkgList :: (PkgInfo -> Bool) -> PkgDB -> [PkgInfo]
 toPkgList prd db = filter prd $ allPackages db
 
-userPkgs :: IO (PkgInfo -> Bool)
-userPkgs = do
+userPkgs :: Maybe FilePath -> IO (PkgInfo -> Bool)
+userPkgs mpath = do
 #ifdef darwin_HOST_OS
     -- drop "/."
-    userDirPref <- takeDirectory <$> getAppUserDataDirectory ""
+    let userDirPrefM = takeDirectory <$> getAppUserDataDirectory ""
 #else
-    userDirPref <- getAppUserDataDirectory ""
+    let userDirPrefM = getAppUserDataDirectory ""
 #endif
+    userDirPref <- maybe userDirPrefM canonicalizePath mpath
     return $ \pkgi -> case libraryDirs pkgi of
         [] -> False -- haskell-platform for example
         xs -> any (userDirPref `isPrefixOf`) xs
