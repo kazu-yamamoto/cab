@@ -2,10 +2,10 @@
 
 module PkgDB where
 
-import Control.Applicative
 import Control.Monad
 import Data.List
 import Data.Map (Map)
+import Data.Maybe (isNothing)
 import qualified Data.Map as M
 import Distribution.Compiler
     (CompilerId(..))
@@ -30,7 +30,6 @@ import Distribution.Simple.Program.Db
 import Distribution.Verbosity
     (normal)
 import System.FilePath
-import System.Directory
 import Utils
 
 type PkgDB = PackageIndex
@@ -45,6 +44,11 @@ getPkgDB mpath = do
             Nothing -> UserPackageDB
             Just path -> SpecificPackageDB $ packageConf path com
     getInstalledPackages normal [GlobalPackageDB,userDB] pro
+
+getGlobalPkgDB :: IO PkgDB
+getGlobalPkgDB = do
+    (_,pro) <- configure normal Nothing Nothing defaultProgramDb
+    getInstalledPackages normal [GlobalPackageDB] pro
 
 getPackageConf :: FilePath -> IO FilePath
 getPackageConf path = do
@@ -85,16 +89,9 @@ toPkgList prd db = filter prd $ allPackages db
 
 userPkgs :: IO (PkgInfo -> Bool)
 userPkgs = do
-#ifdef darwin_HOST_OS
-    -- drop "/."
-    userDirPref <- takeDirectory <$> getAppUserDataDirectory ""
-#else
-    userDirPref <- getAppUserDataDirectory ""
-#endif
-    return $ \pkgi -> case libraryDirs pkgi of
-        [] -> False -- haskell-platform for example
-        xs -> any (userDirPref `isPrefixOf`) xs
-
+    gDB <- getGlobalPkgDB
+    return$ \pkgi -> isNothing$ lookupInstalledPackageId gDB (installedPackageId pkgi)
+    
 allPkgs :: IO (PkgInfo -> Bool)
 allPkgs = return (const True)
 
