@@ -2,10 +2,10 @@
 
 module PkgDB where
 
-import Control.Applicative
 import Control.Monad
 import Data.List
 import Data.Map (Map)
+import Data.Maybe (isNothing)
 import qualified Data.Map as M
 import Distribution.Compiler
     (CompilerId(..))
@@ -30,9 +30,6 @@ import Distribution.Simple.Program.Db
 import Distribution.Verbosity
     (normal)
 import System.FilePath
-import System.Directory
-import System.IO.Unsafe
-    (unsafePerformIO)
 import Utils
 
 type PkgDB = PackageIndex
@@ -47,6 +44,11 @@ getPkgDB mpath = do
             Nothing -> UserPackageDB
             Just path -> SpecificPackageDB $ packageConf path com
     getInstalledPackages normal [GlobalPackageDB,userDB] pro
+
+getGlobalPkgDB :: IO PkgDB
+getGlobalPkgDB = do
+    (_,pro) <- configure normal Nothing Nothing defaultProgramDb
+    getInstalledPackages normal [GlobalPackageDB] pro
 
 getPackageConf :: FilePath -> IO FilePath
 getPackageConf path = do
@@ -85,25 +87,11 @@ lookupByVersion name ver db = lookupSourcePackageId db src
 toPkgList :: (PkgInfo -> Bool) -> PkgDB -> [PkgInfo]
 toPkgList prd db = filter prd $ allPackages db
 
-userPkgs :: Maybe FilePath -> IO (PkgInfo -> Bool)
-userPkgs mpath = do
-#ifdef darwin_HOST_OS
-    -- drop "/."
-    let userDirPrefM = takeDirectory <$> getAppUserDataDirectory ""
-#else
-    let userDirPrefM = getAppUserDataDirectory ""
-#endif
-    -- when the path in mpath is relative this makes it absolute
-    userDirPref <- maybe userDirPrefM canonicalizePath mpath
-    return $ \pkgi -> case libraryDirs pkgi of
-        [] -> False -- haskell-platform for example
-              -- the path in xs may contain .. folders which would
-              -- break the test. That's probably a quirk of cabal-dev 
-              -- when installing packages and passing a relative path 
-              -- to the sandbox. Therefore, the use of unsafePerformIO
-              -- and canonicalizePath to resolve the path.
-        xs -> any (userDirPref `isPrefixOf`)$ map (unsafePerformIO . canonicalizePath) xs
-
+userPkgs :: IO (PkgInfo -> Bool)
+userPkgs = do
+    gDB <- getGlobalPkgDB
+    return$ \pkgi -> isNothing$ lookupInstalledPackageId gDB (installedPackageId pkgi)
+    
 allPkgs :: IO (PkgInfo -> Bool)
 allPkgs = return (const True)
 
