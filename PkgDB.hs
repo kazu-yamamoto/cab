@@ -31,6 +31,8 @@ import Distribution.Verbosity
     (normal)
 import System.FilePath
 import System.Directory
+import System.IO.Unsafe
+    (unsafePerformIO)
 import Utils
 
 type PkgDB = PackageIndex
@@ -91,10 +93,16 @@ userPkgs mpath = do
 #else
     let userDirPrefM = getAppUserDataDirectory ""
 #endif
+    -- when the path in mpath is relative this makes it absolute
     userDirPref <- maybe userDirPrefM canonicalizePath mpath
     return $ \pkgi -> case libraryDirs pkgi of
         [] -> False -- haskell-platform for example
-        xs -> any (userDirPref `isPrefixOf`) xs
+              -- the path in xs may contain .. folders which would
+              -- break the test. That's probably a quirk of cabal-dev 
+              -- when installing packages and passing a relative path 
+              -- to the sandbox. Therefore, the use of unsafePerformIO
+              -- and canonicalizePath to resolve the path.
+        xs -> any (userDirPref `isPrefixOf`)$ map (unsafePerformIO . canonicalizePath) xs
 
 allPkgs :: IO (PkgInfo -> Bool)
 allPkgs = return (const True)
