@@ -86,7 +86,7 @@ unregister doit opts (name,ver) =
     if doit then do
         putStrLn $ "Deleting " ++ name ++ " " ++ ver
         pkgconf <- pkgConfOpt opts
-        when doit $ system (script pkgconf) >> return ()
+        when doit $ void . system $ script pkgconf
       else
         putStrLn $ name ++ " " ++ ver
   where
@@ -109,8 +109,7 @@ genpaths _ _ _ = genPaths
 check :: FunctionCommand
 check _ _ opts = do
     pkgconf <- pkgConfOpt opts
-    system (script pkgconf)
-    return ()
+    void . system $ script pkgconf
   where
    script pkgconf = "ghc-pkg check -v " ++ pkgconf
 
@@ -190,10 +189,8 @@ add :: FunctionCommand
 add _ params opts = case getSandbox opts of
     Nothing -> hPutStrLn stderr "A sandbox must be specified with \"-s\" option."
     Just sbox -> case params of
-        [src] -> do
-            system $ "cabal-dev add-source " ++ src ++ " -s " ++ sbox
-            return ()
-        _ -> hPutStrLn stderr "A source path be specified."
+        [src] -> void . system $ "cabal-dev add-source " ++ src ++ " -s " ++ sbox
+        _     -> hPutStrLn stderr "A source path be specified."
 
 ----------------------------------------------------------------
 
@@ -201,5 +198,5 @@ ghci :: FunctionCommand
 ghci _ _ opts = case getSandbox opts of
     Nothing -> hPutStrLn stderr "A sandbox must be specified with \"-s\" option."
     Just sbox -> do
-      system $ "cabal-dev -s " ++ sbox ++ " ghci"
+      _ <- system $ "cabal-dev -s " ++ sbox ++ " ghci"
       return ()

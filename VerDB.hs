@@ -51,7 +51,7 @@ verinfo = do
     name <- string "* " *> nonEols <* endOfLine
     synpsis
     lat <- latestLabel *> latest <* endOfLine
-    many skip
+    _ <- many skip
     endOfLine
     return (name, lat)
   where

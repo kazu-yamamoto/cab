@@ -1,10 +1,11 @@
 module PkgDB where
 
 import Control.Monad
+import Data.Function
 import Data.List
 import Data.Map (Map)
-import Data.Maybe (isNothing)
 import qualified Data.Map as M
+import Data.Maybe (isNothing)
 import Distribution.Compiler
     (CompilerId(..))
 import Distribution.License
@@ -128,7 +129,7 @@ printDeps rec info db n pkgi = mapM_ (printDep rec info db n) $ depends pkgi
 
 printDep :: Bool -> Bool -> PkgDB -> Int -> InstalledPackageId -> IO ()
 printDep rec info db n pid = case lookupInstalledPackageId db pid of
-    Nothing -> return ()
+    Nothing   -> return ()
     Just pkgi -> do
         putStr $ prefix ++ fullNameOfPkgInfo pkgi
         extraInfo info pkgi
@@ -161,7 +162,7 @@ printRevDeps' rec info db revdb n pkgi = case M.lookup pkgid revdb of
 
 printRevDep' :: Bool -> Bool -> PkgDB -> RevDB -> Int -> InstalledPackageId -> IO ()
 printRevDep' rec info db revdb n pid = case lookupInstalledPackageId db pid of
-    Nothing -> return ()
+    Nothing   -> return ()
     Just pkgi -> do
         putStr $ prefix ++ fullNameOfPkgInfo pkgi
         extraInfo info pkgi
@@ -182,7 +183,7 @@ makeRevDepDB db = M.fromList revdeps
     idDeps pkg = (installedPackageId pkg, depends pkg)
     kvs = sort $ concatMap decomp deps
     decomp (k,vs) = map (\v -> (v,k)) vs
-    kvss = groupBy (\x y -> fst x == fst y) kvs
+    kvss = groupBy ((==) `on` fst) kvs
     comp xs = (fst (head xs), map snd xs)
     revdeps = map comp kvss
 

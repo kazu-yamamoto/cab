@@ -19,10 +19,7 @@ Build-Type:             Simple
 
 Executable cab
   Main-Is:              Main.hs
-  if impl(ghc >= 6.12)
-    GHC-Options:        -Wall -fno-warn-unused-do-bind
-  else
-    GHC-Options:        -Wall
+  GHC-Options:          -Wall
   Build-Depends:        base >= 4.0 && < 5
                       , Cabal
                       , attoparsec >= 0.10
