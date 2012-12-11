@@ -64,7 +64,9 @@ commandDB = [
        , routing = RouteCabal ["configure"]
        , switches = [(SwSandbox, Just "--sandbox")
                     ,(SwFlag, Just "--flags")
-                    ,(SwTest, Just "--enable-tests")]
+                    ,(SwTest, Just "--enable-tests")
+                    ,(SwBench, Just "--enable-benchmarks")
+                    ]
        , manual = Nothing
        }
   , CommandSpec {
@@ -197,6 +199,14 @@ commandDB = [
        , manual = Nothing
        }
   , CommandSpec {
+         command = Bench
+       , commandNames = ["bench"]
+       , document = "Run benchmarks"
+       , routing = RouteCabal ["bench"]
+       , switches = [(SwSandbox, Just "--sandbox")]
+       , manual = Nothing
+       }
+  , CommandSpec {
          command = Doc
        , commandNames = ["doc", "haddock", "man"]
        , document = "Generate manuals"
@@ -255,13 +265,16 @@ getOptDB = [
   , Option ['t'] ["test"]
       (NoArg OptTest)
       "Enable test"
+  , Option ['b'] ["bench"]
+      (NoArg OptBench)
+      "Enable benchmark"
   , Option ['h'] ["help"]
       (NoArg OptHelp)
       "Show help message"
   ]
 
 optionDB :: OptionDB
-optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwSandbox,SwFlag,SwTest] getOptDB
+optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwSandbox,SwFlag,SwTest,SwBench] getOptDB
 
 ----------------------------------------------------------------
 
