@@ -39,6 +39,7 @@ Executable cab
                         Commands
                         Env
                         GenPaths
+                        GHCVer
                         PkgDB
                         Program
                         Types

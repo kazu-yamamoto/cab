@@ -9,6 +9,7 @@ import Data.Char
 import Data.List
 import Data.Maybe
 import GenPaths
+import GHCVer
 import PkgDB
 import System.Exit
 import System.IO
@@ -94,10 +95,14 @@ unregister doit opts (name,ver) =
 
 pkgConfOpt :: [Option] -> IO String
 pkgConfOpt opts = case getSandbox opts of
-    Nothing -> return ""
+    Nothing   -> return ""
     Just path -> do
+        ghcver <- ghcVersion
+        print ghcver
         pkgConf <- getPackageConf path
-        return $ "--package-conf=" ++ pkgConf ++ " "
+        let pkgOpt | ghcver >= 706 = "--package-db="
+                   | otherwise     = "--package-conf="
+        return $ pkgOpt ++ pkgConf ++ " "
 
 ----------------------------------------------------------------
 
