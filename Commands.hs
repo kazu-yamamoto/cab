@@ -98,7 +98,6 @@ pkgConfOpt opts = case getSandbox opts of
     Nothing   -> return ""
     Just path -> do
         ghcver <- ghcVersion
-        print ghcver
         pkgConf <- getPackageConf path
         let pkgOpt | ghcver >= 706 = "--package-db="
                    | otherwise     = "--package-conf="
@@ -116,7 +115,7 @@ check _ _ opts = do
     pkgconf <- pkgConfOpt opts
     void . system $ script pkgconf
   where
-   script pkgconf = "ghc-pkg check -v " ++ pkgconf
+    script pkgconf = "ghc-pkg check -v " ++ pkgconf
 
 ----------------------------------------------------------------
 
