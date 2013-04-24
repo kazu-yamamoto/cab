@@ -99,8 +99,8 @@ pkgConfOpt opts = case getSandbox opts of
     Just path -> do
         ghcver <- ghcVersion
         pkgConf <- getPackageConf path
-        let pkgOpt | ghcver >= 706 = "--package-db="
-                   | otherwise     = "--package-conf="
+        let pkgOpt | ghcver >= 706 = "-package-db "
+                   | otherwise     = "-package-conf "
         return $ pkgOpt ++ pkgConf ++ " "
 
 ----------------------------------------------------------------
