@@ -1,15 +1,16 @@
 module Main where
 
-import CmdDB
 import Control.Applicative
-import Control.Exception
+import Control.Exception (SomeException, Handler(..))
+import qualified Control.Exception as E
 import Control.Monad
 import Data.Maybe
-import Prelude hiding (catch)
 import System.Cmd
 import System.Console.GetOpt
 import System.Environment
 import System.Exit
+
+import CmdDB
 import Env
 import Types
 import Utils
@@ -17,7 +18,7 @@ import Utils
 ----------------------------------------------------------------
 
 main :: IO ()
-main = flip catches handlers $ do
+main = flip E.catches handlers $ do
     unsetEnv "GHC_PACKAGE_PATH"
     oargs <- getArgs
     let pargs = parseArgs getOptDB oargs
@@ -64,7 +65,7 @@ checkOptions2 opts cmdspec oargs func = do
 sandboxEnv :: CommandSpec -> [Option] -> IO [Option]
 sandboxEnv cmdspec opts =
     if hasSandboxOption cmdspec && command cmdspec /= Env
-       then tryEnv `catch` ignore
+       then tryEnv `E.catch` ignore
        else return opts
   where
     tryEnv = (\path -> OptSandbox path : opts) <$> getEnv cabEnvVar
