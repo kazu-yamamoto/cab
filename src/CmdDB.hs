@@ -10,6 +10,7 @@ import System.Exit
 import System.IO
 
 import Program
+import Types
 
 ----------------------------------------------------------------
 
@@ -318,8 +319,8 @@ optionsToString opts swdb = concatMap suboption opts
 ----------------------------------------------------------------
 
 helpCommandAndExit :: FunctionCommand
-helpCommandAndExit _ [] _ = helpAndExit
-helpCommandAndExit _ (cmd:_) _ = do
+helpCommandAndExit [] _ = helpAndExit
+helpCommandAndExit (cmd:_) _ = do
     case mcmdspec of
         Nothing -> helpAndExit
         Just cmdspec -> do

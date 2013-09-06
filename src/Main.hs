@@ -14,6 +14,7 @@ import System.Exit
 
 import CmdDB
 import Env
+import Types
 
 ----------------------------------------------------------------
 
@@ -25,7 +26,7 @@ main = flip E.catches handlers $ do
     checkOptions1 pargs illegalOptionsAndExit
     let Right (args,opts0) = pargs
     when (args == []) helpAndExit
-    when (OptHelp `elem` opts0) $ helpCommandAndExit undefined args undefined
+    when (OptHelp `elem` opts0) $ helpCommandAndExit args undefined
     let opts1 = filter (/= OptHelp) opts0
         act:params = args
         mcmdspec = commandSpecByName act commandDB
@@ -79,7 +80,7 @@ hasSandboxOption cmdspec = isJust $ lookup SwSandbox (switches cmdspec)
 
 run :: CommandSpec -> [Arg] -> [Option] -> IO ()
 run cmdspec params opts = case routing cmdspec of
-    RouteFunc func     -> func cmdspec params opts
+    RouteFunc func     -> func params opts
     RouteCabal subargs -> callProcess pro subargs params opts sws
   where
     pro = cabalCommand opts

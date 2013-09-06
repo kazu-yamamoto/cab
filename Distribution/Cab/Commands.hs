@@ -21,7 +21,7 @@ import System.Process hiding (env)
 ----------------------------------------------------------------
 
 search :: FunctionCommand
-search _ [x] _ = do
+search [x] _ = do
     nvls <- getVerAlist False
     forM_ (lok nvls) $ \(n,v) -> putStrLn $ n ++ " " ++ toDotted v
   where
@@ -31,14 +31,14 @@ search _ [x] _ = do
     lok (e:es)
       | sat e   = e : lok es
       | otherwise = lok es
-search _ _ _ = do
+search _ _ = do
     hPutStrLn stderr "One search-key should be specified."
     exitFailure
 
 ----------------------------------------------------------------
 
 installed :: FunctionCommand
-installed _ _ opts = do
+installed _ opts = do
     let optall = OptAll `elem` opts
         optrec = OptRecursive `elem` opts
     db' <- getPkgDB (getSandbox opts)
@@ -55,7 +55,7 @@ installed _ _ opts = do
     info = OptInfo `elem` opts
 
 outdated :: FunctionCommand
-outdated _ _ opts = do
+outdated _ opts = do
     flt <- if OptAll `elem` opts then allPkgs else userPkgs
     pkgs <- toPkgList flt <$> getPkgDB (getSandbox opts)
     verDB <- getVerDB
@@ -67,7 +67,7 @@ outdated _ _ opts = do
 ----------------------------------------------------------------
 
 uninstall :: FunctionCommand
-uninstall _ nmver opts = do
+uninstall nmver opts = do
     db' <- getPkgDB (getSandbox opts)
     db <- toPkgDB . flip toPkgList db' <$> userPkgs
     pkg <- lookupPkg nmver db
@@ -106,12 +106,12 @@ pkgConfOpt opts = case getSandbox opts of
 ----------------------------------------------------------------
 
 genpaths :: FunctionCommand
-genpaths _ _ _ = genPaths
+genpaths _ _ = genPaths
 
 ----------------------------------------------------------------
 
 check :: FunctionCommand
-check _ _ opts = do
+check _ opts = do
     pkgconf <- pkgConfOpt opts
     void . system $ script pkgconf
   where
@@ -120,10 +120,10 @@ check _ _ opts = do
 ----------------------------------------------------------------
 
 deps :: FunctionCommand
-deps _ nmver opts = printDepends nmver opts printDeps
+deps nmver opts = printDepends nmver opts printDeps
 
 revdeps :: FunctionCommand
-revdeps _ nmver opts = printDepends nmver opts printRevDeps
+revdeps nmver opts = printDepends nmver opts printRevDeps
 
 printDepends :: [String] -> [Option]
              -> (Bool -> Bool -> PkgDB -> Int -> PkgInfo -> IO ()) -> IO ()
@@ -163,7 +163,7 @@ checkOne pkgs = do
 ----------------------------------------------------------------
 
 env :: FunctionCommand
-env _ _ opts = case getSandbox opts of
+env _ opts = case getSandbox opts of
     Nothing -> do
         putStrLn "unset CAB_SANDBOX_PATH"
         putStrLn "unsetenv CAB_SANDBOX_PATH"
@@ -190,7 +190,7 @@ globalPackageDB = do
 ----------------------------------------------------------------
 
 add :: FunctionCommand
-add _ params opts = case getSandbox opts of
+add params opts = case getSandbox opts of
     Nothing -> hPutStrLn stderr "A sandbox must be specified with \"-s\" option."
     Just sbox -> case params of
         [src] -> void . system $ "cabal-dev add-source " ++ src ++ " -s " ++ sbox
@@ -199,7 +199,7 @@ add _ params opts = case getSandbox opts of
 ----------------------------------------------------------------
 
 ghci :: FunctionCommand
-ghci _ _ opts = case getSandbox opts of
+ghci _ opts = case getSandbox opts of
     Nothing -> hPutStrLn stderr "A sandbox must be specified with \"-s\" option."
     Just sbox -> do
       _ <- system $ "cabal-dev -s " ++ sbox ++ " ghci"
