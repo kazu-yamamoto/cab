@@ -1,4 +1,4 @@
-module PkgDB where
+module Distribution.Cab.PkgDB where
 
 import Control.Monad
 import Data.Function
@@ -6,6 +6,7 @@ import Data.List
 import Data.Map (Map)
 import qualified Data.Map as M
 import Data.Maybe (isNothing)
+import Distribution.Cab.Utils
 import Distribution.Compiler
     (CompilerId(..))
 import Distribution.License
@@ -29,7 +30,7 @@ import Distribution.Simple.Program.Db
 import Distribution.Verbosity
     (normal)
 import System.FilePath
-import Utils
+
 
 type PkgDB = PackageIndex
 type PkgInfo = InstalledPackageInfo

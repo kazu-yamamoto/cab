@@ -5,6 +5,8 @@ import Control.Exception (SomeException, Handler(..))
 import qualified Control.Exception as E
 import Control.Monad
 import Data.Maybe
+import Distribution.Cab.Types
+import Distribution.Cab.Utils
 import System.Cmd
 import System.Console.GetOpt
 import System.Environment
@@ -12,8 +14,6 @@ import System.Exit
 
 import CmdDB
 import Env
-import Types
-import Utils
 
 ----------------------------------------------------------------
 

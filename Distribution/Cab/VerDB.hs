@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module VerDB (
+module Distribution.Cab.VerDB (
     VerDB, getVerDB, lookupLatestVersion, getVerAlist
   ) where
 

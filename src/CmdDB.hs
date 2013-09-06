@@ -1,14 +1,15 @@
 module CmdDB where
 
-import Commands
 import Control.Monad
 import Data.List
-import Program
+import Distribution.Cab.Commands
+import Distribution.Cab.Types
+import Distribution.Cab.Utils
 import System.Console.GetOpt
 import System.Exit
 import System.IO
-import Types
-import Utils
+
+import Program
 
 ----------------------------------------------------------------
 

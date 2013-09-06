@@ -1,4 +1,4 @@
-module Utils where
+module Distribution.Cab.Utils where
 
 import Data.List
 

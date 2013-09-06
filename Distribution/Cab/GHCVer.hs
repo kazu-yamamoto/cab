@@ -1,4 +1,4 @@
-module GHCVer where
+module Distribution.Cab.GHCVer where
 
 import Control.Applicative
 import Distribution.Simple.Program (ghcProgram)

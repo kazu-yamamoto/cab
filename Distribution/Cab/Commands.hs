@@ -1,4 +1,4 @@
-module Commands (
+module Distribution.Cab.Commands (
     deps, revdeps, installed, outdated, uninstall, search, env
   , genpaths, check, add, ghci
   ) where
@@ -8,15 +8,15 @@ import Control.Monad
 import Data.Char
 import Data.List
 import Data.Maybe
-import GenPaths
-import GHCVer
-import PkgDB
+import Distribution.Cab.GHCVer
+import Distribution.Cab.GenPaths
+import Distribution.Cab.PkgDB
+import Distribution.Cab.Types
+import Distribution.Cab.Utils
+import Distribution.Cab.VerDB
 import System.Exit
 import System.IO
 import System.Process hiding (env)
-import Types
-import Utils
-import VerDB
 
 ----------------------------------------------------------------
 

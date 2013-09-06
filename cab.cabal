@@ -14,13 +14,38 @@ Description:            This is a MacPorts-like maintenance command of
    this command helps you.
 Homepage:               http://www.mew.org/~kazu/proj/cab/
 Category:               Distribution
-Cabal-Version:          >= 1.6
+Cabal-Version:          >= 1.10
 Build-Type:             Simple
 
-Executable cab
-  Main-Is:              Main.hs
+Library
+  Default-Language:     Haskell2010
   GHC-Options:          -Wall
   Build-Depends:        base >= 4.0 && < 5
+                      , Cabal
+                      , attoparsec >= 0.10
+                      , attoparsec-conduit >= 0.3
+                      , bytestring
+                      , conduit >= 0.3
+                      , containers
+                      , directory
+                      , filepath
+                      , process
+                      , process-conduit >= 0.1
+  Exposed-Modules:	Distribution.Cab.Commands
+                        Distribution.Cab.GHCVer
+                        Distribution.Cab.GenPaths
+                        Distribution.Cab.PkgDB
+                        Distribution.Cab.Types
+                        Distribution.Cab.Utils
+                        Distribution.Cab.VerDB
+
+Executable cab
+  Default-Language:     Haskell2010
+  Main-Is:              Main.hs
+  GHC-Options:          -Wall
+  HS-Source-Dirs:       src
+  Build-Depends:        base >= 4.0 && < 5
+                      , cab
                       , Cabal
                       , attoparsec >= 0.10
                       , attoparsec-conduit >= 0.3
@@ -36,15 +61,8 @@ Executable cab
   else
      Build-Depends:     unix
   Other-Modules:	CmdDB
-                        Commands
                         Env
-                        GenPaths
-                        GHCVer
-                        PkgDB
                         Program
-                        Types
-                        Utils
-                        VerDB
                         Paths_cab
 Source-Repository head
   Type:                 git

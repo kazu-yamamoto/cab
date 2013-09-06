@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module GenPaths (genPaths) where
+module Distribution.Cab.GenPaths (genPaths) where
 
 import Control.Applicative
 import Control.Exception

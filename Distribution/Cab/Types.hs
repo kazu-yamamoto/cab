@@ -1,4 +1,4 @@
-module Types where
+module Distribution.Cab.Types where
 
 import Data.List
 import System.Console.GetOpt
