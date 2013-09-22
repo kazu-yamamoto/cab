@@ -7,7 +7,8 @@ import Control.Applicative hiding (many)
 import Control.Monad
 import Data.Char
 import Data.List
-import Distribution.Cab.GHCVer
+import Distribution.Cab.Sandbox
+import Distribution.Cab.SandboxOpts
 import Distribution.Cab.GenPaths
 import Distribution.Cab.PkgDB
 import Distribution.Cab.Types
@@ -40,7 +41,7 @@ installed :: FunctionCommand
 installed _ opts = do
     let optall = OptAll `elem` opts
         optrec = OptRecursive `elem` opts
-    db' <- getPkgDB (getSandbox opts)
+    db' <- getSandbox >>= getPkgDB
     flt <- if optall then allPkgs else userPkgs
     -- FIXME: the optall case does unnecessary conversion
     let pkgs = toPkgList flt db'
@@ -56,7 +57,7 @@ installed _ opts = do
 outdated :: FunctionCommand
 outdated _ opts = do
     flt <- if OptAll `elem` opts then allPkgs else userPkgs
-    pkgs <- toPkgList flt <$> getPkgDB (getSandbox opts)
+    pkgs <- toPkgList flt <$> (getSandbox >>= getPkgDB)
     verDB <- getVerDB
     forM_ pkgs $ \p -> case lookupLatestVersion (nameOfPkgInfo p) verDB of
         Nothing -> return ()
@@ -67,7 +68,7 @@ outdated _ opts = do
 
 uninstall :: FunctionCommand
 uninstall nmver opts = do
-    db' <- getPkgDB (getSandbox opts)
+    db' <- getSandbox >>= getPkgDB
     db <- toPkgDB . flip toPkgList db' <$> userPkgs
     pkg <- lookupPkg nmver db
     let sortedPkgs = topSortedPkgs pkg db
@@ -82,25 +83,15 @@ uninstall nmver opts = do
     doit = OptNoharm `notElem` opts
 
 unregister :: Bool -> [Option] -> (String,String) -> IO ()
-unregister doit opts (name,ver) =
+unregister doit _ (name,ver) =
     if doit then do
         putStrLn $ "Deleting " ++ name ++ " " ++ ver
-        pkgconf <- pkgConfOpt opts
-        when doit $ void . system $ script pkgconf
+        sandboxOpts <- getSandboxOpts
+        when doit $ void . system $ script sandboxOpts
       else
         putStrLn $ name ++ " " ++ ver
   where
-    script pkgconf = "ghc-pkg unregister " ++ pkgconf ++ name ++ "-" ++ ver
-
-pkgConfOpt :: [Option] -> IO String
-pkgConfOpt opts = case getSandbox opts of
-    Nothing   -> return ""
-    Just path -> do
-        ghcver <- ghcVersion
-        pkgConf <- getPackageConf path
-        let pkgOpt | ghcver >= 706 = "-package-db "
-                   | otherwise     = "-package-conf "
-        return $ pkgOpt ++ pkgConf ++ " "
+    script sandboxOpts = "ghc-pkg unregister " ++ sandboxOpts ++ name ++ "-" ++ ver
 
 ----------------------------------------------------------------
 
@@ -110,11 +101,11 @@ genpaths _ _ = genPaths
 ----------------------------------------------------------------
 
 check :: FunctionCommand
-check _ opts = do
-    pkgconf <- pkgConfOpt opts
-    void . system $ script pkgconf
+check _ _ = do
+    sandboxOpts <- getSandboxOpts
+    void . system $ script sandboxOpts
   where
-    script pkgconf = "ghc-pkg check -v " ++ pkgconf
+    script sandboxOpts = "ghc-pkg check -v " ++ sandboxOpts
 
 ----------------------------------------------------------------
 
@@ -127,7 +118,7 @@ revdeps nmver opts = printDepends nmver opts printRevDeps
 printDepends :: [String] -> [Option]
              -> (Bool -> Bool -> PkgDB -> Int -> PkgInfo -> IO ()) -> IO ()
 printDepends nmver opts func = do
-    db' <- getPkgDB (getSandbox opts)
+    db' <- getSandbox >>= getPkgDB
     pkg <- lookupPkg nmver db'
     db <- if OptAll `elem` opts
           then return db'
@@ -162,17 +153,23 @@ checkOne pkgs = do
 ----------------------------------------------------------------
 
 add :: FunctionCommand
+add = undefined
+{-
 add params opts = case getSandbox opts of
     Nothing -> hPutStrLn stderr "A sandbox must be specified with \"-s\" option."
     Just sbox -> case params of
         [src] -> void . system $ "cabal-dev add-source " ++ src ++ " -s " ++ sbox
         _     -> hPutStrLn stderr "A source path be specified."
+-}
 
 ----------------------------------------------------------------
 
 ghci :: FunctionCommand
+ghci = undefined
+{-
 ghci _ opts = case getSandbox opts of
     Nothing -> hPutStrLn stderr "A sandbox must be specified with \"-s\" option."
     Just sbox -> do
       _ <- system $ "cabal-dev -s " ++ sbox ++ " ghci"
       return ()
+-}

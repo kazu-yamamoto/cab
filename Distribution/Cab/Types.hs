@@ -11,6 +11,3 @@ data Option = OptNoharm
             | OptHelp
             | OptBench
             deriving (Eq,Show)
-
-getSandbox :: [Option] -> Maybe FilePath
-getSandbox = undefined

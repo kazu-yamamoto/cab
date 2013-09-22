@@ -32,9 +32,10 @@ Library
                       , process
                       , process-conduit >= 0.1
   Exposed-Modules:	Distribution.Cab.Commands
-                        Distribution.Cab.GHCVer
                         Distribution.Cab.GenPaths
                         Distribution.Cab.PkgDB
+                        Distribution.Cab.Sandbox
+                        Distribution.Cab.SandboxOpts
                         Distribution.Cab.Types
                         Distribution.Cab.Utils
                         Distribution.Cab.VerDB
