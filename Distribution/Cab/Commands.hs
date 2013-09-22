@@ -8,7 +8,6 @@ import Control.Monad
 import Data.Char
 import Data.List
 import Distribution.Cab.Sandbox
-import Distribution.Cab.SandboxOpts
 import Distribution.Cab.GenPaths
 import Distribution.Cab.PkgDB
 import Distribution.Cab.Types
@@ -86,7 +85,7 @@ unregister :: Bool -> [Option] -> (String,String) -> IO ()
 unregister doit _ (name,ver) =
     if doit then do
         putStrLn $ "Deleting " ++ name ++ " " ++ ver
-        sandboxOpts <- getSandboxOpts
+        sandboxOpts <- getSandbox >>= getSandboxOpts
         when doit $ void . system $ script sandboxOpts
       else
         putStrLn $ name ++ " " ++ ver
@@ -102,7 +101,7 @@ genpaths _ _ = genPaths
 
 check :: FunctionCommand
 check _ _ = do
-    sandboxOpts <- getSandboxOpts
+    sandboxOpts <- getSandbox >>= getSandboxOpts
     void . system $ script sandboxOpts
   where
     script sandboxOpts = "ghc-pkg check -v " ++ sandboxOpts

@@ -34,7 +34,6 @@ Library
   Exposed-Modules:	Distribution.Cab
                         Distribution.Cab.PkgDB
                         Distribution.Cab.Sandbox
-                        Distribution.Cab.SandboxOpts
                         Distribution.Cab.VerDB
   Other-Modules:        Distribution.Cab.Commands
                         Distribution.Cab.GenPaths
