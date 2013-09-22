@@ -4,8 +4,7 @@ import Control.Exception (Handler(..))
 import qualified Control.Exception as E
 import Control.Monad
 import Data.Maybe
-import Distribution.Cab.Types
-import Distribution.Cab.Utils
+import Distribution.Cab
 import System.Cmd
 import System.Console.GetOpt
 import System.Environment
@@ -51,13 +50,13 @@ checkOptions1 _ _            = return ()
 
 checkOptions2 :: [Option] -> CommandSpec -> [Arg] -> ([UnknownOpt] -> IO ()) -> IO ()
 checkOptions2 opts cmdspec oargs func = do
-    let unknowns = check specified supported
+    let unknowns = chk specified supported
     when (unknowns /= []) $ func (concatMap (resolveOptionString oargs) unknowns)
   where
-    check [] _     = []
-    check (x:xs) ys
-      | x `elem` ys = check xs ys
-      | otherwise   = x : check xs ys
+    chk [] _     = []
+    chk (x:xs) ys
+      | x `elem` ys = chk xs ys
+      | otherwise   = x : chk xs ys
     specified = map toSwitch opts
     supported = map fst $ switches cmdspec
 

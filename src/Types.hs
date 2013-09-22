@@ -1,7 +1,7 @@
 module Types where
 
 import Data.List
-import Distribution.Cab.Types
+import Distribution.Cab
 import System.Console.GetOpt
 
 type Arg = String

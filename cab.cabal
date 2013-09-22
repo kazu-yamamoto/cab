@@ -31,14 +31,15 @@ Library
                       , filepath
                       , process
                       , process-conduit >= 0.1
-  Exposed-Modules:	Distribution.Cab.Commands
-                        Distribution.Cab.GenPaths
+  Exposed-Modules:	Distribution.Cab
                         Distribution.Cab.PkgDB
                         Distribution.Cab.Sandbox
                         Distribution.Cab.SandboxOpts
+                        Distribution.Cab.VerDB
+  Other-Modules:        Distribution.Cab.Commands
+                        Distribution.Cab.GenPaths
                         Distribution.Cab.Types
                         Distribution.Cab.Utils
-                        Distribution.Cab.VerDB
 
 Executable cab
   Default-Language:     Haskell2010

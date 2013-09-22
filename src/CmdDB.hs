@@ -2,9 +2,7 @@ module CmdDB where
 
 import Control.Monad
 import Data.List
-import Distribution.Cab.Commands
-import Distribution.Cab.Types
-import Distribution.Cab.Utils
+import Distribution.Cab
 import System.Console.GetOpt
 import System.Exit
 import System.IO
