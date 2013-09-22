@@ -1,5 +1,5 @@
 module Distribution.Cab.Commands (
-    deps, revdeps, installed, outdated, uninstall, search, env
+    deps, revdeps, installed, outdated, uninstall, search
   , genpaths, check, add, ghci
   ) where
 
@@ -7,7 +7,6 @@ import Control.Applicative hiding (many)
 import Control.Monad
 import Data.Char
 import Data.List
-import Data.Maybe
 import Distribution.Cab.GHCVer
 import Distribution.Cab.GenPaths
 import Distribution.Cab.PkgDB
@@ -159,33 +158,6 @@ checkOne pkgs = do
     hPutStrLn stderr "Package version must be specified."
     mapM_ (hPutStrLn stderr . fullNameOfPkgInfo) pkgs
     exitFailure
-
-----------------------------------------------------------------
-
-env :: FunctionCommand
-env _ opts = case getSandbox opts of
-    Nothing -> do
-        putStrLn "unset CAB_SANDBOX_PATH"
-        putStrLn "unsetenv CAB_SANDBOX_PATH"
-        putStrLn ""
-        putStrLn "unset GHC_PACKAGE_PATH"
-        putStrLn "unsetenv GHC_PACKAGE_PATH"
-    Just path -> do
-        pkgConf <- getPackageConf path
-        gPkgConf <- globalPackageDB
-        putStrLn $ "export CAB_SANDBOX_PATH=" ++ path
-        putStrLn $ "setenv CAB_SANDBOX_PATH " ++ path
-        putStrLn ""
-        putStrLn "The following commands are not necessary in normal case."
-        let confs = gPkgConf ++ ":" ++ pkgConf
-        putStrLn $ "export GHC_PACKAGE_PATH=" ++ confs
-        putStrLn $ "setenv GHC_PACKAGE_PATH " ++ confs
-
-globalPackageDB :: IO String
-globalPackageDB = do
-    res <- readProcess "ghc" ["--info"] []
-    let alist = read res :: [(String,String)]
-    return . fromJust $ lookup "Global Package DB" alist
 
 ----------------------------------------------------------------
 

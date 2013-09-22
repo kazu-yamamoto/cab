@@ -14,7 +14,6 @@ data Switch = SwNoharm
             | SwRecursive
             | SwAll
             | SwInfo
-            | SwSandbox
             | SwFlag
             | SwTest
             | SwBench
@@ -25,14 +24,10 @@ toSwitch OptNoharm      = SwNoharm
 toSwitch OptRecursive   = SwRecursive
 toSwitch OptAll         = SwAll
 toSwitch OptInfo        = SwInfo
-toSwitch (OptSandbox _) = SwSandbox
 toSwitch (OptFlag _)    = SwFlag
 toSwitch OptTest        = SwTest
 toSwitch OptBench       = SwBench
 toSwitch _              = error "toSwitch"
-
-getSandbox :: [Option] -> Maybe FilePath
-getSandbox = getValue (\x -> toSwitch x == SwSandbox)
 
 getFlag :: [Option] -> Maybe FilePath
 getFlag = getValue (\x -> toSwitch x == SwFlag)
@@ -40,7 +35,6 @@ getFlag = getValue (\x -> toSwitch x == SwFlag)
 getValue :: (Option -> Bool) -> [Option] -> Maybe FilePath
 getValue p opts = case find p opts of
     Nothing                -> Nothing
-    Just (OptSandbox path) -> Just path
     _                      -> error "getSandbox"
 
 type SwitchSpec = (Switch, Maybe String)
@@ -71,7 +65,6 @@ data Command = Sync
              | Check
              | GenPaths
              | Search
-             | Env
              | Add
              | Ghci
              | Test
@@ -95,16 +88,3 @@ type CommandDB = [CommandSpec]
 
 data Route = RouteFunc FunctionCommand
            | RouteCabal [String]
-
-cabalCommand :: [Option] -> String
-cabalCommand opts
-    | SwSandbox `elem` map toSwitch opts = "cabal-dev"
-    | otherwise                          = "cabal"
-
-----------------------------------------------------------------
-
-cabEnvVar :: String
-cabEnvVar = "CAB_SANDBOX_PATH"
-
-ghcEnvVar :: String
-ghcEnvVar = "GHC_PACKAGE_PATH"

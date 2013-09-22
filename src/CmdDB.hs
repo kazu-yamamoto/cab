@@ -31,7 +31,6 @@ commandDB = [
        , routing = RouteCabal ["install"]
        , switches = [(SwNoharm, Just "--dry-run -v")
                      -- FIXME cabal-dev not support --dry-run
-                    ,(SwSandbox, Just "--sandbox")
                     ,(SwFlag, Just "--flags")
                     ]
        , manual = Just "[<package> [<ver>]]"
@@ -43,7 +42,6 @@ commandDB = [
        , routing = RouteFunc uninstall
        , switches = [(SwNoharm, Nothing)
                     ,(SwRecursive, Nothing)
-                    ,(SwSandbox, Just "--sandbox")
                     ] -- don't allow SwAll
        , manual = Just "<package> [<ver>]"
        }
@@ -55,7 +53,6 @@ commandDB = [
        , switches = [(SwAll, Nothing)
                     ,(SwRecursive, Nothing)
                     ,(SwInfo, Nothing)
-                    ,(SwSandbox, Just "--sandbox")
                     ]
        , manual = Nothing
        }
@@ -64,8 +61,7 @@ commandDB = [
        , commandNames = ["configure", "conf"]
        , document = "Configure a cabal package"
        , routing = RouteCabal ["configure"]
-       , switches = [(SwSandbox, Just "--sandbox")
-                    ,(SwFlag, Just "--flags")
+       , switches = [(SwFlag, Just "--flags")
                     ,(SwTest, Just "--enable-tests")
                     ,(SwBench, Just "--enable-benchmarks")
                     ]
@@ -92,8 +88,7 @@ commandDB = [
        , commandNames = ["outdated"]
        , document = "Display outdated packages"
        , routing = RouteFunc outdated
-       , switches = [(SwAll, Nothing)
-                    ,(SwSandbox, Just "--sandbox")]
+       , switches = [(SwAll, Nothing)]
        , manual = Nothing
        }
   , CommandSpec {
@@ -101,7 +96,7 @@ commandDB = [
        , commandNames = ["info"]
        , document = "Display information of a package"
        , routing = RouteCabal ["info"]
-       , switches = [(SwSandbox, Just "--sandbox")]
+       , switches = []
        , manual = Just "<package> [<ver>]"
        }
   , CommandSpec {
@@ -136,7 +131,6 @@ commandDB = [
        , switches = [(SwRecursive, Nothing)
                     ,(SwAll, Nothing)
                     ,(SwInfo, Nothing)
-                    ,(SwSandbox, Just "--sandbox")
                     ]
        , manual = Just "<package> [<ver>]"
        }
@@ -148,7 +142,6 @@ commandDB = [
        , switches = [(SwRecursive, Nothing)
                     ,(SwAll, Nothing)
                     ,(SwInfo, Nothing)
-                    ,(SwSandbox, Just "--sandbox")
                     ]
        , manual = Just "<package> [<ver>]"
        }
@@ -157,7 +150,7 @@ commandDB = [
        , commandNames = ["check"]
        , document = "Check consistency of packages"
        , routing = RouteFunc check
-       , switches = [(SwSandbox, Just "--sandbox")]
+       , switches = []
        , manual = Nothing
        }
   , CommandSpec {
@@ -177,19 +170,11 @@ commandDB = [
        , manual = Just "<key>"
        }
   , CommandSpec {
-         command = Env
-       , commandNames = ["env"]
-       , document = "Show environment variables"
-       , routing = RouteFunc env
-       , switches = [(SwSandbox, Just "--sandbox")]
-       , manual = Nothing
-       }
-  , CommandSpec {
          command = Add
        , commandNames = ["add", "add-source"]
        , document = "Add a source directory"
        , routing = RouteFunc add
-       , switches = [(SwSandbox, Just "--sandbox")]
+       , switches = []
        , manual = Just "<source>"
        }
   , CommandSpec {
@@ -197,7 +182,7 @@ commandDB = [
        , commandNames = ["test"]
        , document = "Run tests"
        , routing = RouteCabal ["test"]
-       , switches = [(SwSandbox, Just "--sandbox")]
+       , switches = []
        , manual = Nothing
        }
   , CommandSpec {
@@ -205,7 +190,7 @@ commandDB = [
        , commandNames = ["bench"]
        , document = "Run benchmarks"
        , routing = RouteCabal ["bench"]
-       , switches = [(SwSandbox, Just "--sandbox")]
+       , switches = []
        , manual = Nothing
        }
   , CommandSpec {
@@ -221,7 +206,7 @@ commandDB = [
        , commandNames = ["ghci"]
        , document = "Run GHCi within a sandbox"
        , routing = RouteFunc ghci
-       , switches = [(SwSandbox, Just "--sandbox")]
+       , switches = []
        , manual = Nothing
        }
   , CommandSpec {
@@ -258,9 +243,6 @@ getOptDB = [
   , Option ['i'] ["info"]
       (NoArg OptInfo)
       "Show license and author information"
-  , Option ['s'] ["sandbox"]
-      (ReqArg OptSandbox "<sandbox>")
-      "Specify a sandbox directory"
   , Option ['f'] ["flags"]
       (ReqArg OptFlag "<flags>")
       "Specify flags"
@@ -276,7 +258,7 @@ getOptDB = [
   ]
 
 optionDB :: OptionDB
-optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwSandbox,SwFlag,SwTest,SwBench] getOptDB
+optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench] getOptDB
 
 ----------------------------------------------------------------
 
@@ -312,7 +294,6 @@ optionsToString opts swdb = concatMap suboption opts
         Nothing       -> []
         Just Nothing  -> []
         Just (Just x) -> case opt of
-            OptSandbox dir -> [x++"="++dir]
             OptFlag flags  -> [x++"="++flags]
             _              -> [x]
 

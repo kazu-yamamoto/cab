@@ -6,7 +6,6 @@ data Option = OptNoharm
             | OptRecursive
             | OptAll
             | OptInfo
-            | OptSandbox String
             | OptFlag String
             | OptTest
             | OptHelp

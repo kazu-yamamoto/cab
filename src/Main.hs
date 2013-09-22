@@ -1,7 +1,6 @@
 module Main where
 
-import Control.Applicative
-import Control.Exception (SomeException, Handler(..))
+import Control.Exception (Handler(..))
 import qualified Control.Exception as E
 import Control.Monad
 import Data.Maybe
@@ -33,8 +32,7 @@ main = flip E.catches handlers $ do
     when (isNothing mcmdspec) (illegalCommandAndExit act)
     let Just cmdspec = mcmdspec
     checkOptions2 opts1 cmdspec oargs illegalOptionsAndExit
-    opts <- sandboxEnv cmdspec opts1
-    run cmdspec params opts
+    run cmdspec params opts1
   where
     handlers = [Handler handleExit]
     handleExit :: ExitCode -> IO ()
@@ -63,19 +61,6 @@ checkOptions2 opts cmdspec oargs func = do
     specified = map toSwitch opts
     supported = map fst $ switches cmdspec
 
-sandboxEnv :: CommandSpec -> [Option] -> IO [Option]
-sandboxEnv cmdspec opts =
-    if hasSandboxOption cmdspec && command cmdspec /= Env
-       then tryEnv `E.catch` ignore
-       else return opts
-  where
-    tryEnv = (\path -> OptSandbox path : opts) <$> getEnv cabEnvVar
-    ignore :: SomeException -> IO [Option]
-    ignore _ = return opts
-
-hasSandboxOption :: CommandSpec -> Bool
-hasSandboxOption cmdspec = isJust $ lookup SwSandbox (switches cmdspec)
-
 ----------------------------------------------------------------
 
 run :: CommandSpec -> [Arg] -> [Option] -> IO ()
@@ -83,7 +68,7 @@ run cmdspec params opts = case routing cmdspec of
     RouteFunc func     -> func params opts
     RouteCabal subargs -> callProcess pro subargs params opts sws
   where
-    pro = cabalCommand opts
+    pro = "cabal"
     sws = switches cmdspec
 
 callProcess :: String -> [String] -> [Arg] -> [Option] -> [SwitchSpec] -> IO ()
