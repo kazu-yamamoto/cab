@@ -1,22 +1,39 @@
-module Distribution.Cab.PkgDB where
+module Distribution.Cab.PkgDB (
+  -- * Types
+    PkgDB
+  , PkgInfo
+  -- * Obtaining 'PkgDB'
+  , getPkgDB
+  , getGlobalPkgDB
+  , getPackageConf
+  -- * From 'PkgInfo' to 'PkgDB'
+  , toPkgDB
+  -- * From 'PkgDB' to 'PkgInfo'
+  , lookupByName
+  , lookupByVersion
+  , topSortedPkgs
+  -- * From 'PkgDB' to 'PkgInfo'
+  , allPkgs
+  , userPkgs
+  , toPkgList
+  -- * From 'PkgInfo'
+  , fullNameOfPkgInfo
+  , numVersionOfPkgInfo
+  , nameOfPkgInfo
+  , pairNameOfPkgInfo
+  ) where
 
-import Control.Monad
-import Data.Function
-import Data.List
-import Data.Map (Map)
-import qualified Data.Map as M
+
 import Data.Maybe (isNothing)
 import Distribution.Cab.Utils
 import Distribution.Compiler
     (CompilerId(..))
-import Distribution.License
-    (License(..))
 import Distribution.Version
     (Version(..))
 import Distribution.InstalledPackageInfo
     (InstalledPackageInfo_(..), InstalledPackageInfo)
 import Distribution.Package
-    (PackageName(..), PackageIdentifier(..), InstalledPackageId)
+    (PackageName(..), PackageIdentifier(..))
 import Distribution.Simple.Compiler
     (PackageDB(..),Compiler(..))
 import Distribution.Simple.GHC
@@ -113,80 +130,6 @@ versionOfPkgInfo = toDotted . numVersionOfPkgInfo
 
 numVersionOfPkgInfo :: PkgInfo -> [Int]
 numVersionOfPkgInfo = versionBranch . pkgVersion . sourcePackageId
-
-----------------------------------------------------------------
-
-extraInfo :: Bool -> PkgInfo -> IO ()
-extraInfo False _ = return ()
-extraInfo True pkgi = putStr $ " " ++ lcns ++ " \"" ++  auth ++ "\""
-  where
-    lcns = showLicense (license pkgi)
-    auth = author pkgi
-
-----------------------------------------------------------------
-
-printDeps :: Bool -> Bool -> PkgDB -> Int -> PkgInfo -> IO ()
-printDeps rec info db n pkgi = mapM_ (printDep rec info db n) $ depends pkgi
-
-printDep :: Bool -> Bool -> PkgDB -> Int -> InstalledPackageId -> IO ()
-printDep rec info db n pid = case lookupInstalledPackageId db pid of
-    Nothing   -> return ()
-    Just pkgi -> do
-        putStr $ prefix ++ fullNameOfPkgInfo pkgi
-        extraInfo info pkgi
-        putStrLn ""
-        when rec $ printDeps rec info db (n+1) pkgi
-  where
-    prefix = replicate (n * 4) ' '
-
-showLicense :: License -> String
-showLicense (GPL (Just v))     = "GPL" ++ version v
-showLicense (GPL Nothing)      = "GPL"
-showLicense (LGPL (Just v))    = "LGPL" ++ version v
-showLicense (LGPL Nothing)     = "LGPL"
-showLicense (UnknownLicense s) = s
-showLicense x                  = show x
-
-----------------------------------------------------------------
-
-printRevDeps :: Bool -> Bool -> PkgDB -> Int -> PkgInfo -> IO ()
-printRevDeps rec info db n pkgi = printRevDeps' rec info db revdb n pkgi
-  where
-    revdb = makeRevDepDB db
-
-printRevDeps' :: Bool -> Bool -> PkgDB -> RevDB -> Int -> PkgInfo -> IO ()
-printRevDeps' rec info db revdb n pkgi = case M.lookup pkgid revdb of
-    Nothing -> return ()
-    Just pkgids -> mapM_ (printRevDep' rec info db revdb n) pkgids
-  where
-    pkgid = installedPackageId pkgi
-
-printRevDep' :: Bool -> Bool -> PkgDB -> RevDB -> Int -> InstalledPackageId -> IO ()
-printRevDep' rec info db revdb n pid = case lookupInstalledPackageId db pid of
-    Nothing   -> return ()
-    Just pkgi -> do
-        putStr $ prefix ++ fullNameOfPkgInfo pkgi
-        extraInfo info pkgi
-        putStrLn ""
-        when rec $ printRevDeps' rec info db revdb (n+1) pkgi
-  where
-    prefix = replicate (n * 4) ' '
-
-----------------------------------------------------------------
-
-type RevDB = Map InstalledPackageId [InstalledPackageId]
-
-makeRevDepDB :: PkgDB -> RevDB
-makeRevDepDB db = M.fromList revdeps
-  where
-    pkgs = allPackages db
-    deps = map idDeps pkgs
-    idDeps pkg = (installedPackageId pkg, depends pkg)
-    kvs = sort $ concatMap decomp deps
-    decomp (k,vs) = map (\v -> (v,k)) vs
-    kvss = groupBy ((==) `on` fst) kvs
-    comp xs = (fst (head xs), map snd xs)
-    revdeps = map comp kvss
 
 ----------------------------------------------------------------
 

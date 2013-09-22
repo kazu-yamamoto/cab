@@ -7,9 +7,10 @@ import Control.Applicative hiding (many)
 import Control.Monad
 import Data.Char
 import Data.List
-import Distribution.Cab.Sandbox
 import Distribution.Cab.GenPaths
 import Distribution.Cab.PkgDB
+import Distribution.Cab.Printer
+import Distribution.Cab.Sandbox
 import Distribution.Cab.Types
 import Distribution.Cab.Utils
 import Distribution.Cab.VerDB

@@ -33,6 +33,7 @@ Library
                       , process-conduit >= 0.1
   Exposed-Modules:	Distribution.Cab
                         Distribution.Cab.PkgDB
+                        Distribution.Cab.Printer
                         Distribution.Cab.Sandbox
                         Distribution.Cab.VerDB
   Other-Modules:        Distribution.Cab.Commands
