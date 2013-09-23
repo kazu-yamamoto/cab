@@ -30,13 +30,13 @@ getOptDB = [
   , Option ['b'] ["bench"]
       (NoArg OptBench)
       "Enable benchmark"
-  , Option ['d'] ["only-dependencies"]
+  , Option ['d'] ["dep-only"]
       (NoArg OptDepsOnly)
       "Target only dependencies"
-  , Option ['p'] ["library-profiling"]
+  , Option ['p'] ["libr-prof"]
       (NoArg OptLibProfile)
       "Enable library profiling"
-  , Option ['e'] ["executable-profiling"]
+  , Option ['e'] ["exec-prof"]
       (NoArg OptExecProfile)
       "Enable library profiling"
   , Option ['j'] ["jobs"]
@@ -48,4 +48,4 @@ getOptDB = [
   ]
 
 optionDB :: OptionDB
-optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench] getOptDB
+optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench,SwDepsOnly,SwLibProfile,SwExecProfile,SwJobs] getOptDB
