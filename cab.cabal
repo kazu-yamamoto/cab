@@ -39,7 +39,6 @@ Library
                         Distribution.Cab.Version
   Other-Modules:        Distribution.Cab.Commands
                         Distribution.Cab.GenPaths
-                        Distribution.Cab.Types
                         Distribution.Cab.Utils
 
 Executable cab
