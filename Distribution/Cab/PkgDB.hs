@@ -97,7 +97,7 @@ toPkgList prd db = filter prd $ allPackages db
 userPkgs :: IO (PkgInfo -> Bool)
 userPkgs = do
     gDB <- getGlobalPkgDB
-    return$ \pkgi -> isNothing$ lookupInstalledPackageId gDB (installedPackageId pkgi)
+    return $ \pkgi -> isNothing $ lookupInstalledPackageId gDB (installedPackageId pkgi)
 
 allPkgs :: IO (PkgInfo -> Bool)
 allPkgs = return (const True)
