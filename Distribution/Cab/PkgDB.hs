@@ -28,7 +28,7 @@ import Distribution.InstalledPackageInfo
     (InstalledPackageInfo_(..), InstalledPackageInfo)
 import Distribution.Package (PackageName(..), PackageIdentifier(..))
 import Distribution.Simple.Compiler (PackageDB(..))
-import Distribution.Simple.GHC (configure, getInstalledPackages)
+import Distribution.Simple.GHC (configure, getInstalledPackages, getPackageDBContents)
 import Distribution.Simple.PackageIndex
     (lookupPackageName, lookupSourcePackageId
     , allPackages, fromList, reverseDependencyClosure
@@ -45,28 +45,33 @@ type PkgInfo = InstalledPackageInfo
 --
 -- > getSandbox >>= getPkgDB
 getPkgDB :: Maybe FilePath -> IO PkgDB
-getPkgDB mpath = getDB [GlobalPackageDB,userDB]
+getPkgDB mpath = getDBs [GlobalPackageDB,userDB]
   where
     userDB = toUserSpec mpath
 
 -- | Obtaining 'PkgDB' for user
 getUserPkgDB :: Maybe FilePath -> IO PkgDB
-getUserPkgDB mpath = getDB [userDB]
+getUserPkgDB mpath = getDB userDB
   where
     userDB = toUserSpec mpath
+
+-- | Obtaining 'PkgDB' for global
+getGlobalPkgDB :: IO PkgDB
+getGlobalPkgDB = getDB GlobalPackageDB
 
 toUserSpec :: Maybe FilePath -> PackageDB
 toUserSpec Nothing     = UserPackageDB
 toUserSpec (Just path) = SpecificPackageDB path
 
--- | Obtaining 'PkgDB' for global
-getGlobalPkgDB :: IO PkgDB
-getGlobalPkgDB = getDB [GlobalPackageDB]
+getDBs :: [PackageDB] -> IO PackageIndex
+getDBs specs = do
+    (_,_,pro) <- configure normal Nothing Nothing defaultProgramDb
+    getInstalledPackages normal specs pro
 
-getDB :: [PackageDB] -> IO PackageIndex
+getDB :: PackageDB -> IO PackageIndex
 getDB spec = do
-    (_,pro) <- configure normal Nothing Nothing defaultProgramDb
-    getInstalledPackages normal spec pro
+    (_,_,pro) <- configure normal Nothing Nothing defaultProgramDb
+    getPackageDBContents normal spec pro
 
 ----------------------------------------------------------------
 
