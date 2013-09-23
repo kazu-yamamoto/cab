@@ -63,8 +63,8 @@ Executable cab
   else
      Build-Depends:     unix
   Other-Modules:	CmdDB
-                        Env
                         Program
+                        Types
                         Paths_cab
 
 Test-Suite doctest

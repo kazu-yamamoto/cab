@@ -11,14 +11,12 @@ import System.Environment
 import System.Exit
 
 import CmdDB
-import Env
 import Types
 
 ----------------------------------------------------------------
 
 main :: IO ()
 main = flip E.catches handlers $ do
-    unsetEnv "GHC_PACKAGE_PATH"
     oargs <- getArgs
     let pargs = parseArgs getOptDB oargs
     checkOptions1 pargs illegalOptionsAndExit
