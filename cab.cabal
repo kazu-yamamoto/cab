@@ -62,19 +62,21 @@ Executable cab
      Build-Depends:
   else
      Build-Depends:     unix
-  Other-Modules:	CmdDB
+  Other-Modules:	Commands
+                        Help
+                        Options
                         Program
                         Types
                         Paths_cab
 
-Test-Suite doctest
-  Type:                 exitcode-stdio-1.0
-  Default-Language:     Haskell2010
-  HS-Source-Dirs:       test
-  Ghc-Options:          -threaded -Wall
-  Main-Is:              doctests.hs
-  Build-Depends:        base
-                      , doctest >= 0.9.3
+-- Test-Suite doctest
+--   Type:                 exitcode-stdio-1.0
+--   Default-Language:     Haskell2010
+--   HS-Source-Dirs:       test
+--   Ghc-Options:          -threaded -Wall
+--   Main-Is:              doctests.hs
+--   Build-Depends:        base
+--                       , doctest >= 0.9.3
 
 Source-Repository head
   Type:                 git

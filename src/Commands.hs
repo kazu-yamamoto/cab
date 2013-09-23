@@ -1,13 +1,8 @@
-module CmdDB where
+module Commands (commandDB, commandSpecByName) where
 
-import Control.Monad
-import Data.List
 import Distribution.Cab
-import System.Console.GetOpt
-import System.Exit
-import System.IO
 
-import Program
+import {-# SOURCE #-} Help (helpCommandAndExit)
 import Types
 
 ----------------------------------------------------------------
@@ -28,7 +23,6 @@ commandDB = [
        , document = "Install packages"
        , routing = RouteCabal ["install"]
        , switches = [(SwNoharm, Just "--dry-run -v")
-                     -- FIXME cabal-dev not support --dry-run
                     ,(SwFlag, Just "--flags")
                     ]
        , manual = Just "[<package> [<ver>]]"
@@ -232,152 +226,3 @@ commandSpecByName _ [] = Nothing
 commandSpecByName x (ent:ents)
     | x `elem` commandNames ent = Just ent
     | otherwise                 = commandSpecByName x ents
-
-----------------------------------------------------------------
-
-getOptDB :: GetOptDB
-getOptDB = [
-    Option ['n'] ["dry-run"]
-      (NoArg OptNoharm)
-      "Run without destructive operations"
-  , Option ['r'] ["recursive"]
-      (NoArg OptRecursive)
-      "Follow dependencies recursively"
-  , Option ['a'] ["all"]
-      (NoArg OptAll)
-      "Show global packages in addition to user packages"
-  , Option ['i'] ["info"]
-      (NoArg OptInfo)
-      "Show license and author information"
-  , Option ['f'] ["flags"]
-      (ReqArg OptFlag "<flags>")
-      "Specify flags"
-  , Option ['t'] ["test"]
-      (NoArg OptTest)
-      "Enable test"
-  , Option ['b'] ["bench"]
-      (NoArg OptBench)
-      "Enable benchmark"
-  , Option ['h'] ["help"]
-      (NoArg OptHelp)
-      "Show help message"
-  ]
-
-optionDB :: OptionDB
-optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench] getOptDB
-
-----------------------------------------------------------------
-
-optionName :: OptionSpec -> String
-optionName (_,Option (c:_) _ (ReqArg _ arg) _) = '-':c:' ':arg
-optionName (_,Option (c:_) _ _ _)              = '-':[c]
-optionName _                                   = ""
-
-optionNames :: OptionSpec -> [String]
-optionNames (_,Option (c:_) (s:_) _ _) = ['-':[c],'-':'-':s]
-optionNames _                          = []
-
-optionDesc :: OptionSpec -> String
-optionDesc (_,Option _ _ _ desc) = desc
-
-getOptNames :: GetOptSpec -> (String,String)
-getOptNames (Option (c:_) (s:_) _ _) = ('-':[c],'-':'-':s)
-getOptNames _                        = error "getOptNames"
-
-resolveOptionString :: [Arg] -> Switch -> [UnknownOpt]
-resolveOptionString oargs sw = case lookup sw optionDB of
-    Nothing    -> error "resolveOptionString"
-    Just gspec -> let (s,l) = getOptNames gspec
-                  in checkShort s ++ checkLong l
-  where
-    checkShort s = filter (==s) oargs
-    checkLong  l = filter (l `isPrefixOf`) oargs
-
-optionsToString :: [Option] -> SwitchDB -> [String]
-optionsToString opts swdb = concatMap suboption opts
-  where
-    suboption opt = case lookup (toSwitch opt) swdb of
-        Nothing       -> []
-        Just Nothing  -> []
-        Just (Just x) -> case opt of
-            OptFlag flags  -> [x++"="++flags]
-            _              -> [x]
-
-----------------------------------------------------------------
-
-helpCommandAndExit :: FunctionCommand
-helpCommandAndExit [] _ = helpAndExit
-helpCommandAndExit (cmd:_) _ = do
-    case mcmdspec of
-        Nothing -> helpAndExit
-        Just cmdspec -> do
-            putStrLn $ "Usage: " ++ cmd ++ " " ++ showOptions cmdspec ++ showArgs cmdspec
-            putStr "\n"
-            putStrLn $ document cmdspec
-            putStr "\n"
-            putStrLn $ "Aliases: " ++ showAliases cmdspec
-            putStr "\n"
-            printOptions cmdspec
-    exitSuccess
-  where
-    mcmdspec = commandSpecByName cmd commandDB
-    showOptions cmdspec = "[" ++ joinBy "] [" (concatMap (masterOption optionDB) (opts cmdspec)) ++ "]"
-    showArgs cmdspec = maybe "" (" " ++) $ manual cmdspec
-    opts = map fst . switches
-    masterOption [] _ = []
-    masterOption (spec:specs) o
-      | fst spec == o = optionName spec : masterOption specs o
-      | otherwise     = masterOption specs o
-    showAliases = joinBy ", " . commandNames
-
-printOptions :: CommandSpec -> IO ()
-printOptions cmdspec =
-    forM_ opts (printOption optionDB)
-  where
-    opts = map fst $ switches cmdspec
-    printOption [] _ = return ()
-    printOption (spec:specs) o
-      | fst spec == o =
-          putStrLn $ (joinBy ", " . reverse . optionNames $ spec)
-                   ++ "\t" ++ optionDesc spec
-      | otherwise        = printOption specs o
-
-----------------------------------------------------------------
-
-helpAndExit :: IO ()
-helpAndExit = do
-    putStrLn $ programName ++ " " ++ " -- " ++ description
-    putStrLn ""
-    putStrLn $ "Version: " ++ showVersion version
-    putStrLn "Usage:"
-    putStrLn $ "\t" ++ programName
-    putStrLn $ "\t" ++ programName ++ " <command> [args...]"
-    putStrLn   "\t  where"
-    printCommands (getCommands commandDB)
-    exitSuccess
-  where
-    getCommands = map concat
-                . split helpCommandNumber
-                . intersperse ", "
-                . map (head . commandNames)
-    printCommands [] = return ()
-    printCommands (x:xs) = do
-        putStrLn $ "\t    <command> = " ++ x
-        mapM_ (\cmds -> putStrLn $ "\t                " ++ cmds) xs
-
-helpCommandNumber :: Int
-helpCommandNumber = 10
-
-----------------------------------------------------------------
-
-illegalCommandAndExit :: String -> IO ()
-illegalCommandAndExit x = do
-    hPutStrLn stderr $ "Illegal command: " ++ x
-    exitFailure
-
-----------------------------------------------------------------
-
-illegalOptionsAndExit :: [UnknownOpt] -> IO ()
-illegalOptionsAndExit xs = do -- FixME
-    hPutStrLn stderr $ "Illegal options: " ++ joinBy " " xs
-    exitFailure

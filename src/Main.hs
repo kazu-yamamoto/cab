@@ -4,13 +4,16 @@ import Control.Exception (Handler(..))
 import qualified Control.Exception as E
 import Control.Monad
 import Data.Maybe
+import Data.List (isPrefixOf)
 import Distribution.Cab
 import System.Cmd
 import System.Console.GetOpt
 import System.Environment
 import System.Exit
 
-import CmdDB
+import Commands
+import Help
+import Options
 import Types
 
 ----------------------------------------------------------------
@@ -75,3 +78,28 @@ callProcess pro args0 args1 opts sws = void . system $ script
     script = joinBy " " $ pro : args0 ++ cat args1 ++ swchs
     cat [pkg,ver] = [pkg ++ "-" ++ ver]
     cat x         = x
+
+----------------------------------------------------------------
+
+getOptNames :: GetOptSpec -> (String,String)
+getOptNames (Option (c:_) (s:_) _ _) = ('-':[c],'-':'-':s)
+getOptNames _                        = error "getOptNames"
+
+resolveOptionString :: [Arg] -> Switch -> [UnknownOpt]
+resolveOptionString oargs sw = case lookup sw optionDB of
+    Nothing    -> error "resolveOptionString"
+    Just gspec -> let (s,l) = getOptNames gspec
+                  in checkShort s ++ checkLong l
+  where
+    checkShort s = filter (==s) oargs
+    checkLong  l = filter (l `isPrefixOf`) oargs
+
+optionsToString :: [Option] -> SwitchDB -> [String]
+optionsToString opts swdb = concatMap suboption opts
+  where
+    suboption opt = case lookup (toSwitch opt) swdb of
+        Nothing       -> []
+        Just Nothing  -> []
+        Just (Just x) -> case opt of
+            OptFlag flags  -> [x++"="++flags]
+            _              -> [x]
