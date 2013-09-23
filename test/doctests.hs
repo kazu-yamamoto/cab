@@ -4,5 +4,5 @@ import Test.DocTest
 
 main :: IO ()
 main = doctest [
-    "Distribution/Cab/Utils"
+    "Distribution/Cab"
   ]
