@@ -177,11 +177,6 @@ add params opts = case getSandbox opts of
 ----------------------------------------------------------------
 
 ghci :: FunctionCommand
-ghci = undefined
-{-
-ghci _ opts = case getSandbox opts of
-    Nothing -> hPutStrLn stderr "A sandbox must be specified with \"-s\" option."
-    Just sbox -> do
-      _ <- system $ "cabal-dev -s " ++ sbox ++ " ghci"
-      return ()
--}
+ghci _ _ = do
+    opts <- getSandboxOpts <$> getSandbox
+    void $ system $ "ghci" ++ " " ++ opts
