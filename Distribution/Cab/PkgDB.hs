@@ -23,22 +23,18 @@ module Distribution.Cab.PkgDB (
 import Distribution.Cab.Utils (fromDotted)
 import Distribution.Cab.Version
 import Distribution.Cab.VerDB (PkgName)
-import Distribution.Compiler (CompilerId(..))
 import Distribution.Version (Version(..))
 import Distribution.InstalledPackageInfo
     (InstalledPackageInfo_(..), InstalledPackageInfo)
 import Distribution.Package (PackageName(..), PackageIdentifier(..))
-import Distribution.Simple.Compiler (PackageDB(..),Compiler(..))
+import Distribution.Simple.Compiler (PackageDB(..))
 import Distribution.Simple.GHC (configure, getInstalledPackages)
 import Distribution.Simple.PackageIndex
     (lookupPackageName, lookupSourcePackageId
     , allPackages, fromList, reverseDependencyClosure
     , topologicalOrder, PackageIndex)
-import Distribution.Simple.Program (ProgramConfiguration)
 import Distribution.Simple.Program.Db (defaultProgramDb)
 import Distribution.Verbosity (normal)
-import System.FilePath
-
 
 type PkgDB = PackageIndex
 type PkgInfo = InstalledPackageInfo
@@ -49,37 +45,28 @@ type PkgInfo = InstalledPackageInfo
 --
 -- > getSandbox >>= getPkgDB
 getPkgDB :: Maybe FilePath -> IO PkgDB
-getPkgDB mpath = do
-    (userDB,pro) <- getUserDB mpath
-    getDB [GlobalPackageDB,userDB] pro
+getPkgDB mpath = getDB [GlobalPackageDB,userDB]
+  where
+    userDB = toUserSpec mpath
 
 -- | Obtaining 'PkgDB' for user
 getUserPkgDB :: Maybe FilePath -> IO PkgDB
-getUserPkgDB mpath = do
-    (userDB,pro) <- getUserDB mpath
-    getDB [userDB] pro
+getUserPkgDB mpath = getDB [userDB]
+  where
+    userDB = toUserSpec mpath
 
-getUserDB :: Maybe FilePath -> IO (PackageDB, ProgramConfiguration)
-getUserDB mpath = do
-    (com,pro) <- configure normal Nothing Nothing defaultProgramDb
-    let userDB = case mpath of
-            Nothing -> UserPackageDB
-            Just path -> SpecificPackageDB $ packageConf path com
-    return (userDB, pro)
+toUserSpec :: Maybe FilePath -> PackageDB
+toUserSpec Nothing     = UserPackageDB
+toUserSpec (Just path) = SpecificPackageDB path
 
 -- | Obtaining 'PkgDB' for global
 getGlobalPkgDB :: IO PkgDB
-getGlobalPkgDB = do
+getGlobalPkgDB = getDB [GlobalPackageDB]
+
+getDB :: [PackageDB] -> IO PackageIndex
+getDB spec = do
     (_,pro) <- configure normal Nothing Nothing defaultProgramDb
-    getDB [GlobalPackageDB] pro
-
-getDB :: [PackageDB] -> ProgramConfiguration -> IO PackageIndex
-getDB spec pro = getInstalledPackages normal spec pro
-
-packageConf :: FilePath -> Compiler -> FilePath
-packageConf path com = path </> "packages-" ++ versionToString ver ++ ".conf"
-  where
-    CompilerId _ ver = compilerId com
+    getInstalledPackages normal spec pro
 
 ----------------------------------------------------------------
 
