@@ -7,6 +7,7 @@ module Distribution.Cab.VerDB (
   -- * Creating
   , getVerDB
   , toList
+  , toMap
   ) where
 
 import Control.Applicative
@@ -15,6 +16,8 @@ import Data.Attoparsec.ByteString.Char8
 import Data.Conduit
 import Data.Conduit.Attoparsec
 import Data.Conduit.Process
+import Data.Map (Map)
+import qualified Data.Map as M
 import Data.Maybe
 import Distribution.Cab.Version
 
@@ -22,7 +25,7 @@ import Distribution.Cab.Version
 
 type VerInfo = (String, Maybe [Int])
 
-newtype VerDB = VerDB [(String,Ver)]
+newtype VerDB = VerDB [(String,Ver)] deriving (Eq, Show)
 
 data HowToObtain = InstalledOnly | AllRegistered
 
@@ -41,7 +44,10 @@ getVerDB how = VerDB . justOnly <$> verInfos
 ----------------------------------------------------------------
 
 toList :: VerDB -> [(String, Ver)]
-toList (VerDB db) = db
+toList (VerDB alist) = alist
+
+toMap :: VerDB -> Map String Ver
+toMap (VerDB alist) = M.fromList alist
 
 ----------------------------------------------------------------
 
