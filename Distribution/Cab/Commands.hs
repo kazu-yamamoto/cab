@@ -52,13 +52,8 @@ search _ _ = do
 
 installed :: FunctionCommand
 installed _ opts = do
-    let optall = OptAll `elem` opts
-        optrec = OptRecursive `elem` opts
-    db' <- getSandbox >>= getPkgDB
-    flt <- if optall then allPkgs else userPkgs
-    -- FIXME: the optall case does unnecessary conversion
-    let pkgs = toPkgList flt db'
-        db = toPkgDB pkgs
+    db <- getDB opts
+    let pkgs = toPkgInfos db
     forM_ pkgs $ \pkgi -> do
         putStr $ fullNameOfPkgInfo pkgi
         extraInfo info pkgi
@@ -66,25 +61,31 @@ installed _ opts = do
         when optrec $ printDeps True info db 1 pkgi
   where
     info = OptInfo `elem` opts
+    optrec = OptRecursive `elem` opts
 
 outdated :: FunctionCommand
 outdated _ opts = do
-    flt <- if OptAll `elem` opts then allPkgs else userPkgs
-    pkgs <- toPkgList flt <$> (getSandbox >>= getPkgDB)
+    pkgs <- toPkgInfos <$> getDB opts
     verDB <- toMap <$> getVerDB InstalledOnly
     forM_ pkgs $ \p -> case M.lookup (nameOfPkgInfo p) verDB of
         Nothing  -> return ()
         Just ver -> when (verOfPkgInfo p /= ver) $
                       putStrLn $ fullNameOfPkgInfo p ++ " < " ++ verToString ver
 
+getDB :: [Option] -> IO PkgDB
+getDB opts
+  | optall    = getSandbox >>= getPkgDB
+  | otherwise = getSandbox >>= getUserPkgDB
+  where
+    optall = OptAll `elem` opts
+
 ----------------------------------------------------------------
 
 uninstall :: FunctionCommand
 uninstall nmver opts = do
-    db' <- getSandbox >>= getPkgDB
-    db <- toPkgDB . flip toPkgList db' <$> userPkgs
-    pkg <- lookupPkg nmver db
-    let sortedPkgs = topSortedPkgs pkg db
+    userDB <- getSandbox >>= getUserPkgDB
+    pkg <- lookupPkg nmver userDB
+    let sortedPkgs = topSortedPkgs pkg userDB
     if onlyOne && length sortedPkgs /= 1 then do
         hPutStrLn stderr "The following packages depend on this. Use the \"-r\" option."
         mapM_ (hPutStrLn stderr . fullNameOfPkgInfo) (init sortedPkgs)
@@ -133,9 +134,7 @@ printDepends :: [String] -> [Option]
 printDepends nmver opts func = do
     db' <- getSandbox >>= getPkgDB
     pkg <- lookupPkg nmver db'
-    db <- if OptAll `elem` opts
-          then return db'
-          else toPkgDB . flip toPkgList db' <$> userPkgs
+    db <- getDB opts
     func rec info db 0 pkg
   where
     rec = OptRecursive `elem` opts

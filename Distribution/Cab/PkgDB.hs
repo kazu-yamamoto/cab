@@ -6,17 +6,13 @@ module Distribution.Cab.PkgDB (
   , getPkgDB
   , getGlobalPkgDB
   , getUserPkgDB
-  -- * From 'PkgInfo' to 'PkgDB'
-  , toPkgDB
   -- * Looking up
   , lookupByName
   , lookupByVersion
-  -- * Filtering
-  , allPkgs
-  , userPkgs
-  , toPkgList
   -- * Topological sorting
   , topSortedPkgs
+  -- * To 'PkgInfo'
+  , toPkgInfos
   -- * From 'PkgInfo'
   , nameOfPkgInfo
   , fullNameOfPkgInfo
@@ -24,7 +20,6 @@ module Distribution.Cab.PkgDB (
   , verOfPkgInfo
   ) where
 
-import Data.Maybe (isNothing)
 import Distribution.Cab.Utils (fromDotted)
 import Distribution.Cab.Version
 import Distribution.Cab.VerDB (PkgName)
@@ -36,7 +31,7 @@ import Distribution.Package (PackageName(..), PackageIdentifier(..))
 import Distribution.Simple.Compiler (PackageDB(..),Compiler(..))
 import Distribution.Simple.GHC (configure, getInstalledPackages)
 import Distribution.Simple.PackageIndex
-    (lookupPackageName, lookupSourcePackageId, lookupInstalledPackageId
+    (lookupPackageName, lookupSourcePackageId
     , allPackages, fromList, reverseDependencyClosure
     , topologicalOrder, PackageIndex)
 import Distribution.Simple.Program (ProgramConfiguration)
@@ -50,7 +45,7 @@ type PkgInfo = InstalledPackageInfo
 
 ----------------------------------------------------------------
 
--- | Obtaining 'PkgDB'
+-- | Obtaining 'PkgDB' for global and user
 --
 -- > getSandbox >>= getPkgDB
 getPkgDB :: Maybe FilePath -> IO PkgDB
@@ -58,6 +53,7 @@ getPkgDB mpath = do
     (userDB,pro) <- getUserDB mpath
     getDB [GlobalPackageDB,userDB] pro
 
+-- | Obtaining 'PkgDB' for user
 getUserPkgDB :: Maybe FilePath -> IO PkgDB
 getUserPkgDB mpath = do
     (userDB,pro) <- getUserDB mpath
@@ -71,6 +67,7 @@ getUserDB mpath = do
             Just path -> SpecificPackageDB $ packageConf path com
     return (userDB, pro)
 
+-- | Obtaining 'PkgDB' for global
 getGlobalPkgDB :: IO PkgDB
 getGlobalPkgDB = do
     (_,pro) <- configure normal Nothing Nothing defaultProgramDb
@@ -83,9 +80,6 @@ packageConf :: FilePath -> Compiler -> FilePath
 packageConf path com = path </> "packages-" ++ versionToString ver ++ ".conf"
   where
     CompilerId _ ver = compilerId com
-
-toPkgDB :: [PkgInfo] -> PkgDB
-toPkgDB = fromList
 
 ----------------------------------------------------------------
 
@@ -113,16 +107,8 @@ lookupByVersion name ver db = lookupSourcePackageId db src
 
 ----------------------------------------------------------------
 
-toPkgList :: (PkgInfo -> Bool) -> PkgDB -> [PkgInfo]
-toPkgList prd db = filter prd $ allPackages db
-
-userPkgs :: IO (PkgInfo -> Bool)
-userPkgs = do
-    gDB <- getGlobalPkgDB
-    return $ \pkgi -> isNothing $ lookupInstalledPackageId gDB (installedPackageId pkgi)
-
-allPkgs :: IO (PkgInfo -> Bool)
-allPkgs = return (const True)
+toPkgInfos :: PkgDB -> [PkgInfo]
+toPkgInfos db = allPackages db
 
 ----------------------------------------------------------------
 
