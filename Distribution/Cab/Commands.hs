@@ -2,7 +2,7 @@ module Distribution.Cab.Commands (
     FunctionCommand
   , Option(..)
   , deps, revdeps, installed, outdated, uninstall, search
-  , genpaths, check, add, ghci
+  , genpaths, check, initSandbox, add, ghci
   ) where
 
 import Control.Applicative hiding (many)
@@ -165,9 +165,20 @@ checkOne pkgs = do
 
 ----------------------------------------------------------------
 
+initSandbox :: FunctionCommand
+initSandbox []     _ = void . system $ "cabal sandbox init"
+initSandbox [path] _ = void . system $ "cabal sandbox init --sandbox " ++ path
+initSandbox _      _ = do
+    hPutStrLn stderr "Only one argument is allowed"
+    exitFailure
+
+----------------------------------------------------------------
+
 add :: FunctionCommand
 add [src] _ = void . system $ "cabal sandbox add-source " ++ src
-add _     _ = hPutStrLn stderr "A source path be specified."
+add _     _ = do
+    hPutStrLn stderr "A source path be specified."
+    exitFailure
 
 ----------------------------------------------------------------
 
