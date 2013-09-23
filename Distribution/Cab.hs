@@ -18,7 +18,5 @@ module Distribution.Cab (
   , split
   ) where
 
-import Distribution.Cab.Types
 import Distribution.Cab.Commands
 import Distribution.Cab.Utils
-

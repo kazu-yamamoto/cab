@@ -1,5 +1,7 @@
 module Distribution.Cab.Commands (
-    deps, revdeps, installed, outdated, uninstall, search
+    FunctionCommand
+  , Option(..)
+  , deps, revdeps, installed, outdated, uninstall, search
   , genpaths, check, add, ghci
   ) where
 
@@ -12,12 +14,25 @@ import Distribution.Cab.GenPaths
 import Distribution.Cab.PkgDB
 import Distribution.Cab.Printer
 import Distribution.Cab.Sandbox
-import Distribution.Cab.Types
 import Distribution.Cab.VerDB
 import Distribution.Cab.Version
 import System.Exit
 import System.IO
 import System.Process hiding (env)
+
+----------------------------------------------------------------
+
+type FunctionCommand = [String] -> [Option] -> IO ()
+
+data Option = OptNoharm
+            | OptRecursive
+            | OptAll
+            | OptInfo
+            | OptFlag String
+            | OptTest
+            | OptHelp
+            | OptBench
+            deriving (Eq,Show)
 
 ----------------------------------------------------------------
 
@@ -56,10 +71,9 @@ outdated :: FunctionCommand
 outdated _ opts = do
     flt <- if OptAll `elem` opts then allPkgs else userPkgs
     pkgs <- toPkgList flt <$> (getSandbox >>= getPkgDB)
-    alist <- toList <$> getVerDB InstalledOnly
-    let verDB = M.fromList alist
+    verDB <- toMap <$> getVerDB InstalledOnly
     forM_ pkgs $ \p -> case M.lookup (nameOfPkgInfo p) verDB of
-        Nothing -> return ()
+        Nothing  -> return ()
         Just ver -> when (verOfPkgInfo p /= ver) $
                       putStrLn $ fullNameOfPkgInfo p ++ " < " ++ verToString ver
 
