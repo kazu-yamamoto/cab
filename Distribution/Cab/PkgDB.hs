@@ -5,16 +5,18 @@ module Distribution.Cab.PkgDB (
   -- * Obtaining 'PkgDB'
   , getPkgDB
   , getGlobalPkgDB
+  , getUserPkgDB
   -- * From 'PkgInfo' to 'PkgDB'
   , toPkgDB
-  -- * From 'PkgDB' to 'PkgInfo'
+  -- * Looking up
   , lookupByName
   , lookupByVersion
-  , topSortedPkgs
-  -- * From 'PkgDB' to 'PkgInfo'
+  -- * Filtering
   , allPkgs
   , userPkgs
   , toPkgList
+  -- * Topological sorting
+  , topSortedPkgs
   -- * From 'PkgInfo'
   , nameOfPkgInfo
   , fullNameOfPkgInfo
@@ -30,20 +32,16 @@ import Distribution.Compiler (CompilerId(..))
 import Distribution.Version (Version(..))
 import Distribution.InstalledPackageInfo
     (InstalledPackageInfo_(..), InstalledPackageInfo)
-import Distribution.Package
-    (PackageName(..), PackageIdentifier(..))
-import Distribution.Simple.Compiler
-    (PackageDB(..),Compiler(..))
-import Distribution.Simple.GHC
-    (configure, getInstalledPackages)
+import Distribution.Package (PackageName(..), PackageIdentifier(..))
+import Distribution.Simple.Compiler (PackageDB(..),Compiler(..))
+import Distribution.Simple.GHC (configure, getInstalledPackages)
 import Distribution.Simple.PackageIndex
     (lookupPackageName, lookupSourcePackageId, lookupInstalledPackageId
     , allPackages, fromList, reverseDependencyClosure
     , topologicalOrder, PackageIndex)
-import Distribution.Simple.Program.Db
-    (defaultProgramDb)
-import Distribution.Verbosity
-    (normal)
+import Distribution.Simple.Program (ProgramConfiguration)
+import Distribution.Simple.Program.Db (defaultProgramDb)
+import Distribution.Verbosity (normal)
 import System.FilePath
 
 
@@ -52,18 +50,34 @@ type PkgInfo = InstalledPackageInfo
 
 ----------------------------------------------------------------
 
+-- | Obtaining 'PkgDB'
+--
+-- > getSandbox >>= getPkgDB
 getPkgDB :: Maybe FilePath -> IO PkgDB
 getPkgDB mpath = do
+    (userDB,pro) <- getUserDB mpath
+    getDB [GlobalPackageDB,userDB] pro
+
+getUserPkgDB :: Maybe FilePath -> IO PkgDB
+getUserPkgDB mpath = do
+    (userDB,pro) <- getUserDB mpath
+    getDB [userDB] pro
+
+getUserDB :: Maybe FilePath -> IO (PackageDB, ProgramConfiguration)
+getUserDB mpath = do
     (com,pro) <- configure normal Nothing Nothing defaultProgramDb
     let userDB = case mpath of
             Nothing -> UserPackageDB
             Just path -> SpecificPackageDB $ packageConf path com
-    getInstalledPackages normal [GlobalPackageDB,userDB] pro
+    return (userDB, pro)
 
 getGlobalPkgDB :: IO PkgDB
 getGlobalPkgDB = do
     (_,pro) <- configure normal Nothing Nothing defaultProgramDb
-    getInstalledPackages normal [GlobalPackageDB] pro
+    getDB [GlobalPackageDB] pro
+
+getDB :: [PackageDB] -> ProgramConfiguration -> IO PackageIndex
+getDB spec pro = getInstalledPackages normal spec pro
 
 packageConf :: FilePath -> Compiler -> FilePath
 packageConf path com = path </> "packages-" ++ versionToString ver ++ ".conf"
@@ -75,10 +89,18 @@ toPkgDB = fromList
 
 ----------------------------------------------------------------
 
-lookupByName :: String -> PkgDB -> [PkgInfo]
+-- |
+--
+-- > pkgdb <- getGlobalPkgDB
+-- > lookupByName "base" pkgdb
+lookupByName :: PkgName -> PkgDB -> [PkgInfo]
 lookupByName name db = concatMap snd $ lookupPackageName db (PackageName name)
 
-lookupByVersion :: String -> String -> PkgDB -> [PkgInfo]
+-- |
+--
+-- > pkgdb <- getGlobalPkgDB
+-- > lookupByVersion "base" "4.6.0.1" pkgdb
+lookupByVersion :: PkgName -> String -> PkgDB -> [PkgInfo]
 lookupByVersion name ver db = lookupSourcePackageId db src
   where
     src = PackageIdentifier {
