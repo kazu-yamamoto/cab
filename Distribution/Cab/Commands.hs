@@ -166,14 +166,8 @@ checkOne pkgs = do
 ----------------------------------------------------------------
 
 add :: FunctionCommand
-add = undefined
-{-
-add params opts = case getSandbox opts of
-    Nothing -> hPutStrLn stderr "A sandbox must be specified with \"-s\" option."
-    Just sbox -> case params of
-        [src] -> void . system $ "cabal-dev add-source " ++ src ++ " -s " ++ sbox
-        _     -> hPutStrLn stderr "A source path be specified."
--}
+add [src] _ = void . system $ "cabal sandbox add-source " ++ src
+add _     _ = hPutStrLn stderr "A source path be specified."
 
 ----------------------------------------------------------------
 
