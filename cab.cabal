@@ -36,6 +36,7 @@ Library
                         Distribution.Cab.Printer
                         Distribution.Cab.Sandbox
                         Distribution.Cab.VerDB
+                        Distribution.Cab.Version
   Other-Modules:        Distribution.Cab.Commands
                         Distribution.Cab.GenPaths
                         Distribution.Cab.Types

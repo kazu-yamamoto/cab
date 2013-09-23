@@ -9,14 +9,12 @@ import Data.Function
 import Data.List
 import Data.Map (Map)
 import qualified Data.Map as M
-import Distribution.Cab.Utils
+import Distribution.Cab.PkgDB
+import Distribution.Cab.Version
 import Distribution.InstalledPackageInfo (InstalledPackageInfo_(..))
 import Distribution.License (License(..))
 import Distribution.Package (InstalledPackageId)
 import Distribution.Simple.PackageIndex (lookupInstalledPackageId, allPackages)
-import Distribution.Version (Version(..))
-
-import Distribution.Cab.PkgDB
 
 ----------------------------------------------------------------
 
@@ -85,12 +83,9 @@ extraInfo True pkgi = putStr $ " " ++ lcns ++ " \"" ++  auth ++ "\""
     auth = author pkgi
 
 showLicense :: License -> String
-showLicense (GPL (Just v))     = "GPL" ++ version v
+showLicense (GPL (Just v))     = "GPL" ++ versionToString v
 showLicense (GPL Nothing)      = "GPL"
-showLicense (LGPL (Just v))    = "LGPL" ++ version v
+showLicense (LGPL (Just v))    = "LGPL" ++ versionToString v
 showLicense (LGPL Nothing)     = "LGPL"
 showLicense (UnknownLicense s) = s
 showLicense x                  = show x
-
-version :: Version -> String
-version = toDotted . versionBranch

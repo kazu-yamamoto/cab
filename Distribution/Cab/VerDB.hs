@@ -1,7 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Distribution.Cab.VerDB (
-    VerDB, getVerDB, lookupLatestVersion, getVerAlist
+  -- * Types
+    VerDB
+  , HowToObtain(..)
+  -- * Creating
+  , getVerDB
+  , toList
   ) where
 
 import Control.Applicative
@@ -10,36 +15,33 @@ import Data.Attoparsec.ByteString.Char8
 import Data.Conduit
 import Data.Conduit.Attoparsec
 import Data.Conduit.Process
-import Data.Map (Map)
-import qualified Data.Map as M
 import Data.Maybe
+import Distribution.Cab.Version
 
 ----------------------------------------------------------------
 
 type VerInfo = (String, Maybe [Int])
 
-data VerDB = VerDB (Map String [Int])
+newtype VerDB = VerDB [(String,Ver)]
+
+data HowToObtain = InstalledOnly | AllRegistered
 
 ----------------------------------------------------------------
 
-getVerDB :: IO VerDB
-getVerDB = VerDB . M.fromList <$> getVerAlist True
-
-getVerAlist :: Bool -> IO [(String,[Int])]
-getVerAlist installedOnly = justOnly <$> verInfos
+getVerDB :: HowToObtain -> IO VerDB
+getVerDB how = VerDB . justOnly <$> verInfos
   where
-    script = if installedOnly
-             then "cabal list --installed"
-             else "cabal list"
+    script = case how of
+        InstalledOnly -> "cabal list --installed"
+        AllRegistered -> "cabal list"
     verInfos = runResourceT $ sourceCmd script $$ cabalListParser
-    justOnly = map (second fromJust) . filter (isJust . snd)
-
+    justOnly = map (second (toVer . fromJust)) . filter (isJust . snd)
     cabalListParser = sinkParser verinfos
 
 ----------------------------------------------------------------
 
-lookupLatestVersion :: String -> VerDB -> Maybe [Int]
-lookupLatestVersion pkgid (VerDB db) = M.lookup pkgid db
+toList :: VerDB -> [(String, Ver)]
+toList (VerDB db) = db
 
 ----------------------------------------------------------------
 

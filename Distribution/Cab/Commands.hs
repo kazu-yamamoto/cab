@@ -7,13 +7,14 @@ import Control.Applicative hiding (many)
 import Control.Monad
 import Data.Char
 import Data.List
+import qualified Data.Map as M
 import Distribution.Cab.GenPaths
 import Distribution.Cab.PkgDB
 import Distribution.Cab.Printer
 import Distribution.Cab.Sandbox
 import Distribution.Cab.Types
-import Distribution.Cab.Utils
 import Distribution.Cab.VerDB
+import Distribution.Cab.Version
 import System.Exit
 import System.IO
 import System.Process hiding (env)
@@ -22,15 +23,12 @@ import System.Process hiding (env)
 
 search :: FunctionCommand
 search [x] _ = do
-    nvls <- getVerAlist False
-    forM_ (lok nvls) $ \(n,v) -> putStrLn $ n ++ " " ++ toDotted v
+    nvls <- toList <$> getVerDB AllRegistered
+    forM_ (lok nvls) $ \(n,v) -> putStrLn $ n ++ " " ++ verToString v
   where
     key = map toLower x
     sat (n,_) = key `isPrefixOf` map toLower n
-    lok [] = []
-    lok (e:es)
-      | sat e   = e : lok es
-      | otherwise = lok es
+    lok = filter sat
 search _ _ = do
     hPutStrLn stderr "One search-key should be specified."
     exitFailure
@@ -58,11 +56,12 @@ outdated :: FunctionCommand
 outdated _ opts = do
     flt <- if OptAll `elem` opts then allPkgs else userPkgs
     pkgs <- toPkgList flt <$> (getSandbox >>= getPkgDB)
-    verDB <- getVerDB
-    forM_ pkgs $ \p -> case lookupLatestVersion (nameOfPkgInfo p) verDB of
+    alist <- toList <$> getVerDB InstalledOnly
+    let verDB = M.fromList alist
+    forM_ pkgs $ \p -> case M.lookup (nameOfPkgInfo p) verDB of
         Nothing -> return ()
-        Just ver -> when (numVersionOfPkgInfo p /= ver) $
-                        putStrLn $ fullNameOfPkgInfo p ++ " < " ++ toDotted ver
+        Just ver -> when (verOfPkgInfo p /= ver) $
+                      putStrLn $ fullNameOfPkgInfo p ++ " < " ++ verToString ver
 
 ----------------------------------------------------------------
 

@@ -17,19 +17,17 @@ module Distribution.Cab.PkgDB (
   , userPkgs
   , toPkgList
   -- * From 'PkgInfo'
-  , fullNameOfPkgInfo
-  , numVersionOfPkgInfo
   , nameOfPkgInfo
+  , fullNameOfPkgInfo
   , pairNameOfPkgInfo
+  , verOfPkgInfo
   ) where
-
 
 import Data.Maybe (isNothing)
 import Distribution.Cab.Utils
-import Distribution.Compiler
-    (CompilerId(..))
-import Distribution.Version
-    (Version(..))
+import Distribution.Cab.Version
+import Distribution.Compiler (CompilerId(..))
+import Distribution.Version (Version(..))
 import Distribution.InstalledPackageInfo
     (InstalledPackageInfo_(..), InstalledPackageInfo)
 import Distribution.Package
@@ -73,15 +71,12 @@ getPackageConf path = do
     return $ packageConf path com
 
 packageConf :: FilePath -> Compiler -> FilePath
-packageConf path com = path </> "packages-" ++ version ver ++ ".conf"
+packageConf path com = path </> "packages-" ++ versionToString ver ++ ".conf"
   where
     CompilerId _ ver = compilerId com
 
 toPkgDB :: [PkgInfo] -> PkgDB
 toPkgDB = fromList
-
-version :: Version -> String
-version = toDotted . versionBranch
 
 ----------------------------------------------------------------
 
@@ -115,21 +110,18 @@ allPkgs = return (const True)
 ----------------------------------------------------------------
 
 fullNameOfPkgInfo :: PkgInfo -> String
-fullNameOfPkgInfo pkgi = nameOfPkgInfo pkgi ++ " " ++ versionOfPkgInfo pkgi
+fullNameOfPkgInfo pkgi = nameOfPkgInfo pkgi ++ " " ++ verToString (verOfPkgInfo pkgi)
 
 pairNameOfPkgInfo :: PkgInfo -> (String,String)
-pairNameOfPkgInfo pkgi = (nameOfPkgInfo pkgi, versionOfPkgInfo pkgi)
+pairNameOfPkgInfo pkgi = (nameOfPkgInfo pkgi, verToString (verOfPkgInfo pkgi))
 
 nameOfPkgInfo :: PkgInfo -> String
 nameOfPkgInfo = toString . pkgName . sourcePackageId
   where
     toString (PackageName x) = x
 
-versionOfPkgInfo :: PkgInfo -> String
-versionOfPkgInfo = toDotted . numVersionOfPkgInfo
-
-numVersionOfPkgInfo :: PkgInfo -> [Int]
-numVersionOfPkgInfo = versionBranch . pkgVersion . sourcePackageId
+verOfPkgInfo :: PkgInfo -> Ver
+verOfPkgInfo = version . pkgVersion . sourcePackageId
 
 ----------------------------------------------------------------
 
