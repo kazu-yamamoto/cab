@@ -12,6 +12,7 @@ module Distribution.Cab (
   , genpaths
   , check
   , add
+  , initSandbox
   , ghci
   -- * Utilities
   , joinBy

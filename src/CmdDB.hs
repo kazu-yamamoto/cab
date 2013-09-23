@@ -202,8 +202,16 @@ commandDB = [
   , CommandSpec {
          command = Ghci
        , commandNames = ["ghci", "repl"]
-       , document = "Run GHCi within a sandbox"
+       , document = "Run GHCi (with a sandbox)"
        , routing = RouteFunc ghci
+       , switches = []
+       , manual = Nothing
+       }
+  , CommandSpec {
+         command = Init
+       , commandNames = ["init"]
+       , document = "Initialize a sandbox"
+       , routing = RouteFunc initSandbox
        , switches = []
        , manual = Nothing
        }

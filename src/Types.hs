@@ -70,6 +70,7 @@ data Command = Sync
              | Test
              | Bench
              | Doc
+             | Init
              | Help
              deriving (Eq,Show)
 
