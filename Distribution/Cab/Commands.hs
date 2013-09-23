@@ -99,12 +99,12 @@ unregister :: Bool -> [Option] -> (String,String) -> IO ()
 unregister doit _ (name,ver) =
     if doit then do
         putStrLn $ "Deleting " ++ name ++ " " ++ ver
-        sandboxOpts <- getSandbox >>= getSandboxOpts
+        sandboxOpts <- getSandboxOpts <$> getSandbox
         when doit $ void . system $ script sandboxOpts
       else
         putStrLn $ name ++ " " ++ ver
   where
-    script sandboxOpts = "ghc-pkg unregister " ++ sandboxOpts ++ name ++ "-" ++ ver
+    script sandboxOpts = "ghc-pkg unregister " ++ sandboxOpts ++ " " ++ name ++ "-" ++ ver
 
 ----------------------------------------------------------------
 
@@ -115,7 +115,7 @@ genpaths _ _ = genPaths
 
 check :: FunctionCommand
 check _ _ = do
-    sandboxOpts <- getSandbox >>= getSandboxOpts
+    sandboxOpts <- getSandboxOpts <$> getSandbox
     void . system $ script sandboxOpts
   where
     script sandboxOpts = "ghc-pkg check -v " ++ sandboxOpts

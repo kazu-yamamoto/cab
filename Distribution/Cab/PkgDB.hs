@@ -5,7 +5,6 @@ module Distribution.Cab.PkgDB (
   -- * Obtaining 'PkgDB'
   , getPkgDB
   , getGlobalPkgDB
-  , getPackageConf
   -- * From 'PkgInfo' to 'PkgDB'
   , toPkgDB
   -- * From 'PkgDB' to 'PkgInfo'
@@ -64,11 +63,6 @@ getGlobalPkgDB :: IO PkgDB
 getGlobalPkgDB = do
     (_,pro) <- configure normal Nothing Nothing defaultProgramDb
     getInstalledPackages normal [GlobalPackageDB] pro
-
-getPackageConf :: FilePath -> IO FilePath
-getPackageConf path = do
-    (com,_) <- configure normal Nothing Nothing defaultProgramDb
-    return $ packageConf path com
 
 packageConf :: FilePath -> Compiler -> FilePath
 packageConf path com = path </> "packages-" ++ versionToString ver ++ ".conf"

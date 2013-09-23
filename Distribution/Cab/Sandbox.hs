@@ -8,14 +8,9 @@ module Distribution.Cab.Sandbox (
 import Control.Applicative ((<$>))
 import Control.Exception as E (catch, SomeException, throwIO)
 import Data.Char (isSpace)
-import Data.List (isPrefixOf)
-import Distribution.Cab.PkgDB
-import Distribution.Simple.Program (ghcProgram)
-import Distribution.Simple.Program.Types (programName, programFindVersion)
-import Distribution.Verbosity (silent)
-import Distribution.Version (versionBranch)
+import Data.List (isPrefixOf, tails)
 import System.Directory (getCurrentDirectory, doesFileExist)
-import System.FilePath ((</>), takeDirectory)
+import System.FilePath ((</>), takeDirectory, takeFileName)
 
 ----------------------------------------------------------------
 
@@ -66,22 +61,31 @@ getPackageDbDir sconf = do
 ----------------------------------------------------------------
 
 -- | Generate GHC options for package db according to GHC version.
-getSandboxOpts :: Maybe FilePath -> IO String
-getSandboxOpts Nothing     = return ""
-getSandboxOpts (Just path) = do
-    ghcver <- ghcVersion
-    pkgConf <- getPackageConf path
-    let pkgOpt | ghcver >= 706 = "-package-db "
-               | otherwise     = "-package-conf "
-    return $ pkgOpt ++ pkgConf ++ " "
-
-ghcVersion :: IO Int
-ghcVersion = toInt <$> ghcVer
+--
+-- >>> getSandboxOpts Nothing
+-- ""
+-- >>> getSandboxOpts (Just "/path/.cabal-sandbox/i386-osx-ghc-7.6.3-packages.conf.d")
+-- "-package-db /path/.cabal-sandbox/i386-osx-ghc-7.6.3-packages.conf.d"
+-- >>> getSandboxOpts (Just "/path/.cabal-sandbox/i386-osx-ghc-7.4.1-packages.conf.d")
+-- "-package-conf /path/.cabal-sandbox/i386-osx-ghc-7.4.1-packages.conf.d"
+getSandboxOpts :: Maybe FilePath -> String
+getSandboxOpts Nothing     = ""
+getSandboxOpts (Just path) = pkgOpt ++ path
   where
-    ghcVer = programFindVersion ghcProgram silent (programName ghcProgram)
-    toInt Nothing = 0
-    toInt (Just v)
-      | length vs < 2 = 0
-      | otherwise     = (vs !! 0) * 100 + (vs !! 1)
-      where
-        vs = versionBranch v
+    ghcver = extractGhcVer path
+    pkgOpt | ghcver >= 706 = "-package-db "
+           | otherwise     = "-package-conf "
+
+-- | Extracting GHC version from the path of package db.
+--   Exception is thrown if the string argument is incorrect.
+--
+-- >>> extractGhcVer "/foo/bar/i386-osx-ghc-7.6.3-packages.conf.d"
+-- 706
+extractGhcVer :: String -> Int
+extractGhcVer dir = ver
+  where
+    file = takeFileName dir
+    findVer = drop 4 . head . filter ("ghc-" `isPrefixOf`) . tails
+    (verStr1,_:left) = break (== '.') $ findVer file
+    (verStr2,_)      = break (== '.') left
+    ver = read verStr1 * 100 + read verStr2
