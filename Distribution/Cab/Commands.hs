@@ -16,6 +16,7 @@ import Distribution.Cab.Printer
 import Distribution.Cab.Sandbox
 import Distribution.Cab.VerDB
 import Distribution.Cab.Version
+import Distribution.Cab.Utils
 import System.Exit
 import System.IO
 import System.Process hiding (env)
@@ -177,6 +178,6 @@ add params opts = case getSandbox opts of
 ----------------------------------------------------------------
 
 ghci :: FunctionCommand
-ghci _ _ = do
+ghci args _ = do
     opts <- getSandboxOpts <$> getSandbox
-    void $ system $ "ghci" ++ " " ++ opts
+    void $ system $ "ghci" ++ " " ++ opts ++ " " ++ joinBy " " args

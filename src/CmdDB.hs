@@ -201,7 +201,7 @@ commandDB = [
        }
   , CommandSpec {
          command = Ghci
-       , commandNames = ["ghci"]
+       , commandNames = ["ghci", "repl"]
        , document = "Run GHCi within a sandbox"
        , routing = RouteFunc ghci
        , switches = []
