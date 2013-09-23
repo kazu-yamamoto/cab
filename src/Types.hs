@@ -1,6 +1,5 @@
 module Types where
 
-import Data.List
 import Distribution.Cab
 import System.Console.GetOpt
 
@@ -17,6 +16,10 @@ data Switch = SwNoharm
             | SwFlag
             | SwTest
             | SwBench
+            | SwDepsOnly
+            | SwLibProfile
+            | SwExecProfile
+            | SwJobs
             deriving (Eq,Show)
 
 toSwitch :: Option -> Switch
@@ -27,17 +30,24 @@ toSwitch OptInfo        = SwInfo
 toSwitch (OptFlag _)    = SwFlag
 toSwitch OptTest        = SwTest
 toSwitch OptBench       = SwBench
+toSwitch OptDepsOnly    = SwDepsOnly
+toSwitch OptLibProfile  = SwLibProfile
+toSwitch OptExecProfile = SwExecProfile
+toSwitch (OptJobs _)    = SwJobs
 toSwitch _              = error "toSwitch"
 
-getFlag :: [Option] -> Maybe FilePath
-getFlag = getValue (\x -> toSwitch x == SwFlag)
+----------------------------------------------------------------
 
-getValue :: (Option -> Bool) -> [Option] -> Maybe FilePath
-getValue p opts = case find p opts of
-    Nothing                -> Nothing
-    _                      -> error "getSandbox"
+optionArg :: Option -> String
+optionArg (OptFlag str) = str
+optionArg (OptJobs str) = str
+optionArg _             = ""
 
-type SwitchSpec = (Switch, Maybe String)
+----------------------------------------------------------------
+
+data SwitchKind = None | Solo String | WithArg String
+
+type SwitchSpec = (Switch, SwitchKind)
 type SwitchDB = [SwitchSpec]
 
 type GetOptSpec = OptDescr Option

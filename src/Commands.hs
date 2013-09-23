@@ -22,8 +22,13 @@ commandDB = [
        , commandNames = ["install"]
        , document = "Install packages"
        , routing = RouteCabal ["install"]
-       , switches = [(SwNoharm, Just "--dry-run -v")
-                    ,(SwFlag, Just "--flags")
+       , switches = [(SwNoharm, Solo "--dry-run -v")
+                    ,(SwFlag, WithArg "--flags")
+                    ,(SwTest, Solo "--enable-tests")
+                    ,(SwDepsOnly, Solo "--only-dependencies")
+                    ,(SwLibProfile, Solo "--enable-library-profiling")
+                    ,(SwExecProfile, Solo "--enable-executable-profiling")
+                    ,(SwJobs, WithArg "--jobs")
                     ]
        , manual = Just "[<package> [<ver>]]"
        }
@@ -32,8 +37,8 @@ commandDB = [
        , commandNames = ["uninstall", "delete", "remove", "unregister"]
        , document = "Uninstall packages"
        , routing = RouteFunc uninstall
-       , switches = [(SwNoharm, Nothing)
-                    ,(SwRecursive, Nothing)
+       , switches = [(SwNoharm, None)
+                    ,(SwRecursive, None)
                     ] -- don't allow SwAll
        , manual = Just "<package> [<ver>]"
        }
@@ -42,9 +47,9 @@ commandDB = [
        , commandNames = ["installed", "list"]
        , document = "List installed packages"
        , routing = RouteFunc installed
-       , switches = [(SwAll, Nothing)
-                    ,(SwRecursive, Nothing)
-                    ,(SwInfo, Nothing)
+       , switches = [(SwAll, None)
+                    ,(SwRecursive, None)
+                    ,(SwInfo, None)
                     ]
        , manual = Nothing
        }
@@ -53,9 +58,11 @@ commandDB = [
        , commandNames = ["configure", "conf"]
        , document = "Configure a cabal package"
        , routing = RouteCabal ["configure"]
-       , switches = [(SwFlag, Just "--flags")
-                    ,(SwTest, Just "--enable-tests")
-                    ,(SwBench, Just "--enable-benchmarks")
+       , switches = [(SwFlag, WithArg "--flags")
+                    ,(SwTest, Solo "--enable-tests")
+                    ,(SwBench, Solo "--enable-benchmarks")
+                    ,(SwLibProfile, Solo "--enable-library-profiling")
+                    ,(SwExecProfile, Solo "--enable-executable-profiling")
                     ]
        , manual = Nothing
        }
@@ -64,7 +71,7 @@ commandDB = [
        , commandNames = ["build"]
        , document = "Build a cabal package"
        , routing = RouteCabal ["build"]
-       , switches = []
+       , switches = [(SwJobs, WithArg "--jobs")]
        , manual = Nothing
        }
   , CommandSpec {
@@ -80,7 +87,7 @@ commandDB = [
        , commandNames = ["outdated"]
        , document = "Display outdated packages"
        , routing = RouteFunc outdated
-       , switches = [(SwAll, Nothing)]
+       , switches = [(SwAll, None)]
        , manual = Nothing
        }
   , CommandSpec {
@@ -104,7 +111,7 @@ commandDB = [
        , commandNames = ["upload", "up"]
        , document = "Uploading tar.gz to HackageDB"
        , routing = RouteCabal ["upload"]
-       , switches = [(SwNoharm, Just "-c")]
+       , switches = [(SwNoharm, Solo "-c")]
        , manual = Nothing
        }
   , CommandSpec {
@@ -120,9 +127,9 @@ commandDB = [
        , commandNames = ["deps"]
        , document = "Show dependencies of this package"
        , routing = RouteFunc deps
-       , switches = [(SwRecursive, Nothing)
-                    ,(SwAll, Nothing)
-                    ,(SwInfo, Nothing)
+       , switches = [(SwRecursive, None)
+                    ,(SwAll, None)
+                    ,(SwInfo, None)
                     ]
        , manual = Just "<package> [<ver>]"
        }
@@ -131,9 +138,9 @@ commandDB = [
        , commandNames = ["revdeps", "dependents"]
        , document = "Show reverse dependencies of this package"
        , routing = RouteFunc revdeps
-       , switches = [(SwRecursive, Nothing)
-                    ,(SwAll, Nothing)
-                    ,(SwInfo, Nothing)
+       , switches = [(SwRecursive, None)
+                    ,(SwAll, None)
+                    ,(SwInfo, None)
                     ]
        , manual = Just "<package> [<ver>]"
        }

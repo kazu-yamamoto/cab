@@ -33,6 +33,10 @@ data Option = OptNoharm
             | OptTest
             | OptHelp
             | OptBench
+            | OptDepsOnly
+            | OptLibProfile
+            | OptExecProfile
+            | OptJobs String
             deriving (Eq,Show)
 
 ----------------------------------------------------------------

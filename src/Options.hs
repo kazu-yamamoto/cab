@@ -30,6 +30,18 @@ getOptDB = [
   , Option ['b'] ["bench"]
       (NoArg OptBench)
       "Enable benchmark"
+  , Option ['d'] ["only-dependencies"]
+      (NoArg OptDepsOnly)
+      "Target only dependencies"
+  , Option ['p'] ["library-profiling"]
+      (NoArg OptLibProfile)
+      "Enable library profiling"
+  , Option ['e'] ["executable-profiling"]
+      (NoArg OptExecProfile)
+      "Enable library profiling"
+  , Option ['j'] ["jobs"]
+      (ReqArg OptJobs "<jobs>")
+      "Run N jobs"
   , Option ['h'] ["help"]
       (NoArg OptHelp)
       "Show help message"

@@ -98,8 +98,7 @@ optionsToString :: [Option] -> SwitchDB -> [String]
 optionsToString opts swdb = concatMap suboption opts
   where
     suboption opt = case lookup (toSwitch opt) swdb of
-        Nothing       -> []
-        Just Nothing  -> []
-        Just (Just x) -> case opt of
-            OptFlag flags  -> [x++"="++flags]
-            _              -> [x]
+        Nothing          -> []
+        Just None        -> []
+        Just (Solo x)    -> [x]
+        Just (WithArg x) -> [x ++ "=" ++ optionArg opt]
