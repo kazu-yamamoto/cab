@@ -2,10 +2,12 @@
 
 module Distribution.Cab.VerDB (
   -- * Types
-    VerDB
+    PkgName
+  , VerDB
   , HowToObtain(..)
   -- * Creating
   , getVerDB
+  -- * Converting
   , toList
   , toMap
   ) where
@@ -23,9 +25,11 @@ import Distribution.Cab.Version
 
 ----------------------------------------------------------------
 
-type VerInfo = (String, Maybe [Int])
+type PkgName = String
 
-newtype VerDB = VerDB [(String,Ver)] deriving (Eq, Show)
+type VerInfo = (PkgName, Maybe [Int])
+
+newtype VerDB = VerDB [(PkgName,Ver)] deriving (Eq, Show)
 
 data HowToObtain = InstalledOnly | AllRegistered
 
@@ -43,10 +47,16 @@ getVerDB how = VerDB . justOnly <$> verInfos
 
 ----------------------------------------------------------------
 
-toList :: VerDB -> [(String, Ver)]
+-- | Converting 'VerDB' to alist.
+--
+-- >>> db <- getVerDB InstalledOnly
+-- >>> elem "base" . map fst . toList $ db
+-- True
+toList :: VerDB -> [(PkgName, Ver)]
 toList (VerDB alist) = alist
 
-toMap :: VerDB -> Map String Ver
+-- | Converting 'VerDB' to 'Map'.
+toMap :: VerDB -> Map PkgName Ver
 toMap (VerDB alist) = M.fromList alist
 
 ----------------------------------------------------------------

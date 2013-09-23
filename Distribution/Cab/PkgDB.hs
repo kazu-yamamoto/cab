@@ -23,8 +23,9 @@ module Distribution.Cab.PkgDB (
   ) where
 
 import Data.Maybe (isNothing)
-import Distribution.Cab.Utils
+import Distribution.Cab.Utils (fromDotted)
 import Distribution.Cab.Version
+import Distribution.Cab.VerDB (PkgName)
 import Distribution.Compiler (CompilerId(..))
 import Distribution.Version (Version(..))
 import Distribution.InstalledPackageInfo
@@ -103,16 +104,16 @@ allPkgs = return (const True)
 
 ----------------------------------------------------------------
 
-fullNameOfPkgInfo :: PkgInfo -> String
-fullNameOfPkgInfo pkgi = nameOfPkgInfo pkgi ++ " " ++ verToString (verOfPkgInfo pkgi)
-
-pairNameOfPkgInfo :: PkgInfo -> (String,String)
-pairNameOfPkgInfo pkgi = (nameOfPkgInfo pkgi, verToString (verOfPkgInfo pkgi))
-
-nameOfPkgInfo :: PkgInfo -> String
+nameOfPkgInfo :: PkgInfo -> PkgName
 nameOfPkgInfo = toString . pkgName . sourcePackageId
   where
     toString (PackageName x) = x
+
+fullNameOfPkgInfo :: PkgInfo -> String
+fullNameOfPkgInfo pkgi = nameOfPkgInfo pkgi ++ " " ++ verToString (verOfPkgInfo pkgi)
+
+pairNameOfPkgInfo :: PkgInfo -> (PkgName,String)
+pairNameOfPkgInfo pkgi = (nameOfPkgInfo pkgi, verToString (verOfPkgInfo pkgi))
 
 verOfPkgInfo :: PkgInfo -> Ver
 verOfPkgInfo = version . pkgVersion . sourcePackageId
