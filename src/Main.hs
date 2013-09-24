@@ -4,7 +4,7 @@ import Control.Exception (Handler(..))
 import qualified Control.Exception as E
 import Control.Monad
 import Data.Maybe
-import Data.List (isPrefixOf)
+import Data.List (isPrefixOf, intercalate)
 import Distribution.Cab
 import System.Cmd
 import System.Console.GetOpt
@@ -75,7 +75,7 @@ callProcess :: String -> [String] -> [Arg] -> [Option] -> [SwitchSpec] -> IO ()
 callProcess pro args0 args1 opts sws = void . system $ script
   where
     swchs = optionsToString opts sws
-    script = joinBy " " $ pro : args0 ++ cat args1 ++ swchs
+    script = intercalate " " $ pro : args0 ++ cat args1 ++ swchs
     cat [pkg,ver] = [pkg ++ "-" ++ ver]
     cat x         = x
 

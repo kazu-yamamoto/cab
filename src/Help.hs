@@ -35,14 +35,14 @@ helpCommandAndExit (cmd:_) _ = do
     exitSuccess
   where
     mcmdspec = commandSpecByName cmd commandDB
-    showOptions cmdspec = "[" ++ joinBy "] [" (concatMap (masterOption optionDB) (opts cmdspec)) ++ "]"
+    showOptions cmdspec = "[" ++ intercalate "] [" (concatMap (masterOption optionDB) (opts cmdspec)) ++ "]"
     showArgs cmdspec = maybe "" (" " ++) $ manual cmdspec
     opts = map fst . switches
     masterOption [] _ = []
     masterOption (spec:specs) o
       | fst spec == o = optionName spec : masterOption specs o
       | otherwise     = masterOption specs o
-    showAliases = joinBy ", " . commandNames
+    showAliases = intercalate ", " . commandNames
 
 printOptions :: CommandSpec -> IO ()
 printOptions cmdspec =
@@ -52,7 +52,7 @@ printOptions cmdspec =
     printOption [] _ = return ()
     printOption (spec:specs) o
       | fst spec == o =
-          putStrLn $ (joinBy ", " . reverse . optionNames $ spec)
+          putStrLn $ (intercalate ", " . reverse . optionNames $ spec)
                    ++ "\t" ++ optionDesc spec
       | otherwise        = printOption specs o
 
@@ -107,5 +107,5 @@ illegalCommandAndExit x = do
 
 illegalOptionsAndExit :: [UnknownOpt] -> IO ()
 illegalOptionsAndExit xs = do -- FixME
-    hPutStrLn stderr $ "Illegal options: " ++ joinBy " " xs
+    hPutStrLn stderr $ "Illegal options: " ++ intercalate " " xs
     exitFailure

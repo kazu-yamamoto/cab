@@ -15,13 +15,7 @@ fromDotted xs = case break (=='.') xs of
 -- >>> toDotted [1,2,3]
 -- "1.2.3"
 toDotted :: [Int] -> String
-toDotted = joinBy "." . map show
-
--- |
--- >>> joinBy "," ["foo","bar","baz"]
--- "foo,bar,baz"
-joinBy :: String -> [String] -> String
-joinBy = intercalate
+toDotted = intercalate "." . map show
 
 -- |
 -- >>> split 4 "0123457689"

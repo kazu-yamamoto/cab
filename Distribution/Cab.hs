@@ -15,7 +15,6 @@ module Distribution.Cab (
   , initSandbox
   , ghci
   -- * Utilities
-  , joinBy
   , split
   ) where
 

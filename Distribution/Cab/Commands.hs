@@ -8,7 +8,7 @@ module Distribution.Cab.Commands (
 import Control.Applicative hiding (many)
 import Control.Monad
 import Data.Char
-import Data.List
+import Data.List (isPrefixOf, intercalate)
 import qualified Data.Map as M
 import Distribution.Cab.GenPaths
 import Distribution.Cab.PkgDB
@@ -16,7 +16,6 @@ import Distribution.Cab.Printer
 import Distribution.Cab.Sandbox
 import Distribution.Cab.VerDB
 import Distribution.Cab.Version
-import Distribution.Cab.Utils
 import System.Exit
 import System.IO
 import System.Process hiding (env)
@@ -189,4 +188,4 @@ add _     _ = do
 ghci :: FunctionCommand
 ghci args _ = do
     opts <- getSandboxOpts <$> getSandbox
-    void $ system $ "ghci" ++ " " ++ opts ++ " " ++ joinBy " " args
+    void $ system $ "ghci" ++ " " ++ opts ++ " " ++ intercalate " " args
