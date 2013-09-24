@@ -104,7 +104,7 @@ unregister :: Bool -> [Option] -> (String,String) -> IO ()
 unregister doit _ (name,ver) =
     if doit then do
         putStrLn $ "Deleting " ++ name ++ " " ++ ver
-        sandboxOpts <- getSandboxOpts <$> getSandbox
+        sandboxOpts <- getSandboxOpts2 <$> getSandbox
         when doit $ void . system $ script sandboxOpts
       else
         putStrLn $ name ++ " " ++ ver

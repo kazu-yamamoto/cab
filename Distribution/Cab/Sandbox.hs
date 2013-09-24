@@ -3,6 +3,7 @@
 module Distribution.Cab.Sandbox (
     getSandbox
   , getSandboxOpts
+  , getSandboxOpts2
   ) where
 
 import Control.Applicative ((<$>))
@@ -75,6 +76,14 @@ getSandboxOpts (Just path) = pkgOpt ++ path
     ghcver = extractGhcVer path
     pkgOpt | ghcver >= 706 = "-package-db "
            | otherwise     = "-package-conf "
+
+getSandboxOpts2 :: Maybe FilePath -> String
+getSandboxOpts2 Nothing     = ""
+getSandboxOpts2 (Just path) = pkgOpt ++ "=" ++ path
+  where
+    ghcver = extractGhcVer path
+    pkgOpt | ghcver >= 706 = "--package-db"
+           | otherwise     = "--package-conf"
 
 -- | Extracting GHC version from the path of package db.
 --   Exception is thrown if the string argument is incorrect.
