@@ -3,6 +3,8 @@ module Help (
   , helpCommandAndExit
   , illegalOptionsAndExit
   , illegalCommandAndExit
+  , usageDocAlias
+  , optionDoc
   ) where
 
 import Control.Monad
@@ -25,24 +27,36 @@ helpCommandAndExit (cmd:_) _ = do
     case mcmdspec of
         Nothing -> helpAndExit
         Just cmdspec -> do
-            putStrLn $ "Usage: " ++ cmd ++ " " ++ showOptions cmdspec ++ showArgs cmdspec
+            let (usage,doc,alias) = usageDocAlias cmdspec
+            putStrLn $ "Usage: " ++ usage
             putStr "\n"
-            putStrLn $ document cmdspec
+            putStrLn $ doc
             putStr "\n"
-            putStrLn $ "Aliases: " ++ showAliases cmdspec
+            putStrLn $ "Aliases: " ++ alias
             putStr "\n"
             printOptions cmdspec
     exitSuccess
   where
     mcmdspec = commandSpecByName cmd commandDB
-    showOptions cmdspec = "[" ++ intercalate "] [" (concatMap (masterOption optionDB) (opts cmdspec)) ++ "]"
-    showArgs cmdspec = maybe "" (" " ++) $ manual cmdspec
+
+usageDocAlias :: CommandSpec -> (String, String, String)
+usageDocAlias cmdspec = (usage,doc,alias)
+  where
+    usage = cmd ++ " " ++ showOptions ++ showArgs
+    doc = document cmdspec
+    alias = showAliases cmdspec
+    cmd:_ = commandNames cmdspec
+    options = opts cmdspec
+    showOptions
+      | null options = ""
+      | otherwise    = "[" ++ intercalate "] [" (concatMap (masterOption optionDB) (opts cmdspec)) ++ "]"
+    showArgs = maybe "" (" " ++) $ manual cmdspec
     opts = map fst . switches
     masterOption [] _ = []
     masterOption (spec:specs) o
       | fst spec == o = optionName spec : masterOption specs o
       | otherwise     = masterOption specs o
-    showAliases = intercalate ", " . commandNames
+    showAliases = intercalate ", " . tail . commandNames
 
 printOptions :: CommandSpec -> IO ()
 printOptions cmdspec =
@@ -51,10 +65,16 @@ printOptions cmdspec =
     opts = map fst $ switches cmdspec
     printOption [] _ = return ()
     printOption (spec:specs) o
-      | fst spec == o =
-          putStrLn $ (intercalate ", " . reverse . optionNames $ spec)
-                   ++ "\t" ++ optionDesc spec
+      | fst spec == o = do
+          let (key,doc) = optionDoc spec
+          putStrLn $ key ++ "\t" ++ doc
       | otherwise        = printOption specs o
+
+optionDoc :: OptionSpec -> (String, String)
+optionDoc spec = (key,doc)
+  where
+    key = intercalate ", " . reverse . optionNames $ spec
+    doc = optionDesc spec
 
 ----------------------------------------------------------------
 
