@@ -182,7 +182,7 @@ commandDB = [
        , document = "Run tests"
        , routing = RouteCabal ["test"]
        , switches = []
-       , manual = Nothing
+       , manual = Just "[testsuite]"
        }
   , CommandSpec {
          command = Bench
