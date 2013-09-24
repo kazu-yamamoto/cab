@@ -14,9 +14,6 @@ module Distribution.Cab (
   , add
   , initSandbox
   , ghci
-  -- * Utilities
-  , split
   ) where
 
 import Distribution.Cab.Commands
-import Distribution.Cab.Utils

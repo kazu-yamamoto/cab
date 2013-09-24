@@ -109,3 +109,14 @@ illegalOptionsAndExit :: [UnknownOpt] -> IO ()
 illegalOptionsAndExit xs = do -- FixME
     hPutStrLn stderr $ "Illegal options: " ++ intercalate " " xs
     exitFailure
+
+----------------------------------------------------------------
+
+-- |
+-- >>> split 4 "0123457689"
+-- ["0123","4576","89"]
+split :: Int -> [a] -> [[a]]
+split _ [] = []
+split n ss = x : split n rest
+  where
+    (x,rest) = splitAt n ss

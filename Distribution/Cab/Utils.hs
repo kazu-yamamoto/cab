@@ -16,12 +16,3 @@ fromDotted xs = case break (=='.') xs of
 -- "1.2.3"
 toDotted :: [Int] -> String
 toDotted = intercalate "." . map show
-
--- |
--- >>> split 4 "0123457689"
--- ["0123","4576","89"]
-split :: Int -> [a] -> [[a]]
-split _ [] = []
-split n ss = x : split n rest
-  where
-    (x,rest) = splitAt n ss
