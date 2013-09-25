@@ -22,8 +22,8 @@ import Types
 ----------------------------------------------------------------
 
 helpCommandAndExit :: FunctionCommand
-helpCommandAndExit [] _ = helpAndExit
-helpCommandAndExit (cmd:_) _ = do
+helpCommandAndExit [] _ _ = helpAndExit
+helpCommandAndExit (cmd:_) _ _ = do
     case mcmdspec of
         Nothing -> helpAndExit
         Just cmdspec -> do

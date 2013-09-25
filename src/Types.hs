@@ -20,6 +20,7 @@ data Switch = SwNoharm
             | SwLibProfile
             | SwExecProfile
             | SwJobs
+            | SwImport
             deriving (Eq,Show)
 
 toSwitch :: Option -> Switch
@@ -34,18 +35,20 @@ toSwitch OptDepsOnly    = SwDepsOnly
 toSwitch OptLibProfile  = SwLibProfile
 toSwitch OptExecProfile = SwExecProfile
 toSwitch (OptJobs _)    = SwJobs
+toSwitch (OptImport _)  = SwImport
 toSwitch _              = error "toSwitch"
 
 ----------------------------------------------------------------
 
 optionArg :: Option -> String
-optionArg (OptFlag str) = str
-optionArg (OptJobs str) = str
-optionArg _             = ""
+optionArg (OptFlag   str) = str
+optionArg (OptJobs   str) = str
+optionArg (OptImport str) = str
+optionArg _               = ""
 
 ----------------------------------------------------------------
 
-data SwitchKind = None | Solo String | WithArg String
+data SwitchKind = None | Solo String | WithEqArg String | FollowArg String
 
 type SwitchSpec = (Switch, SwitchKind)
 type SwitchDB = [SwitchSpec]

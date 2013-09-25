@@ -22,7 +22,7 @@ import System.Process hiding (env)
 
 ----------------------------------------------------------------
 
-type FunctionCommand = [String] -> [Option] -> IO ()
+type FunctionCommand = [String] -> [Option] -> [String] -> IO ()
 
 data Option = OptNoharm
             | OptRecursive
@@ -36,26 +36,27 @@ data Option = OptNoharm
             | OptLibProfile
             | OptExecProfile
             | OptJobs String
+            | OptImport String
             deriving (Eq,Show)
 
 ----------------------------------------------------------------
 
 search :: FunctionCommand
-search [x] _ = do
+search [x] _ _ = do
     nvls <- toList <$> getVerDB AllRegistered
     forM_ (lok nvls) $ \(n,v) -> putStrLn $ n ++ " " ++ verToString v
   where
     key = map toLower x
     sat (n,_) = key `isPrefixOf` map toLower n
     lok = filter sat
-search _ _ = do
+search _ _ _ = do
     hPutStrLn stderr "One search-key should be specified."
     exitFailure
 
 ----------------------------------------------------------------
 
 installed :: FunctionCommand
-installed _ opts = do
+installed _ opts _ = do
     db <- getDB opts
     let pkgs = toPkgInfos db
     forM_ pkgs $ \pkgi -> do
@@ -68,7 +69,7 @@ installed _ opts = do
     optrec = OptRecursive `elem` opts
 
 outdated :: FunctionCommand
-outdated _ opts = do
+outdated _ opts _ = do
     pkgs <- toPkgInfos <$> getDB opts
     verDB <- toMap <$> getVerDB InstalledOnly
     forM_ pkgs $ \p -> case M.lookup (nameOfPkgInfo p) verDB of
@@ -86,7 +87,7 @@ getDB opts
 ----------------------------------------------------------------
 
 uninstall :: FunctionCommand
-uninstall nmver opts = do
+uninstall nmver opts _ = do
     userDB <- getSandbox >>= getUserPkgDB
     pkg <- lookupPkg nmver userDB
     let sortedPkgs = topSortedPkgs pkg userDB
@@ -114,12 +115,12 @@ unregister doit _ (name,ver) =
 ----------------------------------------------------------------
 
 genpaths :: FunctionCommand
-genpaths _ _ = genPaths
+genpaths _ _ _ = genPaths
 
 ----------------------------------------------------------------
 
 check :: FunctionCommand
-check _ _ = do
+check _ _ _ = do
     sandboxOpts <- getSandboxOpts <$> getSandbox
     void . system $ script sandboxOpts
   where
@@ -128,10 +129,10 @@ check _ _ = do
 ----------------------------------------------------------------
 
 deps :: FunctionCommand
-deps nmver opts = printDepends nmver opts printDeps
+deps nmver opts _ = printDepends nmver opts printDeps
 
 revdeps :: FunctionCommand
-revdeps nmver opts = printDepends nmver opts printRevDeps
+revdeps nmver opts _ = printDepends nmver opts printRevDeps
 
 printDepends :: [String] -> [Option]
              -> (Bool -> Bool -> PkgDB -> Int -> PkgInfo -> IO ()) -> IO ()
@@ -169,23 +170,23 @@ checkOne pkgs = do
 ----------------------------------------------------------------
 
 initSandbox :: FunctionCommand
-initSandbox []     _ = void . system $ "cabal sandbox init"
-initSandbox [path] _ = void . system $ "cabal sandbox init --sandbox " ++ path
-initSandbox _      _ = do
+initSandbox []     _ _ = void . system $ "cabal sandbox init"
+initSandbox [path] _ _ = void . system $ "cabal sandbox init --sandbox " ++ path
+initSandbox _      _ _ = do
     hPutStrLn stderr "Only one argument is allowed"
     exitFailure
 
 ----------------------------------------------------------------
 
 add :: FunctionCommand
-add [src] _ = void . system $ "cabal sandbox add-source " ++ src
-add _     _ = do
+add [src] _ _ = void . system $ "cabal sandbox add-source " ++ src
+add _     _ _ = do
     hPutStrLn stderr "A source path be specified."
     exitFailure
 
 ----------------------------------------------------------------
 
 ghci :: FunctionCommand
-ghci args _ = do
-    opts <- getSandboxOpts <$> getSandbox
-    void $ system $ "ghci" ++ " " ++ opts ++ " " ++ intercalate " " args
+ghci args _ options = do
+    sbxOpts <- getSandboxOpts <$> getSandbox
+    void $ system $ "ghci" ++ " " ++ sbxOpts ++ " " ++ intercalate " " (options ++ args)

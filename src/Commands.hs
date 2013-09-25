@@ -23,12 +23,12 @@ commandDB = [
        , document = "Install packages"
        , routing = RouteCabal ["install"]
        , switches = [(SwNoharm, Solo "--dry-run -v")
-                    ,(SwFlag, WithArg "--flags")
+                    ,(SwFlag, WithEqArg "--flags")
                     ,(SwTest, Solo "--enable-tests")
                     ,(SwDepsOnly, Solo "--only-dependencies")
                     ,(SwLibProfile, Solo "--enable-library-profiling")
                     ,(SwExecProfile, Solo "--enable-executable-profiling")
-                    ,(SwJobs, WithArg "--jobs")
+                    ,(SwJobs, WithEqArg "--jobs")
                     ]
        , manual = Just "[<package> [<ver>]]"
        }
@@ -58,7 +58,7 @@ commandDB = [
        , commandNames = ["configure", "conf"]
        , document = "Configure a cabal package"
        , routing = RouteCabal ["configure"]
-       , switches = [(SwFlag, WithArg "--flags")
+       , switches = [(SwFlag, WithEqArg "--flags")
                     ,(SwTest, Solo "--enable-tests")
                     ,(SwBench, Solo "--enable-benchmarks")
                     ,(SwLibProfile, Solo "--enable-library-profiling")
@@ -71,7 +71,7 @@ commandDB = [
        , commandNames = ["build"]
        , document = "Build a cabal package"
        , routing = RouteCabal ["build"]
-       , switches = [(SwJobs, WithArg "--jobs")]
+       , switches = [(SwJobs, WithEqArg "--jobs")]
        , manual = Nothing
        }
   , CommandSpec {
@@ -205,7 +205,7 @@ commandDB = [
        , commandNames = ["ghci", "repl"]
        , document = "Run GHCi (with a sandbox)"
        , routing = RouteFunc ghci
-       , switches = []
+       , switches = [(SwImport, FollowArg "-i")]
        , manual = Nothing
        }
   , CommandSpec {

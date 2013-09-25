@@ -25,7 +25,7 @@ main = flip E.catches handlers $ do
     checkOptions1 pargs illegalOptionsAndExit
     let Right (args,opts0) = pargs
     when (args == []) helpAndExit
-    when (OptHelp `elem` opts0) $ helpCommandAndExit args undefined
+    when (OptHelp `elem` opts0) $ helpCommandAndExit args [] []
     let opts1 = filter (/= OptHelp) opts0
         act:params = args
         mcmdspec = commandSpecByName act commandDB
@@ -65,17 +65,17 @@ checkOptions2 opts cmdspec oargs func = do
 
 run :: CommandSpec -> [Arg] -> [Option] -> IO ()
 run cmdspec params opts = case routing cmdspec of
-    RouteFunc func     -> func params opts
-    RouteCabal subargs -> callProcess pro subargs params opts sws
+    RouteFunc func     -> func params opts options
+    RouteCabal subargs -> callProcess pro subargs params options
   where
     pro = "cabal"
     sws = switches cmdspec
+    options = optionsToString opts sws
 
-callProcess :: String -> [String] -> [Arg] -> [Option] -> [SwitchSpec] -> IO ()
-callProcess pro args0 args1 opts sws = void . system $ script
+callProcess :: String -> [String] -> [Arg] -> [String] -> IO ()
+callProcess pro args0 args1 options = void . system $ script
   where
-    swchs = optionsToString opts sws
-    script = intercalate " " $ pro : args0 ++ cat args1 ++ swchs
+    script = intercalate " " $ pro : args0 ++ cat args1 ++ options
     cat [pkg,ver] = [pkg ++ "-" ++ ver]
     cat x         = x
 
@@ -98,7 +98,8 @@ optionsToString :: [Option] -> SwitchDB -> [String]
 optionsToString opts swdb = concatMap suboption opts
   where
     suboption opt = case lookup (toSwitch opt) swdb of
-        Nothing          -> []
-        Just None        -> []
-        Just (Solo x)    -> [x]
-        Just (WithArg x) -> [x ++ "=" ++ optionArg opt]
+        Nothing            -> []
+        Just None          -> []
+        Just (Solo x)      -> [x]
+        Just (WithEqArg x) -> [x ++ "=" ++ optionArg opt]
+        Just (FollowArg x) -> [x ++ optionArg opt]

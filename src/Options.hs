@@ -42,10 +42,13 @@ getOptDB = [
   , Option ['j'] ["jobs"]
       (ReqArg OptJobs "<jobs>")
       "Run N jobs"
+  , Option ['i'] ["import"]
+      (ReqArg OptImport "<dir>:<dir>")
+      "Add module import paths"
   , Option ['h'] ["help"]
       (NoArg OptHelp)
       "Show help message"
   ]
 
 optionDB :: OptionDB
-optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench,SwDepsOnly,SwLibProfile,SwExecProfile,SwJobs] getOptDB
+optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench,SwDepsOnly,SwLibProfile,SwExecProfile,SwJobs,SwImport] getOptDB
