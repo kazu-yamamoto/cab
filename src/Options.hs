@@ -18,7 +18,7 @@ getOptDB = [
   , Option ['a'] ["all"]
       (NoArg OptAll)
       "Show global packages in addition to user packages"
-  , Option ['i'] ["info"]
+  , Option ['m'] ["info"]
       (NoArg OptInfo)
       "Show license and author information"
   , Option ['f'] ["flags"]
