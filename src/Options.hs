@@ -33,7 +33,7 @@ getOptDB = [
   , Option ['d'] ["dep-only"]
       (NoArg OptDepsOnly)
       "Target only dependencies"
-  , Option ['p'] ["libr-prof"]
+  , Option ['p'] ["lib-prof"]
       (NoArg OptLibProfile)
       "Enable library profiling"
   , Option ['e'] ["exec-prof"]
