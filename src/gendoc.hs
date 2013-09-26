@@ -3,9 +3,9 @@
 module Main where
 
 import Commands
+import Doc
 import Options
 import Types
-import Help
 
 main :: IO ()
 main = do
@@ -13,7 +13,7 @@ main = do
     putStr "\n"
     putStrLn "?cab"
     putStrLn "!Display the help message."
-    mapM_ prCmdSpec commandDB
+    mapM_ prCmdSpec (commandDB undefined)
     putStr "\n"
     putStrLn "The following options are provided:"
     putStr "\n"

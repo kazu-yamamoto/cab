@@ -1,20 +1,15 @@
 module Help (
     helpAndExit
   , helpCommandAndExit
-  , illegalOptionsAndExit
-  , illegalCommandAndExit
-  , usageDocAlias
-  , optionDoc
   ) where
 
-import Control.Monad
-import Data.List
+import Control.Monad (forM_)
+import Data.List (intersperse)
 import Distribution.Cab
-import System.Console.GetOpt
-import System.Exit
-import System.IO
+import System.Exit (exitSuccess)
 
 import Commands
+import Doc
 import Options
 import Program
 import Types
@@ -37,26 +32,7 @@ helpCommandAndExit (cmd:_) _ _ = do
             printOptions cmdspec
     exitSuccess
   where
-    mcmdspec = commandSpecByName cmd commandDB
-
-usageDocAlias :: CommandSpec -> (String, String, String)
-usageDocAlias cmdspec = (usage,doc,alias)
-  where
-    usage = cmd ++ " " ++ showOptions ++ showArgs
-    doc = document cmdspec
-    alias = showAliases cmdspec
-    cmd:_ = commandNames cmdspec
-    options = opts cmdspec
-    showOptions
-      | null options = ""
-      | otherwise    = "[" ++ intercalate "] [" (concatMap (masterOption optionDB) (opts cmdspec)) ++ "]"
-    showArgs = maybe "" (" " ++) $ manual cmdspec
-    opts = map fst . switches
-    masterOption [] _ = []
-    masterOption (spec:specs) o
-      | fst spec == o = optionName spec : masterOption specs o
-      | otherwise     = masterOption specs o
-    showAliases = intercalate ", " . tail . commandNames
+    mcmdspec = commandSpecByName cmd (commandDB helpCommandAndExit)
 
 printOptions :: CommandSpec -> IO ()
 printOptions cmdspec =
@@ -70,26 +46,6 @@ printOptions cmdspec =
           putStrLn $ key ++ "\t" ++ doc
       | otherwise        = printOption specs o
 
-optionDoc :: OptionSpec -> (String, String)
-optionDoc spec = (key,doc)
-  where
-    key = intercalate ", " . reverse . optionNames $ spec
-    doc = optionDesc spec
-
-----------------------------------------------------------------
-
-optionName :: OptionSpec -> String
-optionName (_,Option (c:_) _ (ReqArg _ arg) _) = '-':c:' ':arg
-optionName (_,Option (c:_) _ _ _)              = '-':[c]
-optionName _                                   = ""
-
-optionNames :: OptionSpec -> [String]
-optionNames (_,Option (c:_) (s:_) _ _) = ['-':[c],'-':'-':s]
-optionNames _                          = []
-
-optionDesc :: OptionSpec -> String
-optionDesc (_,Option _ _ _ desc) = desc
-
 ----------------------------------------------------------------
 
 helpAndExit :: IO ()
@@ -101,7 +57,7 @@ helpAndExit = do
     putStrLn $ "\t" ++ programName
     putStrLn $ "\t" ++ programName ++ " <command> [args...]"
     putStrLn   "\t  where"
-    printCommands (getCommands commandDB)
+    printCommands . getCommands . commandDB $ helpCommandAndExit
     exitSuccess
   where
     getCommands = map concat
@@ -115,20 +71,6 @@ helpAndExit = do
 
 helpCommandNumber :: Int
 helpCommandNumber = 10
-
-----------------------------------------------------------------
-
-illegalCommandAndExit :: String -> IO ()
-illegalCommandAndExit x = do
-    hPutStrLn stderr $ "Illegal command: " ++ x
-    exitFailure
-
-----------------------------------------------------------------
-
-illegalOptionsAndExit :: [UnknownOpt] -> IO ()
-illegalOptionsAndExit xs = do -- FixME
-    hPutStrLn stderr $ "Illegal options: " ++ intercalate " " xs
-    exitFailure
 
 ----------------------------------------------------------------
 

@@ -2,13 +2,12 @@ module Commands (commandDB, commandSpecByName) where
 
 import Distribution.Cab
 
-import {-# SOURCE #-} Help (helpCommandAndExit)
 import Types
 
 ----------------------------------------------------------------
 
-commandDB :: CommandDB
-commandDB = [
+commandDB :: FunctionCommand -> [CommandSpec]
+commandDB help = [
     CommandSpec {
          command = Sync
        , commandNames = ["sync", "update"]
@@ -220,7 +219,7 @@ commandDB = [
          command = Help
        , commandNames = ["help"]
        , document = "Display the help message of the command"
-       , routing = RouteFunc helpCommandAndExit
+       , routing = RouteFunc help
        , switches = []
        , manual = Just "[<command>]"
        }

@@ -3,13 +3,14 @@ module Main where
 import Control.Exception (Handler(..))
 import qualified Control.Exception as E
 import Control.Monad
-import Data.Maybe
 import Data.List (isPrefixOf, intercalate)
+import Data.Maybe
 import Distribution.Cab
 import System.Cmd
 import System.Console.GetOpt
 import System.Environment
 import System.Exit
+import System.IO
 
 import Commands
 import Help
@@ -28,7 +29,7 @@ main = flip E.catches handlers $ do
     when (OptHelp `elem` opts0) $ helpCommandAndExit args [] []
     let opts1 = filter (/= OptHelp) opts0
         act:params = args
-        mcmdspec = commandSpecByName act commandDB
+        mcmdspec = commandSpecByName act (commandDB helpCommandAndExit)
     when (isNothing mcmdspec) (illegalCommandAndExit act)
     let Just cmdspec = mcmdspec
     checkOptions2 opts1 cmdspec oargs illegalOptionsAndExit
@@ -103,3 +104,17 @@ optionsToString opts swdb = concatMap suboption opts
         Just (Solo x)      -> [x]
         Just (WithEqArg x) -> [x ++ "=" ++ optionArg opt]
         Just (FollowArg x) -> [x ++ optionArg opt]
+
+----------------------------------------------------------------
+
+illegalCommandAndExit :: String -> IO ()
+illegalCommandAndExit x = do
+    hPutStrLn stderr $ "Illegal command: " ++ x
+    exitFailure
+
+----------------------------------------------------------------
+
+illegalOptionsAndExit :: [UnknownOpt] -> IO ()
+illegalOptionsAndExit xs = do -- FixME
+    hPutStrLn stderr $ "Illegal options: " ++ intercalate " " xs
+    exitFailure
