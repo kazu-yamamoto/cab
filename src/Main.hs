@@ -20,11 +20,6 @@ import Types
 
 ----------------------------------------------------------------
 
-type UnknownOpt = String
-type ParsedArgs = Either [UnknownOpt] ([Arg],[Option])
-
-----------------------------------------------------------------
-
 main :: IO ()
 main = flip E.catches handlers $ do
     oargs <- getArgs
@@ -47,16 +42,41 @@ main = flip E.catches handlers $ do
 
 ----------------------------------------------------------------
 
+illegalCommandAndExit :: String -> IO ()
+illegalCommandAndExit x = do
+    hPutStrLn stderr $ "Illegal command: " ++ x
+    exitFailure
+
+----------------------------------------------------------------
+
+illegalOptionsAndExit :: UnknownOptPrinter
+illegalOptionsAndExit xs = do -- FixME
+    hPutStrLn stderr $ "Illegal options: " ++ intercalate " " xs
+    exitFailure
+
+----------------------------------------------------------------
+
+type ParsedArgs = Either [UnknownOpt] ([Arg],[Option])
+
 parseArgs :: [GetOptSpec] -> [Arg] -> ParsedArgs
 parseArgs db args = case getOpt' Permute db args of
     (o,n,[],[])      -> Right (n,o)
     (_,_,unknowns,_) -> Left unknowns
 
-checkOptions1 :: ParsedArgs -> ([UnknownOpt] -> IO ()) -> IO ()
+----------------------------------------------------------------
+
+type UnknownOpt = String
+type UnknownOptPrinter = [UnknownOpt] -> IO ()
+
+----------------------------------------------------------------
+
+checkOptions1 :: ParsedArgs -> UnknownOptPrinter -> IO ()
 checkOptions1 (Left es) func = func es
 checkOptions1 _ _            = return ()
 
-checkOptions2 :: [Option] -> CommandSpec -> [Arg] -> ([UnknownOpt] -> IO ()) -> IO ()
+----------------------------------------------------------------
+
+checkOptions2 :: [Option] -> CommandSpec -> [Arg] -> UnknownOptPrinter -> IO ()
 checkOptions2 opts cmdspec oargs func =
     when (unknowns /= []) $
         func (concatMap (resolveOptionString oargs) unknowns)
@@ -73,8 +93,6 @@ unknownOptions opts cmdspec = chk specified supported
     specified = map toSwitch opts
     supported = map fst $ switches cmdspec
 
-----------------------------------------------------------------
-
 resolveOptionString :: [Arg] -> Switch -> [UnknownOpt]
 resolveOptionString oargs sw = case lookup sw optionDB of
     Nothing    -> error "resolveOptionString"
@@ -87,17 +105,3 @@ resolveOptionString oargs sw = case lookup sw optionDB of
 getOptNames :: GetOptSpec -> (String,String)
 getOptNames (Option (c:_) (s:_) _ _) = ('-':[c],'-':'-':s)
 getOptNames _                        = error "getOptNames"
-
-----------------------------------------------------------------
-
-illegalCommandAndExit :: String -> IO ()
-illegalCommandAndExit x = do
-    hPutStrLn stderr $ "Illegal command: " ++ x
-    exitFailure
-
-----------------------------------------------------------------
-
-illegalOptionsAndExit :: [UnknownOpt] -> IO ()
-illegalOptionsAndExit xs = do -- FixME
-    hPutStrLn stderr $ "Illegal options: " ++ intercalate " " xs
-    exitFailure
