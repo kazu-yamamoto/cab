@@ -13,6 +13,7 @@ main = do
     putStr "\n"
     putStrLn "?cab"
     putStrLn "!Display the help message."
+    -- undefined prevents to import "Path_cab.hs"
     mapM_ prCmdSpec (commandDB undefined)
     putStr "\n"
     putStrLn "The following options are provided:"
