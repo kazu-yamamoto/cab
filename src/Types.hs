@@ -3,9 +3,9 @@ module Types where
 import Distribution.Cab
 import System.Console.GetOpt
 
+----------------------------------------------------------------
+
 type Arg = String
-type UnknownOpt = String
-type ParsedArgs = Either [UnknownOpt] ([Arg],[Option])
 
 ----------------------------------------------------------------
 
@@ -22,29 +22,6 @@ data Switch = SwNoharm
             | SwJobs
             | SwImport
             deriving (Eq,Show)
-
-toSwitch :: Option -> Switch
-toSwitch OptNoharm      = SwNoharm
-toSwitch OptRecursive   = SwRecursive
-toSwitch OptAll         = SwAll
-toSwitch OptInfo        = SwInfo
-toSwitch (OptFlag _)    = SwFlag
-toSwitch OptTest        = SwTest
-toSwitch OptBench       = SwBench
-toSwitch OptDepsOnly    = SwDepsOnly
-toSwitch OptLibProfile  = SwLibProfile
-toSwitch OptExecProfile = SwExecProfile
-toSwitch (OptJobs _)    = SwJobs
-toSwitch (OptImport _)  = SwImport
-toSwitch _              = error "toSwitch"
-
-----------------------------------------------------------------
-
-optionArg :: Option -> String
-optionArg (OptFlag   str) = str
-optionArg (OptJobs   str) = str
-optionArg (OptImport str) = str
-optionArg _               = ""
 
 ----------------------------------------------------------------
 

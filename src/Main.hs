@@ -20,6 +20,11 @@ import Types
 
 ----------------------------------------------------------------
 
+type UnknownOpt = String
+type ParsedArgs = Either [UnknownOpt] ([Arg],[Option])
+
+----------------------------------------------------------------
+
 main :: IO ()
 main = flip E.catches handlers $ do
     oargs <- getArgs
@@ -52,9 +57,14 @@ checkOptions1 (Left es) func = func es
 checkOptions1 _ _            = return ()
 
 checkOptions2 :: [Option] -> CommandSpec -> [Arg] -> ([UnknownOpt] -> IO ()) -> IO ()
-checkOptions2 opts cmdspec oargs func = do
-    let unknowns = chk specified supported
-    when (unknowns /= []) $ func (concatMap (resolveOptionString oargs) unknowns)
+checkOptions2 opts cmdspec oargs func =
+    when (unknowns /= []) $
+        func (concatMap (resolveOptionString oargs) unknowns)
+  where
+    unknowns = unknownOptions opts cmdspec
+
+unknownOptions :: [Option] -> CommandSpec -> [Switch]
+unknownOptions opts cmdspec = chk specified supported
   where
     chk [] _     = []
     chk (x:xs) ys
