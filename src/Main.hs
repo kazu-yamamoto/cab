@@ -12,6 +12,7 @@ import System.Exit (ExitCode, exitFailure)
 import System.IO
 
 import Commands
+import Doc
 import Help
 import Options
 import Run

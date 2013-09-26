@@ -1,4 +1,4 @@
-module Commands (commandDB, commandSpecByName) where
+module Commands where
 
 import Distribution.Cab
 
@@ -224,11 +224,3 @@ commandDB help = [
        , manual = Just "[<command>]"
        }
   ]
-
-----------------------------------------------------------------
-
-commandSpecByName :: String -> CommandDB -> Maybe CommandSpec
-commandSpecByName _ [] = Nothing
-commandSpecByName x (ent:ents)
-    | x `elem` commandNames ent = Just ent
-    | otherwise                 = commandSpecByName x ents

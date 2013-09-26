@@ -6,6 +6,14 @@ import System.Console.GetOpt (OptDescr(..), ArgDescr(..))
 import Options
 import Types
 
+commandSpecByName :: String -> CommandDB -> Maybe CommandSpec
+commandSpecByName _ [] = Nothing
+commandSpecByName x (ent:ents)
+    | x `elem` commandNames ent = Just ent
+    | otherwise                 = commandSpecByName x ents
+
+----------------------------------------------------------------
+
 usageDocAlias :: CommandSpec -> (String, String, String)
 usageDocAlias cmdspec = (usage,doc,alias)
   where
@@ -44,4 +52,3 @@ optionNames _                          = []
 
 optionDesc :: OptionSpec -> String
 optionDesc (_,Option _ _ _ desc) = desc
-
