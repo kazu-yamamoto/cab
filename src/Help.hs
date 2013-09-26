@@ -1,3 +1,6 @@
+-- Only Main.hs depends on Help.hs
+-- Only Help.hs depends on Path_cab.hs
+
 module Help (
     helpAndExit
   , helpCommandAndExit
