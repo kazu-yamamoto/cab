@@ -1,20 +1,20 @@
 module Main where
 
 import Control.Exception (Handler(..))
-import qualified Control.Exception as E
-import Control.Monad
+import qualified Control.Exception as E (catches)
+import Control.Monad (when)
 import Data.List (isPrefixOf, intercalate)
-import Data.Maybe
+import Data.Maybe (isNothing)
 import Distribution.Cab
-import System.Cmd
-import System.Console.GetOpt
-import System.Environment
-import System.Exit
+import System.Console.GetOpt (ArgOrder(..), OptDescr(..), getOpt')
+import System.Environment (getArgs)
+import System.Exit (ExitCode, exitFailure)
 import System.IO
 
 import Commands
 import Help
 import Options
+import Run
 import Types
 
 ----------------------------------------------------------------
@@ -64,28 +64,6 @@ checkOptions2 opts cmdspec oargs func = do
 
 ----------------------------------------------------------------
 
-run :: CommandSpec -> [Arg] -> [Option] -> IO ()
-run cmdspec params opts = case routing cmdspec of
-    RouteFunc func     -> func params opts options
-    RouteCabal subargs -> callProcess pro subargs params options
-  where
-    pro = "cabal"
-    sws = switches cmdspec
-    options = optionsToString opts sws
-
-callProcess :: String -> [String] -> [Arg] -> [String] -> IO ()
-callProcess pro args0 args1 options = void . system $ script
-  where
-    script = intercalate " " $ pro : args0 ++ cat args1 ++ options
-    cat [pkg,ver] = [pkg ++ "-" ++ ver]
-    cat x         = x
-
-----------------------------------------------------------------
-
-getOptNames :: GetOptSpec -> (String,String)
-getOptNames (Option (c:_) (s:_) _ _) = ('-':[c],'-':'-':s)
-getOptNames _                        = error "getOptNames"
-
 resolveOptionString :: [Arg] -> Switch -> [UnknownOpt]
 resolveOptionString oargs sw = case lookup sw optionDB of
     Nothing    -> error "resolveOptionString"
@@ -95,15 +73,9 @@ resolveOptionString oargs sw = case lookup sw optionDB of
     checkShort s = filter (==s) oargs
     checkLong  l = filter (l `isPrefixOf`) oargs
 
-optionsToString :: [Option] -> SwitchDB -> [String]
-optionsToString opts swdb = concatMap suboption opts
-  where
-    suboption opt = case lookup (toSwitch opt) swdb of
-        Nothing            -> []
-        Just None          -> []
-        Just (Solo x)      -> [x]
-        Just (WithEqArg x) -> [x ++ "=" ++ optionArg opt]
-        Just (FollowArg x) -> [x ++ optionArg opt]
+getOptNames :: GetOptSpec -> (String,String)
+getOptNames (Option (c:_) (s:_) _ _) = ('-':[c],'-':'-':s)
+getOptNames _                        = error "getOptNames"
 
 ----------------------------------------------------------------
 

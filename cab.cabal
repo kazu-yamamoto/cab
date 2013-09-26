@@ -63,9 +63,11 @@ Executable cab
   else
      Build-Depends:     unix
   Other-Modules:	Commands
+                        Doc
                         Help
                         Options
                         Program
+                        Run
                         Types
                         Paths_cab
 
