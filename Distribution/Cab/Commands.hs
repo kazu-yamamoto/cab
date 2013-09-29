@@ -121,7 +121,7 @@ genpaths _ _ _ = genPaths
 
 check :: FunctionCommand
 check _ _ _ = do
-    sandboxOpts <- getSandboxOpts <$> getSandbox
+    sandboxOpts <- getSandboxOpts2 <$> getSandbox
     void . system $ script sandboxOpts
   where
     script sandboxOpts = "ghc-pkg check -v " ++ sandboxOpts
