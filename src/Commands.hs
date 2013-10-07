@@ -25,8 +25,8 @@ commandDB help = [
                     ,(SwFlag, WithEqArg "--flags")
                     ,(SwTest, Solo "--enable-tests")
                     ,(SwDepsOnly, Solo "--only-dependencies")
-                    ,(SwLibProfile, Solo "--enable-library-profiling -fprof-auto")
-                    ,(SwExecProfile, Solo "--enable-executable-profiling -fprof-auto")
+                    ,(SwLibProfile, Solo "--enable-library-profiling --ghc-options=\"-fprof-auto -fprof-cafs\"")
+                    ,(SwExecProfile, Solo "--enable-executable-profiling --ghc-options=\"-fprof-auto -fprof-cafs\"")
                     ,(SwJobs, WithEqArg "--jobs")
                     ]
        , manual = Just "[<package> [<ver>]]"
@@ -60,8 +60,8 @@ commandDB help = [
        , switches = [(SwFlag, WithEqArg "--flags")
                     ,(SwTest, Solo "--enable-tests")
                     ,(SwBench, Solo "--enable-benchmarks")
-                    ,(SwLibProfile, Solo "--enable-library-profiling -fprof-auto")
-                    ,(SwExecProfile, Solo "--enable-executable-profiling -fprof-auto")
+                    ,(SwLibProfile, Solo "--enable-library-profiling --ghc-options=\"-fprof-auto -fprof-cafs\"")
+                    ,(SwExecProfile, Solo "--enable-executable-profiling --ghc-options=\"-fprof-auto -fprof-cafs\"")
                     ]
        , manual = Nothing
        }
