@@ -25,8 +25,8 @@ commandDB help = [
                     ,(SwFlag, WithEqArg "--flags")
                     ,(SwTest, Solo "--enable-tests")
                     ,(SwDepsOnly, Solo "--only-dependencies")
-                    ,(SwLibProfile, Solo "--enable-library-profiling")
-                    ,(SwExecProfile, Solo "--enable-executable-profiling")
+                    ,(SwLibProfile, Solo "--enable-library-profiling -fprof-auto")
+                    ,(SwExecProfile, Solo "--enable-executable-profiling -fprof-auto")
                     ,(SwJobs, WithEqArg "--jobs")
                     ]
        , manual = Just "[<package> [<ver>]]"
@@ -60,8 +60,8 @@ commandDB help = [
        , switches = [(SwFlag, WithEqArg "--flags")
                     ,(SwTest, Solo "--enable-tests")
                     ,(SwBench, Solo "--enable-benchmarks")
-                    ,(SwLibProfile, Solo "--enable-library-profiling")
-                    ,(SwExecProfile, Solo "--enable-executable-profiling")
+                    ,(SwLibProfile, Solo "--enable-library-profiling -fprof-auto")
+                    ,(SwExecProfile, Solo "--enable-executable-profiling -fprof-auto")
                     ]
        , manual = Nothing
        }
