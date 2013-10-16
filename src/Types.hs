@@ -21,6 +21,7 @@ data Switch = SwNoharm
             | SwExecProfile
             | SwJobs
             | SwImport
+            | SwStatic
             deriving (Eq,Show)
 
 ----------------------------------------------------------------

@@ -37,6 +37,7 @@ data Option = OptNoharm
             | OptExecProfile
             | OptJobs String
             | OptImport String
+            | OptStatic
             deriving (Eq,Show)
 
 ----------------------------------------------------------------

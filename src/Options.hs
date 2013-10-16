@@ -45,10 +45,13 @@ getOptDB = [
   , Option ['i'] ["import"]
       (ReqArg OptImport "<dir>:<dir>")
       "Add module import paths"
+  , Option ['s'] ["static"]
+      (NoArg OptStatic)
+      "Create static libraries only"
   , Option ['h'] ["help"]
       (NoArg OptHelp)
       "Show help message"
   ]
 
 optionDB :: OptionDB
-optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench,SwDepsOnly,SwLibProfile,SwExecProfile,SwJobs,SwImport] getOptDB
+optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench,SwDepsOnly,SwLibProfile,SwExecProfile,SwJobs,SwImport,SwStatic] getOptDB
