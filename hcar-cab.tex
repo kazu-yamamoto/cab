@@ -1,14 +1,14 @@
 % {ttcab}AMaintenanceComman-K{.tex
 \begin{hcarentry}[updated]{{\tt cab} --- A Maintenance Command of Haskell Cabal Packages}
-\report{Kazu Yamamoto}%05/13
+\report{Kazu Yamamoto}%11/13
 \status{open source, actively developed}
 \makeheader
 
-{\tt cab} is a MacPorts-like maintenance command of Haskell cabal packages. Some parts of this program are a wrapper to {\tt ghc-pkg}, {\tt cabal}, and {\tt cabal-dev}.
+{\tt cab} is a MacPorts-like maintenance command of Haskell cabal packages. Some parts of this program are a wrapper to {\tt ghc-pkg} and {\tt cabal}.
 
 If you are always confused due to inconsistency of {\tt ghc-pkg} and {\tt cabal}, or if you want a way to check all outdated packages, or if you want a way to remove outdated packages recursively, this command helps you.
 
-{\tt cab} now provides the benchmark option (``{\tt -b}'') for the ``{\tt conf}'' subcommand
+{\tt cab} now supports the sandbox of {\tt cabal} 1.18 and stopped supporting {\tt cabal-dev}. Some new command-line options are added, including {\tt -j} for parallel jobs, {\tt -p} for library profiling and {\tt -e} for executable profiling.
 
 \FurtherReading
   \url{http://www.mew.org/~kazu/proj/cab/en/}
