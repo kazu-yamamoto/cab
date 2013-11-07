@@ -24,6 +24,7 @@ commandDB help = [
        , switches = [(SwNoharm, Solo "--dry-run -v")
                     ,(SwFlag, WithEqArg "--flags")
                     ,(SwTest, Solo "--enable-tests")
+                    ,(SwBench, Solo "--enable-benchmarks")
                     ,(SwDepsOnly, Solo "--only-dependencies")
                     ,(SwLibProfile, Solo "--enable-library-profiling --ghc-options=\"-fprof-auto -fprof-cafs\"")
                     ,(SwExecProfile, Solo "--enable-executable-profiling --ghc-options=\"-fprof-auto -fprof-cafs\"")
