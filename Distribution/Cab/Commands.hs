@@ -8,7 +8,7 @@ module Distribution.Cab.Commands (
 import Control.Applicative hiding (many)
 import Control.Monad
 import Data.Char
-import Data.List (isPrefixOf, intercalate)
+import Data.List (isPrefixOf, isSuffixOf, intercalate)
 import qualified Data.Map as M
 import Distribution.Cab.GenPaths
 import Distribution.Cab.PkgDB
@@ -97,10 +97,29 @@ uninstall nmver opts _ = do
         mapM_ (hPutStrLn stderr . fullNameOfPkgInfo) (init sortedPkgs)
       else do
         unless doit $ putStrLn "The following packages are deleted without the \"-n\" option."
-        mapM_ (unregister doit opts . pairNameOfPkgInfo) sortedPkgs
+        mapM_ (purge doit opts . pairNameOfPkgInfo) sortedPkgs
   where
     onlyOne = OptRecursive `notElem` opts
     doit = OptNoharm `notElem` opts
+
+purge :: Bool -> [Option] -> (String,String) -> IO ()
+purge doit opts (name,ver) = do
+    putStrLn $ "Deleting " ++ name ++ " " ++ ver
+    sandboxOpts <- getSandboxOpts2 <$> getSandbox
+    libdirs <- queryGhcPkg sandboxOpts "library-dirs"
+    haddoc  <- cutTrailing "html" `fmap` queryGhcPkg sandboxOpts "haddock-html" 
+    unregister doit opts (name,ver)
+    putStrLn  $ unwords ["Removing dirs:", libdirs, haddoc]
+    when doit . void . system . unwords $ ["rm -rf ", libdirs, haddoc]
+
+  where
+    queryGhcPkg sandboxOpts field = do out <- readProcess "ghc-pkg" ["field" ++ sandboxOpts,
+                                                                     name ++ "-" ++ ver,
+                                                                     field] ""
+                                       return . unwords . tail . words $ out
+    cutTrailing suffix s = if suffix `isSuffixOf` s
+                             then reverse . drop (length suffix) . reverse $ s
+                             else s 
 
 unregister :: Bool -> [Option] -> (String,String) -> IO ()
 unregister doit _ (name,ver) =
