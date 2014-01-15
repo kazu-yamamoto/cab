@@ -107,19 +107,18 @@ purge doit opts (name,ver) = do
     putStrLn $ "Deleting " ++ name ++ " " ++ ver
     sandboxOpts <- getSandboxOpts2 <$> getSandbox
     libdirs <- queryGhcPkg sandboxOpts "library-dirs"
-    haddoc  <- cutTrailing "html" `fmap` queryGhcPkg sandboxOpts "haddock-html" 
+    haddoc  <- cutTrailing "html" `fmap` queryGhcPkg sandboxOpts "haddock-html"
     unregister doit opts (name,ver)
-    putStrLn  $ unwords ["Removing dirs:", libdirs, haddoc]
+    putStrLn $ unwords ["Removing dirs:", libdirs, haddoc]
     when doit . void . system . unwords $ ["rm -rf ", libdirs, haddoc]
 
   where
-    queryGhcPkg sandboxOpts field = do out <- readProcess "ghc-pkg" ["field" ++ sandboxOpts,
-                                                                     name ++ "-" ++ ver,
-                                                                     field] ""
-                                       return . unwords . tail . words $ out
-    cutTrailing suffix s = if suffix `isSuffixOf` s
-                             then reverse . drop (length suffix) . reverse $ s
-                             else s 
+    queryGhcPkg sandboxOpts field = do
+        let options = ["field", sandboxOpts, name ++ "-" ++ ver, field]
+        unwords . tail . words <$> readProcess "ghc-pkg" options ""
+    cutTrailing suffix s
+      | suffix `isSuffixOf` s = reverse . drop (length suffix) . reverse $ s
+      | otherwise             = s
 
 unregister :: Bool -> [Option] -> (String,String) -> IO ()
 unregister doit _ (name,ver) =
