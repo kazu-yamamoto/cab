@@ -105,16 +105,17 @@ uninstall nmver opts _ = do
 purge :: Bool -> [Option] -> (String,String) -> IO ()
 purge doit opts (name,ver) = do
     putStrLn $ "Deleting " ++ name ++ " " ++ ver
-    sandboxOpts <- getSandboxOpts2 <$> getSandbox
+    sandboxOpts <- (makeOptList . getSandboxOpts2) <$> getSandbox
     libdirs <- queryGhcPkg sandboxOpts "library-dirs"
     haddoc  <- cutTrailing "html" `fmap` queryGhcPkg sandboxOpts "haddock-html"
     unregister doit opts (name,ver)
     putStrLn $ unwords ["Removing dirs:", libdirs, haddoc]
     when doit . void . system . unwords $ ["rm -rf ", libdirs, haddoc]
-
   where
+    makeOptList "" = []
+    makeOptList x  = [x]
     queryGhcPkg sandboxOpts field = do
-        let options = ["field", sandboxOpts, name ++ "-" ++ ver, field]
+        let options = ["field"] ++ sandboxOpts ++ [name ++ "-" ++ ver, field]
         unwords . tail . words <$> readProcess "ghc-pkg" options ""
     cutTrailing suffix s
       | suffix `isSuffixOf` s = reverse . drop (length suffix) . reverse $ s
