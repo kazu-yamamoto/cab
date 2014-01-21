@@ -104,12 +104,12 @@ uninstall nmver opts _ = do
 
 purge :: Bool -> [Option] -> (String,String) -> IO ()
 purge doit opts (name,ver) = do
-    putStrLn $ "Deleting " ++ name ++ " " ++ ver
+--    putStrLn $ "Deleting " ++ name ++ " " ++ ver
     sandboxOpts <- (makeOptList . getSandboxOpts2) <$> getSandbox
     libdirs <- queryGhcPkg sandboxOpts "library-dirs"
     haddoc  <- cutTrailing "html" `fmap` queryGhcPkg sandboxOpts "haddock-html"
     unregister doit opts (name,ver)
-    putStrLn $ unwords ["Removing dirs:", libdirs, haddoc]
+    putStrLn $ unwords ["Deleting dirs:", libdirs, haddoc]
     when doit . void . system . unwords $ ["rm -rf ", libdirs, haddoc]
   where
     makeOptList "" = []
