@@ -116,7 +116,7 @@ purge doit opts (name,ver) = do
     makeOptList x  = [x]
     queryGhcPkg sandboxOpts field = do
         let options = ["field"] ++ sandboxOpts ++ [name ++ "-" ++ ver, field]
-        unwords . tail . words <$> readProcess "ghc-pkg" options ""
+        (!!1) . words <$> readProcess "ghc-pkg" options ""
     cutTrailing suffix s
       | suffix `isSuffixOf` s = reverse . drop (length suffix) . reverse $ s
       | otherwise             = s
