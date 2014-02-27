@@ -76,7 +76,7 @@ outdated _ opts _ = do
     forM_ pkgs $ \p -> case M.lookup (nameOfPkgInfo p) verDB of
         Nothing  -> return ()
         Just ver -> when (verOfPkgInfo p /= ver) $
-                      putStrLn $ fullNameOfPkgInfo p ++ " < " ++ verToString ver
+                      putStrLn $ fullNameOfPkgInfo p ++ " /= " ++ verToString ver
 
 getDB :: [Option] -> IO PkgDB
 getDB opts
