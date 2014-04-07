@@ -141,7 +141,7 @@ removeDir :: Bool -> FilePath -> IO ()
 removeDir doit dir = do
     exist <- doesDirectoryExist dir
     when exist $ do
-        putStrLn $ "Deleteing " ++ dir
+        putStrLn $ "Deleting " ++ dir
         when doit $ removeDirectoryRecursive dir
 
 unregister :: Bool -> [Option] -> (String,String) -> IO ()
