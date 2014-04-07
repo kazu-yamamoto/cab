@@ -59,10 +59,6 @@ Executable cab
                       , filepath
                       , process
                       , process-conduit >= 1.1
-  if os(windows)
-     Build-Depends:
-  else
-     Build-Depends:     unix
   Other-Modules:	Commands
                         Doc
                         Help
