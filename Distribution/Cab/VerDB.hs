@@ -14,6 +14,7 @@ module Distribution.Cab.VerDB (
 
 import Control.Applicative
 import Control.Arrow (second)
+import Control.Monad.Trans.Resource (runResourceT)
 import Data.Attoparsec.ByteString.Char8
 import Data.Conduit
 import Data.Conduit.Attoparsec
