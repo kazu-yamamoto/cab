@@ -5,9 +5,9 @@ module Distribution.Cab.Commands (
   , genpaths, check, initSandbox, add, ghci
   ) where
 
-import Control.Applicative hiding (many)
-import Control.Monad
-import Data.Char
+import Control.Applicative ((<$>))
+import Control.Monad (forM_, unless, when, void)
+import Data.Char (toLower)
 import Data.List (intercalate, isPrefixOf)
 import qualified Data.Map as M
 import Distribution.Cab.GenPaths
@@ -17,10 +17,10 @@ import Distribution.Cab.Sandbox
 import Distribution.Cab.VerDB
 import Distribution.Cab.Version
 import System.Directory (doesDirectoryExist, removeDirectoryRecursive)
-import System.Exit
+import System.Exit (exitFailure)
 import System.FilePath (takeDirectory, takeFileName)
-import System.IO
-import System.Process hiding (env)
+import System.IO (hPutStrLn, stderr)
+import System.Process (readProcess, system)
 
 ----------------------------------------------------------------
 
