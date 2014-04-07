@@ -8,7 +8,7 @@ module Distribution.Cab.Commands (
 import Control.Applicative hiding (many)
 import Control.Monad
 import Data.Char
-import Data.List (isPrefixOf, isSuffixOf, intercalate)
+import Data.List (intercalate, isPrefixOf)
 import qualified Data.Map as M
 import Distribution.Cab.GenPaths
 import Distribution.Cab.PkgDB
@@ -16,7 +16,9 @@ import Distribution.Cab.Printer
 import Distribution.Cab.Sandbox
 import Distribution.Cab.VerDB
 import Distribution.Cab.Version
+import System.Directory (doesDirectoryExist, removeDirectoryRecursive)
 import System.Exit
+import System.FilePath (takeDirectory, takeFileName)
 import System.IO
 import System.Process hiding (env)
 
@@ -103,23 +105,44 @@ uninstall nmver opts _ = do
     doit = OptNoharm `notElem` opts
 
 purge :: Bool -> [Option] -> (String,String) -> IO ()
-purge doit opts (name,ver) = do
---    putStrLn $ "Deleting " ++ name ++ " " ++ ver
+purge doit opts nameVer = do
     sandboxOpts <- (makeOptList . getSandboxOpts2) <$> getSandbox
-    libdirs <- queryGhcPkg sandboxOpts "library-dirs"
-    haddoc  <- cutTrailing "html" `fmap` queryGhcPkg sandboxOpts "haddock-html"
-    unregister doit opts (name,ver)
-    putStrLn $ unwords ["Deleting dirs:", libdirs, haddoc]
-    when doit . void . system . unwords $ ["rm -rf ", libdirs, haddoc]
+    dirs <- getDirs nameVer sandboxOpts
+    unregister doit opts nameVer
+    mapM_ (removeDir doit) dirs
   where
     makeOptList "" = []
     makeOptList x  = [x]
-    queryGhcPkg sandboxOpts field = do
-        let options = ["field"] ++ sandboxOpts ++ [name ++ "-" ++ ver, field]
-        (!!1) . words <$> readProcess "ghc-pkg" options ""
-    cutTrailing suffix s
-      | suffix `isSuffixOf` s = reverse . drop (length suffix) . reverse $ s
-      | otherwise             = s
+
+getDirs :: (String,String) -> [String] -> IO [FilePath]
+getDirs (name,ver) sandboxOpts = do
+    libdirs <- queryGhcPkg "library-dirs"
+    haddock <- map docDir <$> queryGhcPkg "haddock-html"
+    return $ topDir $ libdirs ++ haddock
+  where
+    nameVer = name ++ "-" ++ ver
+    queryGhcPkg field = do
+        let options = ["field"] ++ sandboxOpts ++ [nameVer, field]
+        ws <- words <$> readProcess "ghc-pkg" options ""
+        return $ case ws of
+            []     -> []
+            (_:xs) -> xs
+    docDir dir
+      | takeFileName dir == "html" = takeDirectory dir
+      | otherwise                  = dir
+    topDir []     = []
+    topDir ds@(dir:_)
+      | takeFileName top == nameVer = top : ds
+      | otherwise                   = ds
+      where
+        top = takeDirectory dir
+
+removeDir :: Bool -> FilePath -> IO ()
+removeDir doit dir = do
+    exist <- doesDirectoryExist dir
+    when exist $ do
+        putStrLn $ "Deleteing " ++ dir
+        when doit $ removeDirectoryRecursive dir
 
 unregister :: Bool -> [Option] -> (String,String) -> IO ()
 unregister doit _ (name,ver) =
