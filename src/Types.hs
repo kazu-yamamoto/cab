@@ -22,6 +22,7 @@ data Switch = SwNoharm
             | SwJobs
             | SwImport
             | SwStatic
+            | SwPackageDB
             deriving (Eq,Show)
 
 ----------------------------------------------------------------

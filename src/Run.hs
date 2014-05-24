@@ -10,20 +10,21 @@ import Types
 ----------------------------------------------------------------
 
 toSwitch :: Option -> Switch
-toSwitch OptNoharm      = SwNoharm
-toSwitch OptRecursive   = SwRecursive
-toSwitch OptAll         = SwAll
-toSwitch OptInfo        = SwInfo
-toSwitch (OptFlag _)    = SwFlag
-toSwitch OptTest        = SwTest
-toSwitch OptBench       = SwBench
-toSwitch OptDepsOnly    = SwDepsOnly
-toSwitch OptLibProfile  = SwLibProfile
-toSwitch OptExecProfile = SwExecProfile
-toSwitch (OptJobs _)    = SwJobs
-toSwitch (OptImport _)  = SwImport
-toSwitch OptStatic      = SwStatic
-toSwitch _              = error "toSwitch"
+toSwitch OptNoharm        = SwNoharm
+toSwitch OptRecursive     = SwRecursive
+toSwitch OptAll           = SwAll
+toSwitch OptInfo          = SwInfo
+toSwitch (OptFlag _)      = SwFlag
+toSwitch OptTest          = SwTest
+toSwitch OptBench         = SwBench
+toSwitch OptDepsOnly      = SwDepsOnly
+toSwitch OptLibProfile    = SwLibProfile
+toSwitch OptExecProfile   = SwExecProfile
+toSwitch (OptJobs _)      = SwJobs
+toSwitch (OptImport _)    = SwImport
+toSwitch OptStatic        = SwStatic
+toSwitch (OptPackageDB _) = SwPackageDB
+toSwitch _                = error "toSwitch"
 
 ----------------------------------------------------------------
 

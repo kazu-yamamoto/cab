@@ -33,7 +33,8 @@ main = flip E.catches handlers $ do
         mcmdspec = commandSpecByName act (commandDB helpCommandAndExit)
     when (isNothing mcmdspec) (illegalCommandAndExit act)
     let Just cmdspec = mcmdspec
-    checkOptions2 opts1 cmdspec oargs illegalOptionsAndExit
+-- TODO
+--    checkOptions2 opts1 cmdspec oargs illegalOptionsAndExit
     run cmdspec params opts1
   where
     handlers = [Handler handleExit]

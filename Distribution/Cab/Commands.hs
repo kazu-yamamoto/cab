@@ -10,6 +10,7 @@ import Control.Monad (forM_, unless, when, void)
 import Data.Char (toLower)
 import Data.List (intercalate, isPrefixOf)
 import qualified Data.Map as M
+import Data.Maybe (mapMaybe)
 import Distribution.Cab.GenPaths
 import Distribution.Cab.PkgDB
 import Distribution.Cab.Printer
@@ -40,6 +41,7 @@ data Option = OptNoharm
             | OptJobs String
             | OptImport String
             | OptStatic
+            | OptPackageDB String
             deriving (Eq,Show)
 
 ----------------------------------------------------------------
@@ -82,16 +84,25 @@ outdated _ opts _ = do
 
 getDB :: [Option] -> IO PkgDB
 getDB opts
-  | optall    = getSandbox >>= getPkgDB
-  | otherwise = getSandbox >>= getUserPkgDB
+  | optall    = getS >>= getPkgDB
+  | otherwise = getS >>= getUserPkgDB
   where
     optall = OptAll `elem` opts
+    getS = getSandbox (optPackageDB opts)
+
+optPackageDB :: [Option] -> Maybe FilePath
+optPackageDB = headMay . mapMaybe pkgDb
+  where
+    pkgDb (OptPackageDB a) = Just a
+    pkgDb _ = Nothing
+    headMay [] = Nothing
+    headMay (a:_) = Just a
 
 ----------------------------------------------------------------
 
 uninstall :: FunctionCommand
 uninstall nmver opts _ = do
-    userDB <- getSandbox >>= getUserPkgDB
+    userDB <- getSandbox (optPackageDB opts) >>= getUserPkgDB
     pkg <- lookupPkg nmver userDB
     let sortedPkgs = topSortedPkgs pkg userDB
     if onlyOne && length sortedPkgs /= 1 then do
@@ -106,7 +117,7 @@ uninstall nmver opts _ = do
 
 purge :: Bool -> [Option] -> (String,String) -> IO ()
 purge doit opts nameVer = do
-    sandboxOpts <- (makeOptList . getSandboxOpts2) <$> getSandbox
+    sandboxOpts <- (makeOptList . getSandboxOpts2) <$> getSandbox (optPackageDB opts)
     dirs <- getDirs nameVer sandboxOpts
     unregister doit opts nameVer
     mapM_ (removeDir doit) dirs
@@ -145,10 +156,10 @@ removeDir doit dir = do
         when doit $ removeDirectoryRecursive dir
 
 unregister :: Bool -> [Option] -> (String,String) -> IO ()
-unregister doit _ (name,ver) =
+unregister doit opts (name,ver) =
     if doit then do
         putStrLn $ "Deleting " ++ name ++ " " ++ ver
-        sandboxOpts <- getSandboxOpts2 <$> getSandbox
+        sandboxOpts <- getSandboxOpts2 <$> getSandbox (optPackageDB opts)
         when doit $ void . system $ script sandboxOpts
       else
         putStrLn $ name ++ " " ++ ver
@@ -163,8 +174,8 @@ genpaths _ _ _ = genPaths
 ----------------------------------------------------------------
 
 check :: FunctionCommand
-check _ _ _ = do
-    sandboxOpts <- getSandboxOpts2 <$> getSandbox
+check _ opts _ = do
+    sandboxOpts <- getSandboxOpts2 <$> getSandbox (optPackageDB opts)
     void . system $ script sandboxOpts
   where
     script sandboxOpts = "ghc-pkg check -v " ++ sandboxOpts
@@ -180,7 +191,7 @@ revdeps nmver opts _ = printDepends nmver opts printRevDeps
 printDepends :: [String] -> [Option]
              -> (Bool -> Bool -> PkgDB -> Int -> PkgInfo -> IO ()) -> IO ()
 printDepends nmver opts func = do
-    db' <- getSandbox >>= getPkgDB
+    db' <- getSandbox (optPackageDB opts) >>= getPkgDB
     pkg <- lookupPkg nmver db'
     db <- getDB opts
     func rec info db 0 pkg
@@ -230,6 +241,6 @@ add _     _ _ = do
 ----------------------------------------------------------------
 
 ghci :: FunctionCommand
-ghci args _ options = do
-    sbxOpts <- getSandboxOpts <$> getSandbox
+ghci args opts options = do
+    sbxOpts <- getSandboxOpts <$> getSandbox (optPackageDB opts)
     void $ system $ "ghci" ++ " " ++ sbxOpts ++ " " ++ intercalate " " (options ++ args)

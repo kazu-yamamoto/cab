@@ -51,6 +51,9 @@ getOptDB = [
   , Option ['h'] ["help"]
       (NoArg OptHelp)
       "Show help message"
+  , Option [] ["package-db"]
+      (ReqArg OptPackageDB "<path.conf.d>")
+      "Use a custom package db"
   ]
 
 optionDB :: OptionDB
