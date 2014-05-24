@@ -26,8 +26,9 @@ pkgDbKeyLen = length pkgDbKey
 
 -- | Find a sandbox config file by tracing ancestor directories,
 --   parse it and return the package db path
-getSandbox :: IO (Maybe FilePath)
-getSandbox = (Just <$> getPkgDb) `E.catch` handler
+getSandbox :: Maybe FilePath -> IO (Maybe FilePath)
+getSandbox j@(Just _) = return j
+getSandbox Nothing    = (Just <$> getPkgDb) `E.catch` handler
   where
     getPkgDb = getCurrentDirectory >>= getSandboxConfigFile >>= getPackageDbDir
     handler :: SomeException -> IO (Maybe String)
