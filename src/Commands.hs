@@ -118,9 +118,9 @@ commandDB help = [
        }
   , CommandSpec {
          command = Unpack
-       , commandNames = ["unpack"]
+       , commandNames = ["get", "unpack"]
        , document = "Untar a package in the current directory"
-       , routing = RouteCabal ["unpack"]
+       , routing = RouteCabal ["get"]
        , switches = []
        , manual = Just "<package> [<ver>]"
        }
