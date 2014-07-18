@@ -48,7 +48,7 @@ Executable cab
   HS-Source-Dirs:       src
   Build-Depends:        base >= 4.0 && < 5
                       , cab
-                      , Cabal
+                      , Cabal >= 1.18
                       , attoparsec >= 0.10
                       , bytestring
                       , conduit >= 1.1
