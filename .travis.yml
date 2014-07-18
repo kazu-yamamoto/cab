@@ -1,6 +1,17 @@
 language: haskell
+
 ghc:
   - 7.0
   - 7.4
   - 7.6
   - 7.8
+
+install:
+  - cabal update
+  - cabal install doctest
+  - cabal install -j --only-dependencies --enable-tests
+
+script:
+  - cabal configure --enable-tests
+  - cabal build
+  - runghc test/doctests.hs
