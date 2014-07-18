@@ -1,9 +1,8 @@
 module Run (run, toSwitch) where
 
-import Control.Monad (void)
 import Data.List (intercalate)
 import Distribution.Cab
-import System.Cmd (system)
+import System.Process (callCommand)
 
 import Types
 
@@ -56,7 +55,7 @@ run cmdspec params opts = case routing cmdspec of
     options = optionsToString opts sws
 
 callProcess :: String -> [String] -> [Arg] -> [String] -> IO ()
-callProcess pro args0 args1 options = void . system $ script
+callProcess pro args0 args1 options = callCommand script
   where
     script = intercalate " " $ pro : args0 ++ cat args1 ++ options
     cat [pkg,ver] = [pkg ++ "-" ++ ver]
