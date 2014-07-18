@@ -23,6 +23,7 @@ toSwitch OptExecProfile = SwExecProfile
 toSwitch (OptJobs _)    = SwJobs
 toSwitch (OptImport _)  = SwImport
 toSwitch OptStatic      = SwStatic
+toSwitch OptFuture      = SwFuture
 toSwitch _              = error "toSwitch"
 
 ----------------------------------------------------------------

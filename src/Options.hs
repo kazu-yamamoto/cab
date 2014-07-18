@@ -48,10 +48,13 @@ getOptDB = [
   , Option ['s'] ["static"]
       (NoArg OptStatic)
       "Create static libraries only"
+  , Option ['u'] ["future"]
+      (NoArg OptFuture)
+      "Show packages with versions ahead of Hackage"
   , Option ['h'] ["help"]
       (NoArg OptHelp)
       "Show help message"
   ]
 
 optionDB :: OptionDB
-optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench,SwDepsOnly,SwLibProfile,SwExecProfile,SwJobs,SwImport,SwStatic] getOptDB
+optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench,SwDepsOnly,SwLibProfile,SwExecProfile,SwJobs,SwImport,SwStatic,SwFuture] getOptDB

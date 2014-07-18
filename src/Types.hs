@@ -22,6 +22,7 @@ data Switch = SwNoharm
             | SwJobs
             | SwImport
             | SwStatic
+            | SwFuture
             deriving (Eq,Show)
 
 ----------------------------------------------------------------

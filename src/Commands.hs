@@ -89,7 +89,9 @@ commandDB help = [
        , commandNames = ["outdated"]
        , document = "Display outdated packages"
        , routing = RouteFunc outdated
-       , switches = [(SwAll, None)]
+       , switches = [(SwAll, None)
+                    ,(SwFuture, Solo "--future")
+                    ]
        , manual = Nothing
        }
   , CommandSpec {
