@@ -16,7 +16,6 @@ import Control.Applicative
 import Control.Arrow (second)
 import Control.Monad.Trans.Resource (runResourceT)
 import Data.Attoparsec.ByteString.Char8
-import Data.Conduit
 import Data.Conduit.Attoparsec
 import Data.Conduit.Process
 import Data.Map (Map)
@@ -42,8 +41,8 @@ getVerDB how = VerDB . justOnly <$> verInfos
     script = case how of
         InstalledOnly -> "cabal list --installed"
         AllRegistered -> "cabal list"
-    verInfos = runResourceT $ sourceCmd script $$ cabalListParser
-    justOnly = map (second (toVer . fromJust)) . filter (isJust . snd)
+    verInfos = runResourceT $ sourceCmdWithConsumer script cabalListParser
+    justOnly = map (second (toVer . fromJust)) . filter (isJust . snd) . snd
     cabalListParser = sinkParser verinfos
 
 ----------------------------------------------------------------

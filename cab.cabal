@@ -1,5 +1,5 @@
 Name:                   cab
-Version:                0.2.10
+Version:                0.2.11
 Author:                 Kazu Yamamoto <kazu@iij.ad.jp>
 Maintainer:             Kazu Yamamoto <kazu@iij.ad.jp>
 License:                BSD3
@@ -25,12 +25,11 @@ Library
                       , attoparsec >= 0.10
                       , bytestring
                       , conduit >= 1.1
-                      , conduit-extra
+                      , conduit-extra >= 1.1.2
                       , containers
                       , directory
                       , filepath
                       , process
-                      , process-conduit >= 1.1
                       , resourcet
   Exposed-Modules:	Distribution.Cab
                         Distribution.Cab.PkgDB
@@ -53,12 +52,11 @@ Executable cab
                       , attoparsec >= 0.10
                       , bytestring
                       , conduit >= 1.1
-                      , conduit-extra
+                      , conduit-extra >= 1.1.2
                       , containers
                       , directory
                       , filepath
                       , process
-                      , process-conduit >= 1.1
   Other-Modules:	Commands
                         Doc
                         Help
