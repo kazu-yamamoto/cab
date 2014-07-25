@@ -40,6 +40,7 @@ data Option = OptNoharm
             | OptJobs String
             | OptImport String
             | OptStatic
+            | OptFuture
             deriving (Eq,Show)
 
 ----------------------------------------------------------------
@@ -77,8 +78,17 @@ outdated _ opts _ = do
     verDB <- toMap <$> getVerDB InstalledOnly
     forM_ pkgs $ \p -> case M.lookup (nameOfPkgInfo p) verDB of
         Nothing  -> return ()
-        Just ver -> when (verOfPkgInfo p /= ver) $
-                      putStrLn $ fullNameOfPkgInfo p ++ " /= " ++ verToString ver
+        Just ver -> do
+            let comp = verOfPkgInfo p `compare` ver
+            when (dated comp) $
+                putStrLn $ fullNameOfPkgInfo p ++ (showIneq comp) ++ verToString ver
+  where
+    dated LT = True
+    dated GT = OptFuture `elem` opts
+    dated EQ = False
+    showIneq LT = " < "
+    showIneq GT = " > "
+    showIneq EQ = error "Packages have equal versions"
 
 getDB :: [Option] -> IO PkgDB
 getDB opts

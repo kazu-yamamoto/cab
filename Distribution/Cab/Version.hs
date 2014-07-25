@@ -10,7 +10,7 @@ import Distribution.Cab.Utils
 import Distribution.Version (Version(..))
 
 -- | Package version.
-newtype Ver = Ver [Int] deriving (Eq,Show)
+newtype Ver = Ver [Int] deriving (Eq,Ord,Read,Show)
 
 -- | Creating 'Ver'.
 --

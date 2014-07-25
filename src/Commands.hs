@@ -89,7 +89,9 @@ commandDB help = [
        , commandNames = ["outdated"]
        , document = "Display outdated packages"
        , routing = RouteFunc outdated
-       , switches = [(SwAll, None)]
+       , switches = [(SwAll, None)
+                    ,(SwFuture, Solo "--future")
+                    ]
        , manual = Nothing
        }
   , CommandSpec {
@@ -118,9 +120,9 @@ commandDB help = [
        }
   , CommandSpec {
          command = Unpack
-       , commandNames = ["unpack"]
+       , commandNames = ["get", "unpack"]
        , document = "Untar a package in the current directory"
-       , routing = RouteCabal ["unpack"]
+       , routing = RouteCabal ["get"]
        , switches = []
        , manual = Just "<package> [<ver>]"
        }
