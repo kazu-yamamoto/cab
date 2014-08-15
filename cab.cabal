@@ -44,9 +44,7 @@ Library
 Executable cab
   Default-Language:     Haskell2010
   Main-Is:              Main.hs
-  GHC-Options:          -Wall
-  if os(windows)
-    GHC-Options:        -threaded
+  GHC-Options:          -Wall -threaded
   HS-Source-Dirs:       src
   Build-Depends:        base >= 4.0 && < 5
                       , cab
