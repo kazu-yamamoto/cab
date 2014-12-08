@@ -1,8 +1,14 @@
+{-# LANGUAGE CPP #-}
 module Run (run, toSwitch) where
 
 import Data.List (intercalate)
 import Distribution.Cab
+#if MIN_VERSION_process(1,2,0)
 import System.Process (callCommand)
+#else
+import Control.Monad (void)
+import System.Cmd (system)
+#endif
 
 import Types
 
@@ -55,8 +61,14 @@ run cmdspec params opts = case routing cmdspec of
     options = optionsToString opts sws
 
 callProcess :: String -> [String] -> [Arg] -> [String] -> IO ()
-callProcess pro args0 args1 options = callCommand script
+callProcess pro args0 args1 options = systemCommand script
   where
+#if MIN_VERSION_process(1,2,0)
+    systemCommand = callCommand
+#else
+    systemCommand = void . system
+#endif
+
     script = intercalate " " $ pro : args0 ++ cat args1 ++ options
     cat [pkg,ver] = [pkg ++ "-" ++ ver]
     cat x         = x
