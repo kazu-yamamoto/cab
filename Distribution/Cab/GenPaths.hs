@@ -50,4 +50,5 @@ getCabalFile = do
         []      -> throwIO $ userError "Cabal file does not exist"
         cfile:_ -> return cfile
   where
+    isCabal :: String -> Bool
     isCabal nm = ".cabal" `isSuffixOf` nm && length nm > 6

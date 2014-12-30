@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 module Distribution.Cab.PkgDB (
   -- * Types
     PkgDB
@@ -30,13 +31,21 @@ import Distribution.Package (PackageName(..), PackageIdentifier(..))
 import Distribution.Simple.Compiler (PackageDB(..))
 import Distribution.Simple.GHC (configure, getInstalledPackages, getPackageDBContents)
 import Distribution.Simple.PackageIndex
-    (lookupPackageName, lookupSourcePackageId
-    , allPackages, fromList, reverseDependencyClosure
-    , topologicalOrder, PackageIndex)
+    (lookupPackageName, lookupSourcePackageId, allPackages
+    , fromList, reverseDependencyClosure, topologicalOrder)
+#if MIN_VERSION_Cabal(1,22,0)
+import Distribution.Simple.PackageIndex (InstalledPackageIndex)
+#else
+import Distribution.Simple.PackageIndex (PackageIndex)
+#endif
 import Distribution.Simple.Program.Db (defaultProgramDb)
 import Distribution.Verbosity (normal)
 
+#if MIN_VERSION_Cabal(1,22,0)
+type PkgDB = InstalledPackageIndex
+#else
 type PkgDB = PackageIndex
+#endif
 type PkgInfo = InstalledPackageInfo
 
 ----------------------------------------------------------------
@@ -63,12 +72,12 @@ toUserSpec :: Maybe FilePath -> PackageDB
 toUserSpec Nothing     = UserPackageDB
 toUserSpec (Just path) = SpecificPackageDB path
 
-getDBs :: [PackageDB] -> IO PackageIndex
+getDBs :: [PackageDB] -> IO PkgDB
 getDBs specs = do
     (_,_,pro) <- configure normal Nothing Nothing defaultProgramDb
     getInstalledPackages normal specs pro
 
-getDB :: PackageDB -> IO PackageIndex
+getDB :: PackageDB -> IO PkgDB
 getDB spec = do
     (_,_,pro) <- configure normal Nothing Nothing defaultProgramDb
     getPackageDBContents normal spec pro
