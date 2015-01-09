@@ -21,7 +21,7 @@ Library
   Default-Language:     Haskell2010
   GHC-Options:          -Wall
   Build-Depends:        base >= 4.0 && < 5
-                      , Cabal >= 1.18 && < 1.21
+                      , Cabal >= 1.18 && < 1.23
                       , attoparsec >= 0.10
                       , bytestring
                       , conduit >= 1.1
