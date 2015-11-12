@@ -126,9 +126,9 @@ purge doit opts nameVer = do
 
 getDirs :: (String,String) -> [String] -> IO [FilePath]
 getDirs (name,ver) sandboxOpts = do
-    libdirs <- queryGhcPkg "library-dirs"
+    importDirs <- queryGhcPkg "import-dirs"
     haddock <- map docDir <$> queryGhcPkg "haddock-html"
-    return $ topDir $ libdirs ++ haddock
+    return $ topDir $ importDirs ++ haddock
   where
     nameVer = name ++ "-" ++ ver
     queryGhcPkg field = do
