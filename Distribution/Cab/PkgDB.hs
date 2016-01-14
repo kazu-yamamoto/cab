@@ -21,12 +21,12 @@ module Distribution.Cab.PkgDB (
   , verOfPkgInfo
   ) where
 
-import Distribution.Cab.Utils (fromDotted)
+import Distribution.Cab.Utils (fromDotted, installedComponentId)
 import Distribution.Cab.Version
 import Distribution.Cab.VerDB (PkgName)
 import Distribution.Version (Version(..))
 import Distribution.InstalledPackageInfo
-    (InstalledPackageInfo_(..), InstalledPackageInfo)
+    (InstalledPackageInfo, sourcePackageId)
 import Distribution.Package (PackageName(..), PackageIdentifier(..))
 import Distribution.Simple.Compiler (PackageDB(..))
 import Distribution.Simple.GHC (configure, getInstalledPackages, getPackageDBContents)
@@ -74,8 +74,8 @@ toUserSpec (Just path) = SpecificPackageDB path
 
 getDBs :: [PackageDB] -> IO PkgDB
 getDBs specs = do
-    (_,_,pro) <- configure normal Nothing Nothing defaultProgramDb
-    getInstalledPackages normal specs pro
+    (comp,_,pro) <- configure normal Nothing Nothing defaultProgramDb
+    getInstalledPackages normal comp specs pro
 
 getDB :: PackageDB -> IO PkgDB
 getDB spec = do
@@ -132,5 +132,5 @@ verOfPkgInfo = version . pkgVersion . sourcePackageId
 topSortedPkgs :: PkgInfo -> PkgDB -> [PkgInfo]
 topSortedPkgs pkgi db = topSort $ pkgids [pkgi]
   where
-    pkgids = map installedPackageId
+    pkgids = map installedComponentId
     topSort = topologicalOrder . fromList . reverseDependencyClosure db
