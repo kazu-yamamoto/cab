@@ -15,6 +15,7 @@ import qualified Distribution.Simple.PackageIndex as Cabal
 import qualified Distribution.InstalledPackageInfo as Cabal
     (installedPackageId)
 import Distribution.Package (InstalledPackageId)
+import Distribution.Package (PackageInstalled)
 import qualified Distribution.Simple.PackageIndex as Cabal
     (lookupInstalledPackageId)
 #endif
@@ -46,6 +47,6 @@ installedComponentId = Cabal.installedPackageId
 lookupComponentId :: PackageIndex a -> ComponentId -> Maybe a
 lookupComponentId = Cabal.lookupComponentId
 #else
-lookupComponentId :: PackageIndex a -> InstalledPackageId -> Maybe a
+lookupComponentId :: PackageInstalled a => PackageIndex a -> InstalledPackageId -> Maybe a
 lookupComponentId = Cabal.lookupInstalledPackageId
 #endif

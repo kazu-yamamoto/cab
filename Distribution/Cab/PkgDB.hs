@@ -74,8 +74,12 @@ toUserSpec (Just path) = SpecificPackageDB path
 
 getDBs :: [PackageDB] -> IO PkgDB
 getDBs specs = do
-    (comp,_,pro) <- configure normal Nothing Nothing defaultProgramDb
-    getInstalledPackages normal comp specs pro
+    (_comp,_,pro) <- configure normal Nothing Nothing defaultProgramDb
+    getInstalledPackages normal
+#if MIN_VERSION_Cabal(1,23,0)
+                         comp
+#endif
+                         specs pro
 
 getDB :: PackageDB -> IO PkgDB
 getDB spec = do
