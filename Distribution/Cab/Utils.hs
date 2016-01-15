@@ -4,6 +4,9 @@ module Distribution.Cab.Utils where
 import Data.List
 
 import Distribution.InstalledPackageInfo (InstalledPackageInfo)
+#if MIN_VERSION_Cabal(1,21,0) && !(MIN_VERSION_Cabal(1,23,0))
+import Distribution.Package (PackageInstalled)
+#endif
 import Distribution.Simple.PackageIndex (PackageIndex)
 #if MIN_VERSION_Cabal(1,23,0)
 import qualified Distribution.InstalledPackageInfo as Cabal
@@ -15,7 +18,6 @@ import qualified Distribution.Simple.PackageIndex as Cabal
 import qualified Distribution.InstalledPackageInfo as Cabal
     (installedPackageId)
 import Distribution.Package (InstalledPackageId)
-import Distribution.Package (PackageInstalled)
 import qualified Distribution.Simple.PackageIndex as Cabal
     (lookupInstalledPackageId)
 #endif
@@ -46,7 +48,10 @@ installedComponentId = Cabal.installedPackageId
 #if MIN_VERSION_Cabal(1,23,0)
 lookupComponentId :: PackageIndex a -> ComponentId -> Maybe a
 lookupComponentId = Cabal.lookupComponentId
-#else
+#elif MIN_VERSION_Cabal(1,21,0)
 lookupComponentId :: PackageInstalled a => PackageIndex a -> InstalledPackageId -> Maybe a
+lookupComponentId = Cabal.lookupInstalledPackageId
+#else
+lookupComponentId :: PackageIndex -> InstalledPackageId
 lookupComponentId = Cabal.lookupInstalledPackageId
 #endif
