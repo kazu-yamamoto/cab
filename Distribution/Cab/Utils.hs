@@ -52,6 +52,6 @@ lookupComponentId = Cabal.lookupComponentId
 lookupComponentId :: PackageInstalled a => PackageIndex a -> InstalledPackageId -> Maybe a
 lookupComponentId = Cabal.lookupInstalledPackageId
 #else
-lookupComponentId :: PackageIndex -> InstalledPackageId
+lookupComponentId :: PackageIndex -> InstalledPackageId -> Maybe InstalledPackageInfo
 lookupComponentId = Cabal.lookupInstalledPackageId
 #endif
