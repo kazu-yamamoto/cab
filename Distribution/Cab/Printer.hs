@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 module Distribution.Cab.Printer (
     printDeps
   , printRevDeps
@@ -11,10 +12,11 @@ import Data.Map (Map)
 import qualified Data.Map as M
 import Distribution.Cab.PkgDB
 import Distribution.Cab.Version
-import Distribution.InstalledPackageInfo (InstalledPackageInfo_(..))
+import Distribution.Cab.Utils (installedComponentId, lookupComponentId)
+import Distribution.InstalledPackageInfo (author, depends, license)
 import Distribution.License (License(..))
 import Distribution.Package (InstalledPackageId)
-import Distribution.Simple.PackageIndex (lookupInstalledPackageId, allPackages)
+import Distribution.Simple.PackageIndex (allPackages)
 
 ----------------------------------------------------------------
 
@@ -25,7 +27,7 @@ makeRevDepDB db = M.fromList revdeps
   where
     pkgs = allPackages db
     deps = map idDeps pkgs
-    idDeps pkg = (installedPackageId pkg, depends pkg)
+    idDeps pkg = (installedComponentId pkg, depends pkg)
     kvs = sort $ concatMap decomp deps
     decomp (k,vs) = map (\v -> (v,k)) vs
     kvss = groupBy ((==) `on` fst) kvs
@@ -38,7 +40,7 @@ printDeps :: Bool -> Bool -> PkgDB -> Int -> PkgInfo -> IO ()
 printDeps rec info db n pkgi = mapM_ (printDep rec info db n) $ depends pkgi
 
 printDep :: Bool -> Bool -> PkgDB -> Int -> InstalledPackageId -> IO ()
-printDep rec info db n pid = case lookupInstalledPackageId db pid of
+printDep rec info db n pid = case lookupComponentId db pid of
     Nothing   -> return ()
     Just pkgi -> do
         putStr $ prefix ++ fullNameOfPkgInfo pkgi
@@ -60,10 +62,10 @@ printRevDeps' rec info db revdb n pkgi = case M.lookup pkgid revdb of
     Nothing -> return ()
     Just pkgids -> mapM_ (printRevDep' rec info db revdb n) pkgids
   where
-    pkgid = installedPackageId pkgi
+    pkgid = installedComponentId pkgi
 
 printRevDep' :: Bool -> Bool -> PkgDB -> RevDB -> Int -> InstalledPackageId -> IO ()
-printRevDep' rec info db revdb n pid = case lookupInstalledPackageId db pid of
+printRevDep' rec info db revdb n pid = case lookupComponentId db pid of
     Nothing   -> return ()
     Just pkgi -> do
         putStr $ prefix ++ fullNameOfPkgInfo pkgi
