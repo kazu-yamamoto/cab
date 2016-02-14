@@ -21,7 +21,7 @@ module Distribution.Cab.PkgDB (
   , verOfPkgInfo
   ) where
 
-import Distribution.Cab.Utils (fromDotted, installedComponentId)
+import Distribution.Cab.Utils (fromDotted, installedUnitId)
 import Distribution.Cab.Version
 import Distribution.Cab.VerDB (PkgName)
 import Distribution.Version (Version(..))
@@ -77,7 +77,7 @@ getDBs specs = do
     (_comp,_,pro) <- configure normal Nothing Nothing defaultProgramDb
     getInstalledPackages normal
 #if MIN_VERSION_Cabal(1,23,0)
-                         comp
+                         _comp
 #endif
                          specs pro
 
@@ -134,7 +134,7 @@ verOfPkgInfo = version . pkgVersion . sourcePackageId
 ----------------------------------------------------------------
 
 topSortedPkgs :: PkgInfo -> PkgDB -> [PkgInfo]
-topSortedPkgs pkgi db = topSort $ pkgids [pkgi]
+topSortedPkgs pkgi db = topSort $ unitids [pkgi]
   where
-    pkgids = map installedComponentId
+    unitids = map installedUnitId
     topSort = topologicalOrder . fromList . reverseDependencyClosure db

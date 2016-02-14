@@ -10,14 +10,14 @@ import Distribution.Package (PackageInstalled)
 import Distribution.Simple.PackageIndex (PackageIndex)
 #if MIN_VERSION_Cabal(1,23,0)
 import qualified Distribution.InstalledPackageInfo as Cabal
-    (installedComponentId)
-import Distribution.Package (ComponentId)
+    (installedUnitId)
+import qualified Distribution.Package as Cabal (UnitId)
 import qualified Distribution.Simple.PackageIndex as Cabal
-    (lookupComponentId)
+    (lookupUnitId)
 #else
 import qualified Distribution.InstalledPackageInfo as Cabal
     (installedPackageId)
-import Distribution.Package (InstalledPackageId)
+import qualified Distribution.Package as Cabal (InstalledPackageId)
 import qualified Distribution.Simple.PackageIndex as Cabal
     (lookupInstalledPackageId)
 #endif
@@ -38,20 +38,25 @@ toDotted :: [Int] -> String
 toDotted = intercalate "." . map show
 
 #if MIN_VERSION_Cabal(1,23,0)
-installedComponentId :: InstalledPackageInfo -> ComponentId
-installedComponentId = Cabal.installedComponentId
+type UnitId = Cabal.UnitId
 #else
-installedComponentId :: InstalledPackageInfo -> InstalledPackageId
-installedComponentId = Cabal.installedPackageId
+type UnitId = Cabal.InstalledPackageId
+#endif
+
+installedUnitId :: InstalledPackageInfo -> UnitId
+#if MIN_VERSION_Cabal(1,23,0)
+installedUnitId = Cabal.installedUnitId
+#else
+installedUnitId = Cabal.installedPackageId
 #endif
 
 #if MIN_VERSION_Cabal(1,23,0)
-lookupComponentId :: PackageIndex a -> ComponentId -> Maybe a
-lookupComponentId = Cabal.lookupComponentId
+lookupUnitId :: PackageIndex a -> UnitId -> Maybe a
+lookupUnitId = Cabal.lookupUnitId
 #elif MIN_VERSION_Cabal(1,21,0)
-lookupComponentId :: PackageInstalled a => PackageIndex a -> InstalledPackageId -> Maybe a
-lookupComponentId = Cabal.lookupInstalledPackageId
+lookupUnitId :: PackageInstalled a => PackageIndex a -> UnitId -> Maybe a
+lookupUnitId = Cabal.lookupInstalledPackageId
 #else
-lookupComponentId :: PackageIndex -> InstalledPackageId -> Maybe InstalledPackageInfo
-lookupComponentId = Cabal.lookupInstalledPackageId
+lookupUnitId :: PackageIndex -> UnitId -> Maybe InstalledPackageInfo
+lookupUnitId = Cabal.lookupInstalledPackageId
 #endif
