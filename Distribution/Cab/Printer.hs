@@ -12,22 +12,21 @@ import Data.Map (Map)
 import qualified Data.Map as M
 import Distribution.Cab.PkgDB
 import Distribution.Cab.Version
-import Distribution.Cab.Utils (installedComponentId, lookupComponentId)
+import Distribution.Cab.Utils (UnitId, installedUnitId, lookupUnitId)
 import Distribution.InstalledPackageInfo (author, depends, license)
 import Distribution.License (License(..))
-import Distribution.Package (InstalledPackageId)
 import Distribution.Simple.PackageIndex (allPackages)
 
 ----------------------------------------------------------------
 
-type RevDB = Map InstalledPackageId [InstalledPackageId]
+type RevDB = Map UnitId [UnitId]
 
 makeRevDepDB :: PkgDB -> RevDB
 makeRevDepDB db = M.fromList revdeps
   where
     pkgs = allPackages db
     deps = map idDeps pkgs
-    idDeps pkg = (installedComponentId pkg, depends pkg)
+    idDeps pkg = (installedUnitId pkg, depends pkg)
     kvs = sort $ concatMap decomp deps
     decomp (k,vs) = map (\v -> (v,k)) vs
     kvss = groupBy ((==) `on` fst) kvs
@@ -39,14 +38,14 @@ makeRevDepDB db = M.fromList revdeps
 printDeps :: Bool -> Bool -> PkgDB -> Int -> PkgInfo -> IO ()
 printDeps rec info db n pkgi = mapM_ (printDep rec info db n) $ depends pkgi
 
-printDep :: Bool -> Bool -> PkgDB -> Int -> InstalledPackageId -> IO ()
-printDep rec info db n pid = case lookupComponentId db pid of
-    Nothing   -> return ()
-    Just pkgi -> do
-        putStr $ prefix ++ fullNameOfPkgInfo pkgi
-        extraInfo info pkgi
+printDep :: Bool -> Bool -> PkgDB -> Int -> UnitId -> IO ()
+printDep rec info db n uid = case lookupUnitId db uid of
+    Nothing    -> return ()
+    Just uniti -> do
+        putStr $ prefix ++ fullNameOfPkgInfo uniti
+        extraInfo info uniti
         putStrLn ""
-        when rec $ printDeps rec info db (n+1) pkgi
+        when rec $ printDeps rec info db (n+1) uniti
   where
     prefix = replicate (n * 4) ' '
 
@@ -58,20 +57,20 @@ printRevDeps rec info db n pkgi = printRevDeps' rec info db revdb n pkgi
     revdb = makeRevDepDB db
 
 printRevDeps' :: Bool -> Bool -> PkgDB -> RevDB -> Int -> PkgInfo -> IO ()
-printRevDeps' rec info db revdb n pkgi = case M.lookup pkgid revdb of
+printRevDeps' rec info db revdb n pkgi = case M.lookup unitid revdb of
     Nothing -> return ()
-    Just pkgids -> mapM_ (printRevDep' rec info db revdb n) pkgids
+    Just unitids -> mapM_ (printRevDep' rec info db revdb n) unitids
   where
-    pkgid = installedComponentId pkgi
+    unitid = installedUnitId pkgi
 
-printRevDep' :: Bool -> Bool -> PkgDB -> RevDB -> Int -> InstalledPackageId -> IO ()
-printRevDep' rec info db revdb n pid = case lookupComponentId db pid of
-    Nothing   -> return ()
-    Just pkgi -> do
-        putStr $ prefix ++ fullNameOfPkgInfo pkgi
-        extraInfo info pkgi
+printRevDep' :: Bool -> Bool -> PkgDB -> RevDB -> Int -> UnitId -> IO ()
+printRevDep' rec info db revdb n uid = case lookupUnitId db uid of
+    Nothing    -> return ()
+    Just uniti -> do
+        putStr $ prefix ++ fullNameOfPkgInfo uniti
+        extraInfo info uniti
         putStrLn ""
-        when rec $ printRevDeps' rec info db revdb (n+1) pkgi
+        when rec $ printRevDeps' rec info db revdb (n+1) uniti
   where
     prefix = replicate (n * 4) ' '
 
