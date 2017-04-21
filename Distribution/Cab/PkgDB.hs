@@ -21,13 +21,13 @@ module Distribution.Cab.PkgDB (
   , verOfPkgInfo
   ) where
 
-import Distribution.Cab.Utils (fromDotted, installedUnitId)
+import Distribution.Cab.Utils
+    (fromDotted, installedUnitId, mkPackageName, unPackageName)
 import Distribution.Cab.Version
 import Distribution.Cab.VerDB (PkgName)
-import Distribution.Version (Version(..))
 import Distribution.InstalledPackageInfo
     (InstalledPackageInfo, sourcePackageId)
-import Distribution.Package (PackageName(..), PackageIdentifier(..))
+import Distribution.Package (PackageIdentifier(..))
 import Distribution.Simple.Compiler (PackageDB(..))
 import Distribution.Simple.GHC (configure, getInstalledPackages, getPackageDBContents)
 import Distribution.Simple.PackageIndex
@@ -93,7 +93,7 @@ getDB spec = do
 -- > pkgdb <- getGlobalPkgDB
 -- > lookupByName "base" pkgdb
 lookupByName :: PkgName -> PkgDB -> [PkgInfo]
-lookupByName name db = concatMap snd $ lookupPackageName db (PackageName name)
+lookupByName name db = concatMap snd $ lookupPackageName db (mkPackageName name)
 
 -- |
 --
@@ -103,11 +103,8 @@ lookupByVersion :: PkgName -> String -> PkgDB -> [PkgInfo]
 lookupByVersion name ver db = lookupSourcePackageId db src
   where
     src = PackageIdentifier {
-        pkgName = PackageName name
-      , pkgVersion = Version {
-          versionBranch = fromDotted ver
-        , versionTags = []
-        }
+        pkgName = mkPackageName name
+      , pkgVersion = toVersion $ fromDotted ver
       }
 
 ----------------------------------------------------------------
@@ -118,9 +115,7 @@ toPkgInfos db = allPackages db
 ----------------------------------------------------------------
 
 nameOfPkgInfo :: PkgInfo -> PkgName
-nameOfPkgInfo = toString . pkgName . sourcePackageId
-  where
-    toString (PackageName x) = x
+nameOfPkgInfo = unPackageName . pkgName . sourcePackageId
 
 fullNameOfPkgInfo :: PkgInfo -> String
 fullNameOfPkgInfo pkgi = nameOfPkgInfo pkgi ++ " " ++ verToString (verOfPkgInfo pkgi)

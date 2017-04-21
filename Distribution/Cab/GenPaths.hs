@@ -6,9 +6,9 @@ import Control.Applicative
 import Control.Exception
 import Control.Monad
 import Data.List (isSuffixOf)
-import Distribution.Package
+import Distribution.Cab.Utils (readGenericPackageDescription, unPackageName)
+import Distribution.Package (pkgName, pkgVersion)
 import Distribution.PackageDescription
-import Distribution.PackageDescription.Parse (readPackageDescription)
 import Distribution.Verbosity (silent)
 import Distribution.Version
 import System.Directory
@@ -31,9 +31,9 @@ genPaths = do
 
 getNameVersion :: FilePath -> IO (String,Version)
 getNameVersion file = do
-    desc <- readPackageDescription silent file
+    desc <- readGenericPackageDescription silent file
     let pkg = package . packageDescription $ desc
-        PackageName nm = pkgName pkg
+        nm = unPackageName $ pkgName pkg
         name = map (trans '-' '_') nm
         version = pkgVersion pkg
     return (name, version)
