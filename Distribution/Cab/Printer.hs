@@ -17,6 +17,10 @@ import Distribution.InstalledPackageInfo (author, depends, license)
 import Distribution.License (License(..))
 import Distribution.Simple.PackageIndex (allPackages)
 
+#if MIN_VERSION_Cabal(2,2,0)
+import Distribution.License (licenseFromSPDX)
+#endif
+
 ----------------------------------------------------------------
 
 type RevDB = Map UnitId [UnitId]
@@ -80,8 +84,15 @@ extraInfo :: Bool -> PkgInfo -> IO ()
 extraInfo False _ = return ()
 extraInfo True pkgi = putStr $ " " ++ lcns ++ " \"" ++  auth ++ "\""
   where
-    lcns = showLicense (license pkgi)
+    lcns = showLicense (pkgInfoLicense pkgi)
     auth = author pkgi
+
+pkgInfoLicense :: PkgInfo -> License
+#if MIN_VERSION_Cabal(2,2,0)
+pkgInfoLicense = either licenseFromSPDX id . license
+#else
+pkgInfoLicense = license
+#endif
 
 showLicense :: License -> String
 showLicense (GPL (Just v))     = "GPL" ++ versionToString v

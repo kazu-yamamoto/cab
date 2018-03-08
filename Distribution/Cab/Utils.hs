@@ -30,10 +30,17 @@ import qualified Distribution.Simple.PackageIndex as Cabal
 #if MIN_VERSION_Cabal(2,0,0)
 import qualified Distribution.Package as Cabal
     (mkPackageName, unPackageName)
+#else
+import qualified Distribution.Package as Cabal (PackageName(..))
+#endif
+
+#if MIN_VERSION_Cabal(2,2,0)
+import qualified Distribution.PackageDescription.Parsec as Cabal
+    (readGenericPackageDescription)
+#elif MIN_VERSION_Cabal(2,0,0)
 import qualified Distribution.PackageDescription.Parse as Cabal
     (readGenericPackageDescription)
 #else
-import qualified Distribution.Package as Cabal (PackageName(..))
 import qualified Distribution.PackageDescription.Parse as Cabal
     (readPackageDescription)
 #endif
