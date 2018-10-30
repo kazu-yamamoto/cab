@@ -12,7 +12,7 @@ commandDB help = [
          command = Sync
        , commandNames = ["sync", "update"]
        , document = "Fetch the latest package index"
-       , routing = RouteCabal ["update"]
+       , routing = RouteCabal ["v1-update"]
        , switches = []
        , manual = Nothing
        }
@@ -20,7 +20,7 @@ commandDB help = [
          command = Install
        , commandNames = ["install"]
        , document = "Install packages"
-       , routing = RouteCabal ["install"]
+       , routing = RouteCabal ["v1-install"]
        , switches = [(SwNoharm, Solo "--dry-run -v")
                     ,(SwFlag, WithEqArg "--flags")
                     ,(SwTest, Solo "--enable-tests")
@@ -58,7 +58,7 @@ commandDB help = [
          command = Configure
        , commandNames = ["configure", "conf"]
        , document = "Configure a cabal package"
-       , routing = RouteCabal ["configure"]
+       , routing = RouteCabal ["v1-configure"]
        , switches = [(SwFlag, WithEqArg "--flags")
                     ,(SwTest, Solo "--enable-tests")
                     ,(SwBench, Solo "--enable-benchmarks")
@@ -72,7 +72,7 @@ commandDB help = [
          command = Build
        , commandNames = ["build"]
        , document = "Build a cabal package"
-       , routing = RouteCabal ["build"]
+       , routing = RouteCabal ["v1-build"]
        , switches = [(SwJobs, WithEqArg "--jobs")]
        , manual = Nothing
        }
@@ -80,7 +80,7 @@ commandDB help = [
          command = Clean
        , commandNames = ["clean"]
        , document = "Clean up a build directory"
-       , routing = RouteCabal ["clean"]
+       , routing = RouteCabal ["v1-clean"]
        , switches = []
        , manual = Nothing
        }
@@ -98,7 +98,7 @@ commandDB help = [
          command = Info
        , commandNames = ["info"]
        , document = "Display information of a package"
-       , routing = RouteCabal ["info"]
+       , routing = RouteCabal ["v1-info"]
        , switches = []
        , manual = Just "<package> [<ver>]"
        }
@@ -106,7 +106,7 @@ commandDB help = [
          command = Sdist
        , commandNames = ["sdist", "pack"]
        , document = "Make tar.gz for source distribution"
-       , routing = RouteCabal ["sdist"]
+       , routing = RouteCabal ["v1-sdist"]
        , switches = []
        , manual = Nothing
        }
@@ -114,7 +114,7 @@ commandDB help = [
          command = Upload
        , commandNames = ["upload", "up"]
        , document = "Uploading tar.gz to HackageDB"
-       , routing = RouteCabal ["upload"]
+       , routing = RouteCabal ["upload", "--publish"]
        , switches = [(SwNoharm, Solo "-c")]
        , manual = Nothing
        }
@@ -184,7 +184,7 @@ commandDB help = [
          command = Test
        , commandNames = ["test"]
        , document = "Run tests"
-       , routing = RouteCabal ["test"]
+       , routing = RouteCabal ["v1-test"]
        , switches = []
        , manual = Just "[testsuite]"
        }
@@ -192,7 +192,7 @@ commandDB help = [
          command = Bench
        , commandNames = ["bench"]
        , document = "Run benchmarks"
-       , routing = RouteCabal ["bench"]
+       , routing = RouteCabal ["v1-bench"]
        , switches = []
        , manual = Nothing
        }
@@ -200,7 +200,7 @@ commandDB help = [
          command = Doc
        , commandNames = ["doc", "haddock", "man"]
        , document = "Generate manuals"
-       , routing = RouteCabal ["haddock", "--hyperlink-source"]
+       , routing = RouteCabal ["v1-haddock", "--hyperlink-source"]
        , switches = []
        , manual = Nothing
        }
