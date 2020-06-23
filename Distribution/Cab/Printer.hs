@@ -82,7 +82,7 @@ printRevDep' rec info db revdb n uid = case lookupUnitId db uid of
 
 extraInfo :: Bool -> PkgInfo -> IO ()
 extraInfo False _ = return ()
-extraInfo True pkgi = putStr $ " " ++ lcns ++ " \"" ++  auth ++ "\""
+extraInfo True pkgi = putStr $ " " ++ lcns ++ " \"" ++ show auth ++ "\""
   where
     lcns = showLicense (pkgInfoLicense pkgi)
     auth = author pkgi

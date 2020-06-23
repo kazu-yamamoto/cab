@@ -223,8 +223,8 @@ checkOne pkgs = do
 ----------------------------------------------------------------
 
 initSandbox :: FunctionCommand
-initSandbox []     _ _ = void . system $ "cabal sandbox init"
-initSandbox [path] _ _ = void . system $ "cabal sandbox init --sandbox " ++ path
+initSandbox []     _ _ = void . system $ "cabal v1-sandbox init"
+initSandbox [path] _ _ = void . system $ "cabal v1-sandbox init --sandbox " ++ path
 initSandbox _      _ _ = do
     hPutStrLn stderr "Only one argument is allowed"
     exitFailure
@@ -232,7 +232,7 @@ initSandbox _      _ _ = do
 ----------------------------------------------------------------
 
 add :: FunctionCommand
-add [src] _ _ = void . system $ "cabal sandbox add-source " ++ src
+add [src] _ _ = void . system $ "cabal v1-sandbox add-source " ++ src
 add _     _ _ = do
     hPutStrLn stderr "A source path be specified."
     exitFailure
