@@ -5,7 +5,6 @@ module Distribution.Cab.Commands (
   , genpaths, check, initSandbox, add, ghci
   ) where
 
-import Control.Applicative ((<$>))
 import Control.Monad (forM_, unless, when, void)
 import Data.Char (toLower)
 import Data.List (intercalate, isPrefixOf)

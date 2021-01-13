@@ -6,7 +6,6 @@ module Distribution.Cab.Sandbox (
   , getSandboxOpts2
   ) where
 
-import Control.Applicative ((<$>))
 import Control.Exception as E (catch, SomeException, throwIO)
 import Data.Char (isSpace)
 import Data.List (isPrefixOf, tails)
