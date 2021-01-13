@@ -28,6 +28,7 @@ commandDB help = [
                     ,(SwDepsOnly, Solo "--only-dependencies")
                     ,(SwLibProfile, Solo "--enable-library-profiling --ghc-options=\"-fprof-auto -fprof-cafs\"")
                     ,(SwExecProfile, Solo "--enable-profiling --ghc-options=\"-fprof-auto -fprof-cafs\"")
+                    ,(SwDebug, Solo "--ghc-options=\"-g\"")
                     ,(SwJobs, WithEqArg "--jobs")
                     ,(SwStatic, Solo "--disable-shared")
                     ]
@@ -64,6 +65,7 @@ commandDB help = [
                     ,(SwBench, Solo "--enable-benchmarks")
                     ,(SwLibProfile, Solo "--enable-library-profiling --ghc-options=\"-fprof-auto -fprof-cafs\"")
                     ,(SwExecProfile, Solo "--enable-profiling --ghc-options=\"-fprof-auto -fprof-cafs\"")
+                    ,(SwDebug, Solo "--ghc-options=\"-g\"")
                     ,(SwStatic, Solo "--disable-shared")
                     ]
        , manual = Nothing

@@ -25,6 +25,7 @@ toSwitch OptBench       = SwBench
 toSwitch OptDepsOnly    = SwDepsOnly
 toSwitch OptLibProfile  = SwLibProfile
 toSwitch OptExecProfile = SwExecProfile
+toSwitch OptDebug       = SwDebug
 toSwitch (OptJobs _)    = SwJobs
 toSwitch (OptImport _)  = SwImport
 toSwitch OptStatic      = SwStatic

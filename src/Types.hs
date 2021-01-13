@@ -19,6 +19,7 @@ data Switch = SwNoharm
             | SwDepsOnly
             | SwLibProfile
             | SwExecProfile
+            | SwDebug
             | SwJobs
             | SwImport
             | SwStatic

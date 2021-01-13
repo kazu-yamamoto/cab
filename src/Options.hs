@@ -39,6 +39,9 @@ getOptDB = [
   , Option ['e'] ["exec-prof"]
       (NoArg OptExecProfile)
       "Enable library profiling"
+  , Option ['g'] ["debug"]
+      (NoArg OptDebug)
+      "Enable debug trace"
   , Option ['j'] ["jobs"]
       (ReqArg OptJobs "<jobs>")
       "Run N jobs"
@@ -57,4 +60,4 @@ getOptDB = [
   ]
 
 optionDB :: OptionDB
-optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench,SwDepsOnly,SwLibProfile,SwExecProfile,SwJobs,SwImport,SwStatic,SwFuture] getOptDB
+optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench,SwDepsOnly,SwLibProfile,SwExecProfile,SwDebug,SwJobs,SwImport,SwStatic,SwFuture] getOptDB

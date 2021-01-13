@@ -41,6 +41,7 @@ data Option = OptNoharm
             | OptImport String
             | OptStatic
             | OptFuture
+            | OptDebug
             deriving (Eq,Show)
 
 ----------------------------------------------------------------
