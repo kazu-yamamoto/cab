@@ -41,6 +41,7 @@ data Option = OptNoharm
             | OptStatic
             | OptFuture
             | OptDebug
+            | OptAllowNewer
             deriving (Eq,Show)
 
 ----------------------------------------------------------------

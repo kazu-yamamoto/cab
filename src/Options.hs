@@ -54,10 +54,13 @@ getOptDB = [
   , Option ['u'] ["future"]
       (NoArg OptFuture)
       "Show packages with versions ahead of Hackage"
+  , Option ['x'] ["newer"]
+       (NoArg OptAllowNewer)
+      "Allow newer versions"
   , Option ['h'] ["help"]
       (NoArg OptHelp)
       "Show help message"
   ]
 
 optionDB :: OptionDB
-optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench,SwDepsOnly,SwLibProfile,SwExecProfile,SwDebug,SwJobs,SwImport,SwStatic,SwFuture] getOptDB
+optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench,SwDepsOnly,SwLibProfile,SwExecProfile,SwDebug,SwJobs,SwImport,SwStatic,SwFuture,SwAllowNewer] getOptDB

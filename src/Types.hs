@@ -24,6 +24,7 @@ data Switch = SwNoharm
             | SwImport
             | SwStatic
             | SwFuture
+            | SwAllowNewer
             deriving (Eq,Show)
 
 ----------------------------------------------------------------

@@ -31,6 +31,7 @@ commandDB help = [
                     ,(SwDebug, Solo "--ghc-options=\"-g\"")
                     ,(SwJobs, WithEqArg "--jobs")
                     ,(SwStatic, Solo "--disable-shared")
+                    ,(SwAllowNewer, Solo "--allow-newer")
                     ]
        , manual = Just "[<package> [<ver>]]"
        }
@@ -67,6 +68,7 @@ commandDB help = [
                     ,(SwExecProfile, Solo "--enable-profiling --ghc-options=\"-fprof-auto -fprof-cafs\"")
                     ,(SwDebug, Solo "--ghc-options=\"-g\"")
                     ,(SwStatic, Solo "--disable-shared")
+                    ,(SwAllowNewer, Solo "--allow-newer")
                     ]
        , manual = Nothing
        }
