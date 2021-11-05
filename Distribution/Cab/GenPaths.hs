@@ -7,7 +7,7 @@ import Control.Monad
 import Data.List (isSuffixOf)
 import Distribution.Cab.Utils (readGenericPackageDescription, unPackageName)
 import Distribution.Package (pkgName, pkgVersion)
-import Distribution.PackageDescription
+import Distribution.PackageDescription (package, packageDescription)
 import Distribution.Verbosity (silent)
 import Distribution.Version
 import System.Directory
