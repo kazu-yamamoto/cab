@@ -12,7 +12,7 @@ commandDB help = [
          command = Sync
        , commandNames = ["sync", "update"]
        , document = "Fetch the latest package index"
-       , routing = RouteCabal ["v1-update"]
+       , routing = RouteCabal ["update"]
        , switches = []
        , manual = Nothing
        }
@@ -110,7 +110,7 @@ commandDB help = [
          command = Sdist
        , commandNames = ["sdist", "pack"]
        , document = "Make tar.gz for source distribution"
-       , routing = RouteCabal ["v1-sdist"]
+       , routing = RouteCabal ["sdist"]
        , switches = []
        , manual = Nothing
        }
