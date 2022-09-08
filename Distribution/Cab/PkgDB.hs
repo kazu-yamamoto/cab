@@ -19,6 +19,8 @@ module Distribution.Cab.PkgDB (
   , fullNameOfPkgInfo
   , pairNameOfPkgInfo
   , verOfPkgInfo
+  -- * Find internal libraries
+  , findInternalLibs
   ) where
 
 import Distribution.Cab.Utils
@@ -26,7 +28,7 @@ import Distribution.Cab.Utils
 import Distribution.Cab.Version
 import Distribution.Cab.VerDB (PkgName)
 import Distribution.InstalledPackageInfo
-    (InstalledPackageInfo, sourcePackageId)
+    (InstalledPackageInfo(depends), sourcePackageId)
 import Distribution.Package (PackageIdentifier(..))
 import Distribution.Simple.Compiler (PackageDB(..))
 import Distribution.Simple.GHC (configure, getInstalledPackages, getPackageDBContents)
@@ -40,6 +42,12 @@ import Distribution.Simple.PackageIndex (PackageIndex)
 #endif
 import Distribution.Simple.Program.Db (defaultProgramDb)
 import Distribution.Verbosity (normal)
+import Distribution.Types.UnitId (unUnitId)
+
+import Data.Char
+import Data.Maybe
+
+----------------------------------------------------------------
 
 #if MIN_VERSION_Cabal(1,22,0)
 type PkgDB = InstalledPackageIndex
@@ -133,3 +141,22 @@ topSortedPkgs pkgi db = topSort $ unitids [pkgi]
   where
     unitids = map installedUnitId
     topSort = topologicalOrder . fromList . reverseDependencyClosure db
+
+----------------------------------------------------------------
+
+findInternalLibs :: PkgInfo -> [String]
+findInternalLibs pkgInfo =
+    catMaybes $ map (getInternalLib . unUnitId) $ depends pkgInfo
+
+getInternalLib :: String -> Maybe String
+getInternalLib xs0 = case drop 22 $ skip xs0 of
+  _:xs1   -> Just $ take (length xs1) xs1
+  _       -> Nothing
+  where
+    skip ys = case break (== '-') ys of
+      (_,'-':b:bs)
+        | isDigit b -> case break (== '-') bs of
+            (_,'-':ds) -> ds
+            _          -> "" -- error
+        | otherwise -> skip bs
+      _  -> "" -- error

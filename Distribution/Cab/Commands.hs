@@ -110,18 +110,23 @@ uninstall nmver opts _ = do
         mapM_ (hPutStrLn stderr . fullNameOfPkgInfo) (init sortedPkgs)
       else do
         unless doit $ putStrLn "The following packages are deleted without the \"-n\" option."
-        mapM_ (purge doit opts . pairNameOfPkgInfo) sortedPkgs
+        mapM_ (purge doit opts) sortedPkgs
   where
     onlyOne = OptRecursive `notElem` opts
     doit = OptNoharm `notElem` opts
 
-purge :: Bool -> [Option] -> (String,String) -> IO ()
-purge doit opts nameVer = do
+purge :: Bool -> [Option] -> PkgInfo -> IO ()
+purge doit opts pkgInfo = do
     sandboxOpts <- (makeOptList . getSandboxOpts2) <$> getSandbox
     dirs <- getDirs nameVer sandboxOpts
     unregister doit opts nameVer
+    mapM_ unregisterInternal $ findInternalLibs pkgInfo
     mapM_ (removeDir doit) dirs
   where
+    unregisterInternal subname = unregister doit opts (nm,ver)
+      where
+        nm = "z-" ++ name ++ "-z-" ++ subname
+    nameVer@(name,ver) = pairNameOfPkgInfo pkgInfo
     makeOptList "" = []
     makeOptList x  = [x]
 
