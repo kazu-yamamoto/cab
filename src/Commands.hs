@@ -225,6 +225,14 @@ commandDB help = [
        , manual = Nothing
        }
   , CommandSpec {
+         command = DocTest
+       , commandNames = ["doctest"]
+       , document = "Run doctest"
+       , routing = RouteCabal ["v1-repl", "--with-ghc=doctest"]
+       , switches = []
+       , manual = Nothing
+       }
+  , CommandSpec {
          command = Help
        , commandNames = ["help"]
        , document = "Display the help message of the command"

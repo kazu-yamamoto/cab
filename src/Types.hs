@@ -65,6 +65,7 @@ data Command = Sync
              | Bench
              | Doc
              | Init
+             | DocTest
              | Help
              deriving (Eq,Show)
 
