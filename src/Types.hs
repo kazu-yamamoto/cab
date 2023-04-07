@@ -25,6 +25,7 @@ data Switch = SwNoharm
             | SwStatic
             | SwFuture
             | SwAllowNewer
+            | SwCleanUp
             deriving (Eq,Show)
 
 ----------------------------------------------------------------

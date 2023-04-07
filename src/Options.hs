@@ -57,10 +57,13 @@ getOptDB = [
   , Option ['x'] ["newer"]
        (NoArg OptAllowNewer)
       "Allow newer versions"
+  , Option ['c'] ["cleanup"]
+       (NoArg OptCleanUp)
+      "Remove outdated packages"
   , Option ['h'] ["help"]
       (NoArg OptHelp)
       "Show help message"
   ]
 
 optionDB :: OptionDB
-optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench,SwDepsOnly,SwLibProfile,SwExecProfile,SwDebug,SwJobs,SwImport,SwStatic,SwFuture,SwAllowNewer] getOptDB
+optionDB = zip [SwNoharm,SwRecursive,SwAll,SwInfo,SwFlag,SwTest,SwBench,SwDepsOnly,SwLibProfile,SwExecProfile,SwDebug,SwJobs,SwImport,SwStatic,SwFuture,SwAllowNewer,SwCleanUp] getOptDB

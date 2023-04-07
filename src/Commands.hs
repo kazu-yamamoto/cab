@@ -95,6 +95,7 @@ commandDB help = [
        , routing = RouteFunc outdated
        , switches = [(SwAll, None)
                     ,(SwFuture, Solo "--future")
+                    ,(SwCleanUp, None)
                     ]
        , manual = Nothing
        }

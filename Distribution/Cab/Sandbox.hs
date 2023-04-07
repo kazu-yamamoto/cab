@@ -94,6 +94,6 @@ extractGhcVer dir = ver
   where
     file = takeFileName dir
     findVer = drop 4 . head . filter ("ghc-" `isPrefixOf`) . tails
-    (verStr1,_:left) = break (== '.') $ findVer file
-    (verStr2,_)      = break (== '.') left
+    (verStr1,left) = break (== '.') $ findVer file
+    (verStr2,_)    = break (== '.') $ tail left
     ver = read verStr1 * 100 + read verStr2

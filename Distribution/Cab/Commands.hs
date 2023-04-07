@@ -5,6 +5,7 @@ module Distribution.Cab.Commands (
   , genpaths, check, initSandbox, add, ghci
   ) where
 
+import qualified Control.Exception as E
 import Control.Monad (forM_, unless, when, void)
 import Data.Char (toLower)
 import Data.List (intercalate, isPrefixOf)
@@ -42,6 +43,7 @@ data Option = OptNoharm
             | OptFuture
             | OptDebug
             | OptAllowNewer
+            | OptCleanUp
             deriving (Eq,Show)
 
 ----------------------------------------------------------------
@@ -77,12 +79,17 @@ outdated :: FunctionCommand
 outdated _ opts _ = do
     pkgs <- toPkgInfos <$> getDB opts
     verDB <- toMap <$> getVerDB InstalledOnly
+    let del = OptCleanUp `elem` opts
     forM_ pkgs $ \p -> case M.lookup (nameOfPkgInfo p) verDB of
         Nothing  -> return ()
         Just ver -> do
             let comp = verOfPkgInfo p `compare` ver
-            when (dated comp) $
-                putStrLn $ fullNameOfPkgInfo p ++ (showIneq comp) ++ verToString ver
+            when (dated comp) $ do
+                if del then do
+                    let (nm,vr) = pairNameOfPkgInfo p
+                    uninstall [nm,vr] [OptRecursive] [] `E.catch` \(E.SomeException _) -> return ()
+                  else
+                    putStrLn $ fullNameOfPkgInfo p ++ showIneq comp ++ verToString ver
   where
     dated LT = True
     dated GT = OptFuture `elem` opts

@@ -31,6 +31,7 @@ toSwitch (OptImport _)  = SwImport
 toSwitch OptStatic      = SwStatic
 toSwitch OptFuture      = SwFuture
 toSwitch OptAllowNewer  = SwAllowNewer
+toSwitch OptCleanUp     = SwCleanUp
 toSwitch _              = error "toSwitch"
 
 ----------------------------------------------------------------
