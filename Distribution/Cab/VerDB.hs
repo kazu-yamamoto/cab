@@ -20,8 +20,8 @@ import Control.Monad.Trans.Resource (runResourceT)
 import Data.Attoparsec.ByteString.Char8
 import Data.Conduit.Attoparsec
 import Data.Conduit.Process
-import Data.Map (Map)
-import qualified Data.Map as M
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as M
 import Data.Maybe
 import Distribution.Cab.Version
 

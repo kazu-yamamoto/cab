@@ -9,8 +9,8 @@ module Distribution.Cab.Printer (
 import Control.Monad
 import Data.Function
 import Data.List
-import Data.Map (Map)
-import qualified Data.Map as M
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as M
 import Distribution.Cab.PkgDB
 import Distribution.Cab.Utils (UnitId, installedUnitId, lookupUnitId)
 import Distribution.Cab.Version

@@ -18,7 +18,7 @@ import qualified Control.Exception as E
 import Control.Monad (forM_, unless, void, when)
 import Data.Char (toLower)
 import Data.List (intercalate, isPrefixOf)
-import qualified Data.Map as M
+import qualified Data.Map.Strict as M
 import Distribution.Cab.GenPaths
 import Distribution.Cab.PkgDB
 import Distribution.Cab.Printer
