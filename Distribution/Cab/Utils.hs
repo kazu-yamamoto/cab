@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+
 module Distribution.Cab.Utils where
 
 import Data.List
@@ -53,9 +54,9 @@ import qualified Distribution.PackageDescription.Parse as Cabal
 -- [1,2,3]
 fromDotted :: String -> [Int]
 fromDotted [] = []
-fromDotted xs = case break (=='.') xs of
-    (x,"") -> [read x :: Int]
-    (x,_:ys) -> (read x :: Int) : fromDotted ys
+fromDotted xs = case break (== '.') xs of
+    (x, "") -> [read x :: Int]
+    (x, _ : ys) -> (read x :: Int) : fromDotted ys
 
 -- |
 -- >>> toDotted [1,2,3]
@@ -107,7 +108,8 @@ unPackageName (Cabal.PackageName s) = s
 
 -- GenericPackageDescription
 
-readGenericPackageDescription :: Verbosity -> FilePath -> IO GenericPackageDescription
+readGenericPackageDescription
+    :: Verbosity -> FilePath -> IO GenericPackageDescription
 #if MIN_VERSION_Cabal(2,0,0)
 readGenericPackageDescription = Cabal.readGenericPackageDescription
 #else

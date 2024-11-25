@@ -25,10 +25,10 @@ prCmdSpec cmdspec = do
     putStrLn $ "?cab " ++ escape usage
     putStrLn $ "!" ++ doc ++ "." ++ aliases
   where
-    (usage,doc,alias) = usageDocAlias cmdspec
+    (usage, doc, alias) = usageDocAlias cmdspec
     aliases
-      | alias == "" = ""
-      | otherwise   = "\\<br /\\>Command aliases: " ++ escape alias
+        | alias == "" = ""
+        | otherwise = "\\<br /\\>Command aliases: " ++ escape alias
 
 prOptSpec :: OptionSpec -> IO ()
 prOptSpec spec = do
@@ -39,6 +39,6 @@ prOptSpec spec = do
 
 escape :: String -> String
 escape [] = []
-escape ('[':rest) = "\\[" ++ escape rest
-escape (']':rest) = "\\]" ++ escape rest
-escape (c:rest)   = c : escape rest
+escape ('[' : rest) = "\\[" ++ escape rest
+escape (']' : rest) = "\\]" ++ escape rest
+escape (c : rest) = c : escape rest

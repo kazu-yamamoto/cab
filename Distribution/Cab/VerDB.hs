@@ -1,16 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Distribution.Cab.VerDB (
-  -- * Types
-    PkgName
-  , VerDB
-  , HowToObtain(..)
-  -- * Creating
-  , getVerDB
-  -- * Converting
-  , toList
-  , toMap
-  ) where
+    -- * Types
+    PkgName,
+    VerDB,
+    HowToObtain (..),
+
+    -- * Creating
+    getVerDB,
+
+    -- * Converting
+    toList,
+    toMap,
+) where
 
 import Control.Applicative
 import Control.Arrow (second)
@@ -29,7 +31,7 @@ type PkgName = String
 
 type VerInfo = (PkgName, Maybe [Int])
 
-newtype VerDB = VerDB [(PkgName,Ver)] deriving (Eq, Show)
+newtype VerDB = VerDB [(PkgName, Ver)] deriving (Eq, Show)
 
 data HowToObtain = InstalledOnly | AllRegistered
 
@@ -73,15 +75,18 @@ verinfo = do
     endOfLine
     return (name, lat)
   where
-    latestLabel = string "    Default available version: " -- cabal 0.10
-              <|> string "    Latest version available: "  -- cabal 0.8
+    latestLabel =
+        string "    Default available version: " -- cabal 0.10
+            <|> string "    Latest version available: " -- cabal 0.8
     skip = many1 nonEols *> endOfLine
-    synpsis = string "    Synopsis:" *> nonEols *> endOfLine *> more
-          <|> return ()
+    synpsis =
+        string "    Synopsis:" *> nonEols *> endOfLine *> more
+            <|> return ()
       where
         more = () <$ many (string "     " *> nonEols *> endOfLine)
-    latest = Nothing <$ (char '[' *> nonEols)
-         <|> Just <$> dotted
+    latest =
+        Nothing <$ (char '[' *> nonEols)
+            <|> Just <$> dotted
 
 dotted :: Parser [Int]
 dotted = decimal `sepBy` char '.'

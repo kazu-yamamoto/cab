@@ -1,10 +1,12 @@
 module Program (
-    version, showVersion
-  , programName, description
-  ) where
+    version,
+    showVersion,
+    programName,
+    description,
+) where
 
-import Paths_cab
 import Data.Version
+import Paths_cab
 
 programName :: String
 programName = "cab"

@@ -1,18 +1,19 @@
 {-# LANGUAGE CPP #-}
+
 module Distribution.Cab.Version (
-    Ver
-  , toVer
-  , toVersion
-  , verToString
-  , version
-  , versionToString
-  ) where
+    Ver,
+    toVer,
+    toVersion,
+    verToString,
+    version,
+    versionToString,
+) where
 
 import Distribution.Cab.Utils
 import Distribution.Version
 
 -- | Package version.
-newtype Ver = Ver [Int] deriving (Eq,Ord,Read,Show)
+newtype Ver = Ver [Int] deriving (Eq, Ord, Read, Show)
 
 -- | Creating 'Ver'.
 --

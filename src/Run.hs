@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+
 module Run (run, toSwitch) where
 
 import Data.List (intercalate)
@@ -15,40 +16,40 @@ import Types
 ----------------------------------------------------------------
 
 toSwitch :: Option -> Switch
-toSwitch OptNoharm      = SwNoharm
-toSwitch OptRecursive   = SwRecursive
-toSwitch OptAll         = SwAll
-toSwitch OptInfo        = SwInfo
-toSwitch (OptFlag _)    = SwFlag
-toSwitch OptTest        = SwTest
-toSwitch OptBench       = SwBench
-toSwitch OptDepsOnly    = SwDepsOnly
-toSwitch OptLibProfile  = SwLibProfile
+toSwitch OptNoharm = SwNoharm
+toSwitch OptRecursive = SwRecursive
+toSwitch OptAll = SwAll
+toSwitch OptInfo = SwInfo
+toSwitch (OptFlag _) = SwFlag
+toSwitch OptTest = SwTest
+toSwitch OptBench = SwBench
+toSwitch OptDepsOnly = SwDepsOnly
+toSwitch OptLibProfile = SwLibProfile
 toSwitch OptExecProfile = SwExecProfile
-toSwitch OptDebug       = SwDebug
-toSwitch (OptJobs _)    = SwJobs
-toSwitch (OptImport _)  = SwImport
-toSwitch OptStatic      = SwStatic
-toSwitch OptFuture      = SwFuture
-toSwitch OptAllowNewer  = SwAllowNewer
-toSwitch OptCleanUp     = SwCleanUp
-toSwitch _              = error "toSwitch"
+toSwitch OptDebug = SwDebug
+toSwitch (OptJobs _) = SwJobs
+toSwitch (OptImport _) = SwImport
+toSwitch OptStatic = SwStatic
+toSwitch OptFuture = SwFuture
+toSwitch OptAllowNewer = SwAllowNewer
+toSwitch OptCleanUp = SwCleanUp
+toSwitch _ = error "toSwitch"
 
 ----------------------------------------------------------------
 
 optionArg :: Option -> String
-optionArg (OptFlag   str) = str
-optionArg (OptJobs   str) = str
+optionArg (OptFlag str) = str
+optionArg (OptJobs str) = str
 optionArg (OptImport str) = str
-optionArg _               = ""
+optionArg _ = ""
 
 optionsToString :: [Option] -> SwitchDB -> [String]
 optionsToString opts swdb = concatMap suboption opts
   where
     suboption opt = case lookup (toSwitch opt) swdb of
-        Nothing            -> []
-        Just None          -> []
-        Just (Solo x)      -> [x]
+        Nothing -> []
+        Just None -> []
+        Just (Solo x) -> [x]
         Just (WithEqArg x) -> [x ++ "=" ++ optionArg opt]
         Just (FollowArg x) -> [x ++ optionArg opt]
 
@@ -56,7 +57,7 @@ optionsToString opts swdb = concatMap suboption opts
 
 run :: CommandSpec -> [Arg] -> [Option] -> IO ()
 run cmdspec params opts = case routing cmdspec of
-    RouteFunc func     -> func params opts options
+    RouteFunc func -> func params opts options
     RouteCabal subargs -> callProcess pro subargs params options
   where
     pro = "cabal"
@@ -71,7 +72,6 @@ callProcess pro args0 args1 options = systemCommand script
 #else
     systemCommand = void . system
 #endif
-
     script = intercalate " " $ pro : args0 ++ cat args1 ++ options
-    cat [pkg,ver] = [pkg ++ "-" ++ ver]
-    cat x         = x
+    cat [pkg, ver] = [pkg ++ "-" ++ ver]
+    cat x = x

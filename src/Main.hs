@@ -1,12 +1,12 @@
 module Main where
 
-import Control.Exception (Handler(..))
+import Control.Exception (Handler (..))
 import qualified Control.Exception as E (catches)
 import Control.Monad (when)
-import Data.List (isPrefixOf, intercalate)
+import Data.List (intercalate, isPrefixOf)
 import Data.Maybe (isNothing)
 import Distribution.Cab
-import System.Console.GetOpt (ArgOrder(..), OptDescr(..), getOpt')
+import System.Console.GetOpt (ArgOrder (..), OptDescr (..), getOpt')
 import System.Environment (getArgs)
 import System.Exit (ExitCode, exitFailure)
 import System.IO
@@ -25,11 +25,11 @@ main = flip E.catches handlers $ do
     oargs <- getArgs
     let pargs = parseArgs getOptDB oargs
     checkOptions1 pargs illegalOptionsAndExit
-    let Right (args,opts0) = pargs
+    let Right (args, opts0) = pargs
     when (args == []) helpAndExit
     when (OptHelp `elem` opts0) $ helpCommandAndExit args [] []
     let opts1 = filter (/= OptHelp) opts0
-        act:params = args
+        act : params = args
         mcmdspec = commandSpecByName act (commandDB helpCommandAndExit)
     when (isNothing mcmdspec) (illegalCommandAndExit act)
     let Just cmdspec = mcmdspec
@@ -50,18 +50,19 @@ illegalCommandAndExit x = do
 ----------------------------------------------------------------
 
 illegalOptionsAndExit :: UnknownOptPrinter
-illegalOptionsAndExit xs = do -- FixME
+illegalOptionsAndExit xs = do
+    -- FixME
     hPutStrLn stderr $ "Illegal options: " ++ intercalate " " xs
     exitFailure
 
 ----------------------------------------------------------------
 
-type ParsedArgs = Either [UnknownOpt] ([Arg],[Option])
+type ParsedArgs = Either [UnknownOpt] ([Arg], [Option])
 
 parseArgs :: [GetOptSpec] -> [Arg] -> ParsedArgs
 parseArgs db args = case getOpt' Permute db args of
-    (o,n,[],[])      -> Right (n,o)
-    (_,_,unknowns,_) -> Left unknowns
+    (o, n, [], []) -> Right (n, o)
+    (_, _, unknowns, _) -> Left unknowns
 
 ----------------------------------------------------------------
 
@@ -72,7 +73,7 @@ type UnknownOptPrinter = [UnknownOpt] -> IO ()
 
 checkOptions1 :: ParsedArgs -> UnknownOptPrinter -> IO ()
 checkOptions1 (Left es) func = func es
-checkOptions1 _ _            = return ()
+checkOptions1 _ _ = return ()
 
 ----------------------------------------------------------------
 
@@ -86,22 +87,23 @@ checkOptions2 opts cmdspec oargs func =
 unknownOptions :: [Option] -> CommandSpec -> [Switch]
 unknownOptions opts cmdspec = chk specified supported
   where
-    chk [] _     = []
-    chk (x:xs) ys
-      | x `elem` ys = chk xs ys
-      | otherwise   = x : chk xs ys
+    chk [] _ = []
+    chk (x : xs) ys
+        | x `elem` ys = chk xs ys
+        | otherwise = x : chk xs ys
     specified = map toSwitch opts
     supported = map fst $ switches cmdspec
 
 resolveOptionString :: [Arg] -> Switch -> [UnknownOpt]
 resolveOptionString oargs sw = case lookup sw optionDB of
-    Nothing    -> error "resolveOptionString"
-    Just gspec -> let (s,l) = getOptNames gspec
-                  in checkShort s ++ checkLong l
+    Nothing -> error "resolveOptionString"
+    Just gspec ->
+        let (s, l) = getOptNames gspec
+         in checkShort s ++ checkLong l
   where
-    checkShort s = filter (==s) oargs
-    checkLong  l = filter (l `isPrefixOf`) oargs
+    checkShort s = filter (== s) oargs
+    checkLong l = filter (l `isPrefixOf`) oargs
 
-getOptNames :: GetOptSpec -> (String,String)
-getOptNames (Option (c:_) (s:_) _ _) = ('-':[c],'-':'-':s)
-getOptNames _                        = error "getOptNames"
+getOptNames :: GetOptSpec -> (String, String)
+getOptNames (Option (c : _) (s : _) _ _) = ('-' : [c], '-' : '-' : s)
+getOptNames _ = error "getOptNames"
