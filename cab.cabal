@@ -1,80 +1,81 @@
-Name:                   cab
-Version:                0.2.21
-Author:                 Kazu Yamamoto <kazu@iij.ad.jp>
-Maintainer:             Kazu Yamamoto <kazu@iij.ad.jp>
-License:                BSD3
-License-File:           LICENSE
-Synopsis:               A maintenance command of Haskell cabal packages
-Description:            This is a MacPorts-like maintenance command of
-   Haskell cabal packages. Some part of this program is a wrapper to
-   "ghc-pkg" and "cabal".
-   If you are always confused due to inconsistency of two commands,
-   or if you want a way to check all outdated packages,
-   or if you want a way to remove outdated packages recursively,
-   this command helps you.
-Homepage:               http://www.mew.org/~kazu/proj/cab/
-Category:               Distribution
-Cabal-Version:          >= 1.10
-Build-Type:             Simple
+cabal-version: >=1.10
+name:          cab
+version:       0.2.21
+license:       BSD3
+license-file:  LICENSE
+maintainer:    Kazu Yamamoto <kazu@iij.ad.jp>
+author:        Kazu Yamamoto <kazu@iij.ad.jp>
+homepage:      http://www.mew.org/~kazu/proj/cab/
+synopsis:      A maintenance command of Haskell cabal packages
+description:
+    This is a MacPorts-like maintenance command of
+    Haskell cabal packages. Some part of this program is a wrapper to
+    "ghc-pkg" and "cabal".
+    If you are always confused due to inconsistency of two commands,
+    or if you want a way to check all outdated packages,
+    or if you want a way to remove outdated packages recursively,
+    this command helps you.
 
-Library
-  Default-Language:     Haskell2010
-  GHC-Options:          -Wall
-  Build-Depends:        base >= 4.0 && < 5
-                      , Cabal >= 1.18
-                      , attoparsec >= 0.10
-                      , bytestring
-                      , conduit >= 1.1
-                      , conduit-extra >= 1.1.2
-                      , containers
-                      , directory
-                      , filepath
-                      , process
-                      , resourcet
-  Exposed-Modules:	Distribution.Cab
-                        Distribution.Cab.PkgDB
-                        Distribution.Cab.Printer
-                        Distribution.Cab.Sandbox
-                        Distribution.Cab.VerDB
-                        Distribution.Cab.Version
-  Other-Modules:        Distribution.Cab.Commands
-                        Distribution.Cab.GenPaths
-                        Distribution.Cab.Utils
+category:      Distribution
+build-type:    Simple
 
-Executable cab
-  Default-Language:     Haskell2010
-  Main-Is:              Main.hs
-  GHC-Options:          -Wall -threaded
-  HS-Source-Dirs:       src
-  Build-Depends:        base >= 4.0 && < 5
-                      , cab
-                      , Cabal >= 1.18
-                      , attoparsec >= 0.10
-                      , bytestring
-                      , conduit >= 1.1
-                      , conduit-extra >= 1.1.2
-                      , containers
-                      , directory
-                      , filepath
-                      , process
-  Other-Modules:	Commands
-                        Doc
-                        Help
-                        Options
-                        Program
-                        Run
-                        Types
-                        Paths_cab
+source-repository head
+    type:     git
+    location: git://github.com/kazu-yamamoto/cab.git
 
--- Test-Suite doctest
---   Type:                 exitcode-stdio-1.0
---   Default-Language:     Haskell2010
---   HS-Source-Dirs:       test
---   Ghc-Options:          -threaded -Wall
---   Main-Is:              doctests.hs
---   Build-Depends:        base >= 4.0 && < 5
---                       , doctest >= 0.9.3
+library
+    exposed-modules:
+        Distribution.Cab
+        Distribution.Cab.PkgDB
+        Distribution.Cab.Printer
+        Distribution.Cab.Sandbox
+        Distribution.Cab.VerDB
+        Distribution.Cab.Version
 
-Source-Repository head
-  Type:                 git
-  Location:             git://github.com/kazu-yamamoto/cab.git
+    other-modules:
+        Distribution.Cab.Commands
+        Distribution.Cab.GenPaths
+        Distribution.Cab.Utils
+
+    default-language: Haskell2010
+    ghc-options:      -Wall
+    build-depends:
+        base >=4.0 && <5,
+        Cabal >=1.18,
+        attoparsec >=0.10,
+        bytestring,
+        conduit >=1.1,
+        conduit-extra >=1.1.2,
+        containers,
+        directory,
+        filepath,
+        process,
+        resourcet
+
+executable cab
+    main-is:          Main.hs
+    hs-source-dirs:   src
+    other-modules:
+        Commands
+        Doc
+        Help
+        Options
+        Program
+        Run
+        Types
+        Paths_cab
+
+    default-language: Haskell2010
+    ghc-options:      -Wall -threaded
+    build-depends:
+        base >=4.0 && <5,
+        cab,
+        Cabal >=1.18,
+        attoparsec >=0.10,
+        bytestring,
+        conduit >=1.1,
+        conduit-extra >=1.1.2,
+        containers,
+        directory,
+        filepath,
+        process
