@@ -150,7 +150,7 @@ findInternalLibs pkgInfo =
 
 getInternalLib :: String -> Maybe String
 getInternalLib xs0 = case drop 22 $ skip xs0 of
-  _:xs1   -> Just $ take (length xs1) xs1
+  _:xs1   -> Just xs1
   _       -> Nothing
   where
     skip ys = case break (== '-') ys of
