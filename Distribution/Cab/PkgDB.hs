@@ -19,8 +19,9 @@ module Distribution.Cab.PkgDB (
   , fullNameOfPkgInfo
   , pairNameOfPkgInfo
   , verOfPkgInfo
-  -- * Find internal libraries
+  -- * Find other libraries
   , findInternalLibs
+  , findSourceLib
   ) where
 
 import Distribution.Cab.Utils
@@ -126,8 +127,8 @@ toPkgInfos db = allPackages db
 
 nameOfPkgInfo :: PkgInfo -> PkgName
 nameOfPkgInfo pkgi = case sourceLibName pkgi of
-    LMainLibName ->  name
-    LSubLibName subname -> "z-" ++ name ++ "-z-" ++ unUnqualComponentName subname
+    LMainLibName -> name
+    LSubLibName sub -> libNameHack name $ unUnqualComponentName sub
   where
    name =  unPackageName $ pkgName $ sourcePackageId pkgi
 
@@ -150,8 +151,8 @@ topSortedPkgs pkgi db = topSort $ unitids [pkgi]
 
 ----------------------------------------------------------------
 
-findInternalLibs :: PkgInfo -> [String]
-findInternalLibs pkgInfo =
+findInternalLibs :: PkgInfo -> String -> [String]
+findInternalLibs pkgInfo name = map (libNameHack name) $
     catMaybes $ map (getInternalLib . unUnitId) $ depends pkgInfo
 
 getInternalLib :: String -> Maybe String
@@ -166,3 +167,19 @@ getInternalLib xs0 = case drop 22 $ skip xs0 of
             _          -> "" -- error
         | otherwise -> skip bs
       _  -> "" -- error
+
+
+----------------------------------------------------------------
+
+-- A cabal package can exports multiple libraries.
+findSourceLib :: PkgDB -> PkgInfo -> [PkgInfo]
+findSourceLib db pkgi = case sourceLibName pkgi of
+  -- Only one library is exported.
+  LMainLibName -> []
+  -- This is a sub library. Need to find a main(source) library.
+  LSubLibName _ -> lookupSourcePackageId db $ sourcePackageId pkgi
+
+----------------------------------------------------------------
+
+libNameHack :: String -> String -> String
+libNameHack name subname = "z-" ++ name ++ "-z-" ++ subname

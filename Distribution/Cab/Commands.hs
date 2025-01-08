@@ -119,10 +119,15 @@ getDB opts
 ----------------------------------------------------------------
 
 uninstall :: FunctionCommand
-uninstall nmver opts _ = do
+uninstall nmver opts _ = uninstall' opts $ Right nmver
+
+uninstall' :: [Option] -> Either PkgInfo [String] -> IO ()
+uninstall' opts ex = do
     userDB <- getSandbox >>= getUserPkgDB
-    pkg <- lookupPkg nmver userDB
-    let sortedPkgs = topSortedPkgs pkg userDB
+    pkgi <- case ex of
+        Right nmver -> lookupPkg nmver userDB
+        Left pkgi' -> return $ pkgi'
+    let sortedPkgs = topSortedPkgs pkgi userDB
     if onlyOne && length sortedPkgs /= 1
         then do
             hPutStrLn stderr "The following packages depend on this. Use the \"-r\" option."
@@ -131,6 +136,14 @@ uninstall nmver opts _ = do
             unless doit $
                 putStrLn "The following packages are deleted without the \"-n\" option."
             mapM_ (purge doit opts) sortedPkgs
+            -- If "delete -r" removes a sub libraries of a package
+            -- which exports multiple libraries, we need to delete the
+            -- main library. Otherwise, DB gets inconsistency.
+            when doit $ do
+                -- DB is not updated.  So, if doit is False, this may
+                -- result in infinite loop, sigh.
+                let sourceLibs = map Left $ concatMap (findSourceLib userDB) sortedPkgs
+                mapM_ (uninstall' opts) sourceLibs
   where
     onlyOne = OptRecursive `notElem` opts
     doit = OptNoharm `notElem` opts
@@ -140,12 +153,10 @@ purge doit opts pkgInfo = do
     sandboxOpts <- (makeOptList . getSandboxOpts2) <$> getSandbox
     dirs <- getDirs nameVer sandboxOpts
     unregister doit opts nameVer
-    mapM_ unregisterInternal $ findInternalLibs pkgInfo
+    mapM_ unregisterInternal $ findInternalLibs pkgInfo name
     mapM_ (removeDir doit) dirs
   where
-    unregisterInternal subname = unregister doit opts (nm, ver)
-      where
-        nm = "z-" ++ name ++ "-z-" ++ subname
+    unregisterInternal subname = unregister doit opts (subname, ver)
     nameVer@(name, ver) = pairNameOfPkgInfo pkgInfo
     makeOptList "" = []
     makeOptList x = [x]
