@@ -28,7 +28,7 @@ import Distribution.Cab.Utils
 import Distribution.Cab.Version
 import Distribution.Cab.VerDB (PkgName)
 import Distribution.InstalledPackageInfo
-    (InstalledPackageInfo(depends), sourcePackageId)
+    (InstalledPackageInfo(depends), sourcePackageId, sourceLibName)
 import Distribution.Package (PackageIdentifier(..))
 import Distribution.Simple.Compiler (PackageDB(..))
 import Distribution.Simple.GHC (configure, getInstalledPackages, getPackageDBContents)
@@ -41,8 +41,10 @@ import Distribution.Simple.PackageIndex (InstalledPackageIndex)
 import Distribution.Simple.PackageIndex (PackageIndex)
 #endif
 import Distribution.Simple.Program.Db (defaultProgramDb)
-import Distribution.Verbosity (normal)
+import Distribution.Types.LibraryName
 import Distribution.Types.UnitId (unUnitId)
+import Distribution.Types.UnqualComponentName (unUnqualComponentName)
+import Distribution.Verbosity (normal)
 
 import Data.Char
 import Data.Maybe
@@ -123,7 +125,11 @@ toPkgInfos db = allPackages db
 ----------------------------------------------------------------
 
 nameOfPkgInfo :: PkgInfo -> PkgName
-nameOfPkgInfo = unPackageName . pkgName . sourcePackageId
+nameOfPkgInfo pkgi = case sourceLibName pkgi of
+    LMainLibName ->  name
+    LSubLibName subname -> "z-" ++ name ++ "-z-" ++ unUnqualComponentName subname
+  where
+   name =  unPackageName $ pkgName $ sourcePackageId pkgi
 
 fullNameOfPkgInfo :: PkgInfo -> String
 fullNameOfPkgInfo pkgi = nameOfPkgInfo pkgi ++ " " ++ verToString (verOfPkgInfo pkgi)
