@@ -31,7 +31,11 @@ import Distribution.Cab.VerDB (PkgName)
 import Distribution.InstalledPackageInfo
     (InstalledPackageInfo(depends), sourcePackageId, sourceLibName)
 import Distribution.Package (PackageIdentifier(..))
+#if MIN_VERSION_Cabal(3,14,0)
+import Distribution.Simple.Compiler (PackageDB, PackageDBX(..))
+#else
 import Distribution.Simple.Compiler (PackageDB(..))
+#endif
 import Distribution.Simple.GHC (configure, getInstalledPackages, getPackageDBContents)
 import Distribution.Simple.PackageIndex
     (lookupPackageName, lookupSourcePackageId, allPackages
@@ -46,6 +50,10 @@ import Distribution.Types.LibraryName
 import Distribution.Types.UnitId (unUnitId)
 import Distribution.Types.UnqualComponentName (unUnqualComponentName)
 import Distribution.Verbosity (normal)
+
+#if MIN_VERSION_Cabal(3,14,0)
+import Distribution.Utils.Path (makeSymbolicPath)
+#endif
 
 import Data.Char
 import Data.Maybe
@@ -81,7 +89,11 @@ getGlobalPkgDB = getDB GlobalPackageDB
 
 toUserSpec :: Maybe FilePath -> PackageDB
 toUserSpec Nothing     = UserPackageDB
+#if MIN_VERSION_Cabal(3,14,0)
+toUserSpec (Just path) = SpecificPackageDB $ makeSymbolicPath path
+#else
 toUserSpec (Just path) = SpecificPackageDB path
+#endif
 
 getDBs :: [PackageDB] -> IO PkgDB
 getDBs specs = do
@@ -90,12 +102,20 @@ getDBs specs = do
 #if MIN_VERSION_Cabal(1,23,0)
                          _comp
 #endif
+#if MIN_VERSION_Cabal(3,14,0)
+                         Nothing
+#endif
                          specs pro
 
 getDB :: PackageDB -> IO PkgDB
 getDB spec = do
     (_,_,pro) <- configure normal Nothing Nothing defaultProgramDb
-    getPackageDBContents normal spec pro
+    getPackageDBContents
+      normal
+#if MIN_VERSION_Cabal(3,14,0)
+      Nothing
+#endif
+      spec pro
 
 ----------------------------------------------------------------
 

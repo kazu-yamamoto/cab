@@ -35,7 +35,11 @@ import qualified Distribution.Package as Cabal
 import qualified Distribution.Package as Cabal (PackageName(..))
 #endif
 
-#if MIN_VERSION_Cabal(3,8,0)
+#if MIN_VERSION_Cabal(3,14,0)
+import qualified Distribution.Simple.PackageDescription as Cabal
+    (readGenericPackageDescription)
+import Distribution.Utils.Path (makeSymbolicPath)
+#elif MIN_VERSION_Cabal(3,8,0)
 import qualified Distribution.Simple.PackageDescription as Cabal
     (readGenericPackageDescription)
 #elif MIN_VERSION_Cabal(2,2,0)
@@ -110,7 +114,9 @@ unPackageName (Cabal.PackageName s) = s
 
 readGenericPackageDescription
     :: Verbosity -> FilePath -> IO GenericPackageDescription
-#if MIN_VERSION_Cabal(2,0,0)
+#if MIN_VERSION_Cabal(3,14,0)
+readGenericPackageDescription v fp = Cabal.readGenericPackageDescription v Nothing $ makeSymbolicPath fp
+#elif MIN_VERSION_Cabal(2,0,0)
 readGenericPackageDescription = Cabal.readGenericPackageDescription
 #else
 readGenericPackageDescription = Cabal.readPackageDescription
